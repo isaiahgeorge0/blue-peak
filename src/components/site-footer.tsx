@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-off-white/10 bg-black">
@@ -30,6 +32,16 @@ export function SiteFooter() {
           </h2>
           <p className="mt-3 text-sm text-off-white/80">
             Ipswich and the surrounding Suffolk area.
+          </p>
+          <p className="mt-6 text-sm text-off-white/80">
+            <Link
+              href="/roadmap"
+              className="transition-colors hover:text-baby-blue"
+            >
+              Roadmap
+            </Link>
+            <span className="text-off-white/40"> · </span>
+            <span className="text-off-white/50">What we&apos;re building next</span>
           </p>
           <p className="mt-6 text-sm text-off-white/50">
             © 2026 Blue Peak Solutions. All rights reserved.

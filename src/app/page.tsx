@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { roadmapFeatures } from "@/lib/roadmap";
 
 const quoteButtonClassName =
   "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90";
@@ -145,8 +146,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Roadmap teaser */}
       <section className="bg-black">
+        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+                What&apos;s next for Blue Peak
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-off-white/70">
+                Tools we are building so quotes, crews, and referrals stay as
+                organised as the work on site.
+              </p>
+            </div>
+            <Link
+              href="/roadmap"
+              className="text-sm font-medium text-baby-blue transition-opacity hover:opacity-80"
+            >
+              View the roadmap
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+            {roadmapFeatures.map((feature) => (
+              <Link
+                key={feature.slug}
+                href={`/roadmap#${feature.slug}`}
+                className="group block border-t border-off-white/10 pt-5"
+              >
+                <p className="text-xs font-medium tracking-wide text-baby-blue uppercase">
+                  {feature.label}
+                </p>
+                <h3 className="mt-3 font-serif text-lg text-off-white group-hover:text-baby-blue">
+                  {feature.name}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-off-white/65">
+                  {feature.summary}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="bg-charcoal">
         <div className="mx-auto max-w-6xl px-6 py-16 text-center lg:py-20">
           <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
             Ready to get a price on the job?
