@@ -1,69 +1,167 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-export default function Home() {
+const quoteButtonClassName =
+  "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: {
+      absolute: "Blue Peak Solutions | Building and renovation in Ipswich",
+    },
+    description:
+      "Kitchens, extensions, bathrooms, and refurbs across Ipswich and Suffolk. Written quotes before we start.",
+  };
+}
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      {/* Hero */}
+      <section className="bg-black">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
+          <div>
+            <h1 className="max-w-xl text-4xl leading-tight tracking-tight text-off-white sm:text-5xl lg:text-6xl">
+              Building work you don&apos;t have to worry about
+            </h1>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-off-white/75">
+              Kitchens, extensions, and refurbs across Ipswich and Suffolk,
+              quoted in writing before we start.
+            </p>
+            <div className="mt-8">
+              <Link href="/contact" className={quoteButtonClassName}>
+                Get a quote
+              </Link>
+            </div>
+          </div>
+          {/* Hero photo: replace this block with a finished-job photograph */}
+          <div className="aspect-video w-full bg-gray-800" />
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="border-y border-off-white/10 bg-charcoal">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-10 sm:grid-cols-3 sm:gap-6">
+          <div>
+            <p className="font-serif text-3xl text-off-white">12 years</p>
+            <p className="mt-2 text-sm text-off-white/65">
+              Trading as a two-person team in Ipswich
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl text-off-white">180+ jobs</p>
+            <p className="mt-2 text-sm text-off-white/65">
+              Kitchens, bathrooms, extensions, and full refurbs completed
+            </p>
+          </div>
+          <div>
+            <p className="font-serif text-3xl text-off-white">Local patch</p>
+            <p className="mt-2 text-sm text-off-white/65">
+              Ipswich, Felixstowe, Woodbridge, and Colchester
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How we work */}
+      <section className="bg-black">
+        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
+          <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            How we work
+          </h2>
+          <ol className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
+            <li>
+              <p className="text-sm font-medium tracking-wide text-baby-blue">
+                01
+              </p>
+              <h3 className="mt-3 text-xl text-off-white">Enquire</h3>
+              <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                Tell us what you want doing and send a few photos. We will say
+                quickly whether it is a job we can take on.
+              </p>
+            </li>
+            <li>
+              <p className="text-sm font-medium tracking-wide text-baby-blue">
+                02
+              </p>
+              <h3 className="mt-3 text-xl text-off-white">Get a fixed quote</h3>
+              <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                We visit the property, measure up, and send a written price
+                before any work is booked.
+              </p>
+            </li>
+            <li>
+              <p className="text-sm font-medium tracking-wide text-baby-blue">
+                03
+              </p>
+              <h3 className="mt-3 text-xl text-off-white">Book the work</h3>
+              <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                Agree a start date, we protect the house, and we stay on it
+                until the job is finished.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* Proof band */}
+      <section className="bg-charcoal">
+        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
+          <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            Recent work
+          </h2>
+          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+            <Link href="/work" className="group block">
+              {/* Project photo: Ipswich kitchen and dining refit */}
+              <div className="aspect-video bg-gray-800" />
+              <p className="mt-4 font-serif text-lg text-off-white group-hover:text-baby-blue">
+                Kitchen and dining refit, Ipswich
+              </p>
+              <p className="mt-1 text-sm text-off-white/65">
+                New layout, units, and flooring in a Victorian terrace
+              </p>
+            </Link>
+            <Link href="/work" className="group block">
+              {/* Project photo: Felixstowe rear extension */}
+              <div className="aspect-video bg-gray-800" />
+              <p className="mt-4 font-serif text-lg text-off-white group-hover:text-baby-blue">
+                Rear extension, Felixstowe
+              </p>
+              <p className="mt-1 text-sm text-off-white/65">
+                Single-storey addition opening onto the garden
+              </p>
+            </Link>
+            <Link href="/work" className="group block">
+              {/* Project photo: Woodbridge bathroom renovation */}
+              <div className="aspect-video bg-gray-800" />
+              <p className="mt-4 font-serif text-lg text-off-white group-hover:text-baby-blue">
+                Bathroom renovation, Woodbridge
+              </p>
+              <p className="mt-1 text-sm text-off-white/65">
+                Full strip-out, tiling, and a walk-in shower
+              </p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="bg-black">
+        <div className="mx-auto max-w-6xl px-6 py-16 text-center lg:py-20">
+          <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            Ready to get a price on the job?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base text-off-white/75">
+            Tell us what you are planning. We usually reply the same working
+            day.
           </p>
+          <div className="mt-8">
+            <Link href="/contact" className={quoteButtonClassName}>
+              Get a quote
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }
