@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { LeadStatusSelect } from "@/components/lead-status-select";
+import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -24,6 +26,14 @@ type LeadRow = {
   status: string | null;
 };
 
+const STATUS_RANK: Record<LeadStatus, number> = {
+  new: 0,
+  contacted: 1,
+  quoted: 2,
+  won: 3,
+  lost: 4,
+};
+
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -37,6 +47,30 @@ function formatDate(value: string) {
 
 function displayValue(value: string | null) {
   return value && value.trim() ? value : "-";
+}
+
+function sortLeads(rows: LeadRow[]) {
+  return [...rows].sort((a, b) => {
+    const aStatus = (
+      a.status && (LEAD_STATUSES as readonly string[]).includes(a.status)
+        ? a.status
+        : "new"
+    ) as LeadStatus;
+    const bStatus = (
+      b.status && (LEAD_STATUSES as readonly string[]).includes(b.status)
+        ? b.status
+        : "new"
+    ) as LeadStatus;
+
+    const rankDiff = STATUS_RANK[aStatus] - STATUS_RANK[bStatus];
+    if (rankDiff !== 0) {
+      return rankDiff;
+    }
+
+    return (
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  });
 }
 
 export default async function AdminLeadsPage() {
@@ -57,7 +91,7 @@ export default async function AdminLeadsPage() {
     console.error("admin leads: failed to load", error.message);
   }
 
-  const rows = (leads ?? []) as LeadRow[];
+  const rows = sortLeads((leads ?? []) as LeadRow[]);
 
   return (
     <div>
@@ -65,7 +99,7 @@ export default async function AdminLeadsPage() {
         Leads
       </h1>
       <p className="mt-3 text-sm text-off-white/70">
-        Quote requests from the website, newest first.
+        Quote requests from the website. New leads are listed first.
       </p>
 
       {error ? (
@@ -95,7 +129,11 @@ export default async function AdminLeadsPage() {
               {rows.map((lead) => (
                 <tr
                   key={lead.id}
-                  className="border-b border-off-white/5 last:border-b-0"
+                  className={`border-b border-off-white/5 last:border-b-0 ${
+                    lead.status === "new" || !lead.status
+                      ? "bg-baby-blue/5"
+                      : ""
+                  }`}
                 >
                   <td className="whitespace-nowrap px-4 py-3 text-off-white/70">
                     {formatDate(lead.created_at)}
@@ -104,7 +142,12 @@ export default async function AdminLeadsPage() {
                   <td className="px-4 py-3">{displayValue(lead.phone)}</td>
                   <td className="px-4 py-3">{displayValue(lead.email)}</td>
                   <td className="px-4 py-3">{displayValue(lead.service_type)}</td>
-                  <td className="px-4 py-3">{displayValue(lead.status)}</td>
+                  <td className="px-4 py-3">
+                    <LeadStatusSelect
+                      leadId={lead.id}
+                      initialStatus={lead.status}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
