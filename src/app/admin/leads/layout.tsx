@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logoutAdmin } from "@/app/admin/actions";
 
-export default function AdminProtectedLayout({
+export default function AdminLeadsLayout({
   children,
 }: {
   children: React.ReactNode;
