@@ -8,6 +8,7 @@ import {
   deleteCalendarEvent,
   type CalendarEventRow,
 } from "@/app/admin/calendar/actions";
+import { TimePicker } from "@/components/admin/time-picker";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const RECURRENCE_OPTIONS = [
@@ -372,28 +373,28 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                   </label>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="block">
+                    <div>
                       <span className="text-xs tracking-wide text-off-white/55 uppercase">
                         Start time
                       </span>
-                      <input
-                        type="time"
+                      <TimePicker
                         value={startTime}
-                        onChange={(event) => setStartTime(event.target.value)}
-                        className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
+                        onChange={setStartTime}
+                        aria-label="Start time"
+                        disabled={isPending}
                       />
-                    </label>
-                    <label className="block">
+                    </div>
+                    <div>
                       <span className="text-xs tracking-wide text-off-white/55 uppercase">
                         End time
                       </span>
-                      <input
-                        type="time"
+                      <TimePicker
                         value={endTime}
-                        onChange={(event) => setEndTime(event.target.value)}
-                        className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
+                        onChange={setEndTime}
+                        aria-label="End time"
+                        disabled={isPending}
                       />
-                    </label>
+                    </div>
                   </div>
 
                   <label className="block">
