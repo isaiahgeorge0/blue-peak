@@ -9,6 +9,14 @@ import {
   type CalendarEventRow,
 } from "@/app/admin/calendar/actions";
 import { TimePicker } from "@/components/admin/time-picker";
+import {
+  expandEventsForRange,
+  groupOccurrencesByDate,
+  recurrenceLabel,
+  type CalendarOccurrence,
+  type RecurrenceValue,
+  weekdayFromDateKey,
+} from "@/lib/calendar-recurrence";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const RECURRENCE_OPTIONS = [
@@ -21,12 +29,14 @@ const RECURRENCE_OPTIONS = [
 type AdminCalendarProps = {
   year: number;
   month: number;
+  rangeStart: string;
+  rangeEnd: string;
   events: CalendarEventRow[];
 };
 
 type ModalState =
   | { type: "create"; date: string }
-  | { type: "view"; event: CalendarEventRow }
+  | { type: "view"; occurrence: CalendarOccurrence }
   | null;
 
 function pad2(value: number) {
@@ -121,7 +131,28 @@ function buildMonthCells(year: number, month: number) {
   return cells;
 }
 
-export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
+function RepeatIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className="h-3 w-3 shrink-0 text-baby-blue"
+      aria-hidden
+    >
+      <path
+        fill="currentColor"
+        d="M2.5 3.5h7.2a3.3 3.3 0 0 1 0 6.6H8.2v-1.5h1.5a1.8 1.8 0 1 0 0-3.6H2.5L4.2 6.7 3.1 7.8 0 4.7l3.1-3.1 1.1 1.1L2.5 3.5Zm11 9H6.3a3.3 3.3 0 0 1 0-6.6h1.5v1.5H6.3a1.8 1.8 0 1 0 0 3.6h7.2l-1.7-1.7 1.1-1.1L16 11.3l-3.1 3.1-1.1-1.1 1.7-1.8Z"
+      />
+    </svg>
+  );
+}
+
+export function AdminCalendar({
+  year,
+  month,
+  rangeStart,
+  rangeEnd,
+  events,
+}: AdminCalendarProps) {
   const router = useRouter();
   const titleId = useId();
   const [modal, setModal] = useState<ModalState>(null);
@@ -129,6 +160,9 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [recurrence, setRecurrence] = useState<RecurrenceValue>("none");
+  const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -137,22 +171,9 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
   const cells = useMemo(() => buildMonthCells(year, month), [year, month]);
 
   const eventsByDate = useMemo(() => {
-    const map = new Map<string, CalendarEventRow[]>();
-    for (const event of events) {
-      const list = map.get(event.start_date) ?? [];
-      list.push(event);
-      map.set(event.start_date, list);
-    }
-    for (const list of map.values()) {
-      list.sort((a, b) => {
-        const aTime = a.start_time ?? "";
-        const bTime = b.start_time ?? "";
-        if (aTime !== bTime) return aTime.localeCompare(bTime);
-        return a.title.localeCompare(b.title);
-      });
-    }
-    return map;
-  }, [events]);
+    const occurrences = expandEventsForRange(events, rangeStart, rangeEnd);
+    return groupOccurrencesByDate(occurrences);
+  }, [events, rangeStart, rangeEnd]);
 
   const todayKey = useMemo(() => {
     const now = new Date();
@@ -177,19 +198,30 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
     setStartTime("");
     setEndTime("");
     setNotes("");
+    setRecurrence("none");
+    setRecurrenceDays([weekdayFromDateKey(dateKey)]);
+    setRecurrenceEndDate("");
     setError(null);
     setModal({ type: "create", date: dateKey });
   }
 
-  function openView(event: CalendarEventRow) {
+  function openView(occurrence: CalendarOccurrence) {
     setError(null);
-    setModal({ type: "view", event });
+    setModal({ type: "view", occurrence });
   }
 
   function closeModal() {
     if (isPending) return;
     setModal(null);
     setError(null);
+  }
+
+  function toggleWeekday(day: number) {
+    setRecurrenceDays((current) =>
+      current.includes(day)
+        ? current.filter((value) => value !== day)
+        : [...current, day].sort((a, b) => a - b),
+    );
   }
 
   function handleCreate(event: React.FormEvent) {
@@ -204,6 +236,15 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
         start_date: modal.date,
         start_time: startTime || undefined,
         end_time: endTime || undefined,
+        recurrence,
+        recurrence_days_of_week:
+          recurrence === "weekly" || recurrence === "biweekly"
+            ? recurrenceDays
+            : undefined,
+        recurrence_end_date:
+          recurrence !== "none" && recurrenceEndDate
+            ? recurrenceEndDate
+            : undefined,
       });
 
       if (!result.ok) {
@@ -216,10 +257,18 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
     });
   }
 
-  function handleDelete(eventId: string) {
+  function handleDelete(eventRow: CalendarEventRow) {
+    const isRecurring = eventRow.recurrence !== "none";
+    const confirmed = window.confirm(
+      isRecurring
+        ? "Delete this entire recurring series? Individual occurrences cannot be removed separately yet."
+        : "Delete this event?",
+    );
+    if (!confirmed) return;
+
     setError(null);
     startTransition(async () => {
-      const result = await deleteCalendarEvent(eventId);
+      const result = await deleteCalendarEvent(eventRow.id);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -229,6 +278,10 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
     });
   }
 
+  const showDayPicker =
+    recurrence === "weekly" || recurrence === "biweekly";
+  const showRepeatUntil = recurrence !== "none";
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -237,8 +290,8 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
             Calendar
           </h1>
           <p className="mt-3 text-sm text-off-white/70">
-            Internal planning view. Non-recurring events show on their start
-            date.
+            Internal planning view. Recurring events expand across the month
+            without duplicating rows.
           </p>
         </div>
 
@@ -309,18 +362,32 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                   </span>
 
                   <ul className="mt-1 space-y-1">
-                    {dayEvents.map((event) => {
-                      const timeLabel = formatTime(event.start_time);
+                    {dayEvents.map((occurrence) => {
+                      const timeLabel = formatTime(occurrence.event.start_time);
                       return (
-                        <li key={event.id}>
+                        <li
+                          key={`${occurrence.event.id}-${occurrence.occurrenceDate}`}
+                        >
                           <button
                             type="button"
-                            onClick={() => openView(event)}
-                            className="pointer-events-auto block w-full truncate rounded border border-baby-blue/25 bg-baby-blue/10 px-1.5 py-0.5 text-left text-[11px] text-off-white/90 hover:border-baby-blue/50"
-                            title={event.title}
+                            onClick={() => openView(occurrence)}
+                            className={[
+                              "pointer-events-auto flex w-full items-center gap-1 truncate rounded border px-1.5 py-0.5 text-left text-[11px] text-off-white/90 hover:border-baby-blue/50",
+                              occurrence.isRecurring
+                                ? "border-baby-blue/40 bg-baby-blue/15"
+                                : "border-baby-blue/25 bg-baby-blue/10",
+                            ].join(" ")}
+                            title={
+                              occurrence.isRecurring
+                                ? `${occurrence.event.title} (recurring)`
+                                : occurrence.event.title
+                            }
                           >
-                            {timeLabel ? `${timeLabel} ` : ""}
-                            {event.title}
+                            {occurrence.isRecurring ? <RepeatIcon /> : null}
+                            <span className="truncate">
+                              {timeLabel ? `${timeLabel} ` : ""}
+                              {occurrence.event.title}
+                            </span>
                           </button>
                         </li>
                       );
@@ -343,7 +410,7 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="w-full max-w-md rounded-lg border border-off-white/15 bg-charcoal p-5 shadow-xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-off-white/15 bg-charcoal p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             {modal.type === "create" ? (
@@ -415,11 +482,21 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                       Recurrence
                     </span>
                     <select
-                      value="none"
-                      disabled
-                      aria-disabled="true"
-                      title="Recurring events come in a later pass"
-                      className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white/50 outline-none disabled:cursor-not-allowed"
+                      value={recurrence}
+                      onChange={(event) => {
+                        const nextValue = event.target.value as RecurrenceValue;
+                        setRecurrence(nextValue);
+                        if (
+                          (nextValue === "weekly" ||
+                            nextValue === "biweekly") &&
+                          recurrenceDays.length === 0
+                        ) {
+                          setRecurrenceDays([
+                            weekdayFromDateKey(modal.date),
+                          ]);
+                        }
+                      }}
+                      className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
                     >
                       {RECURRENCE_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -427,10 +504,63 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                         </option>
                       ))}
                     </select>
-                    <span className="mt-1 block text-[11px] text-off-white/40">
-                      Recurring events are disabled for now — saves as none.
-                    </span>
                   </label>
+
+                  {showDayPicker ? (
+                    <fieldset>
+                      <legend className="text-xs tracking-wide text-off-white/55 uppercase">
+                        Repeat on
+                      </legend>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {WEEKDAY_LABELS.map((label, day) => {
+                          const selected = recurrenceDays.includes(day);
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() => toggleWeekday(day)}
+                              aria-pressed={selected}
+                              className={[
+                                "rounded-md border px-2.5 py-1.5 text-xs transition-colors",
+                                selected
+                                  ? "border-baby-blue/50 bg-baby-blue/15 text-baby-blue"
+                                  : "border-off-white/15 text-off-white/65 hover:border-off-white/30",
+                              ].join(" ")}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  ) : null}
+
+                  {recurrence === "monthly" ? (
+                    <p className="text-xs text-off-white/50">
+                      Repeats on day {Number(modal.date.slice(-2))} each month.
+                    </p>
+                  ) : null}
+
+                  {showRepeatUntil ? (
+                    <label className="block">
+                      <span className="text-xs tracking-wide text-off-white/55 uppercase">
+                        Repeat until
+                      </span>
+                      <input
+                        type="date"
+                        value={recurrenceEndDate}
+                        min={modal.date}
+                        onChange={(event) =>
+                          setRecurrenceEndDate(event.target.value)
+                        }
+                        className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue [color-scheme:dark]"
+                      />
+                      <span className="mt-1 block text-[11px] text-off-white/40">
+                        Leave blank to repeat indefinitely (shown up to 12
+                        months from the start date).
+                      </span>
+                    </label>
+                  ) : null}
 
                   {error ? (
                     <p className="text-sm text-baby-blue">{error}</p>
@@ -461,10 +591,10 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                   id={titleId}
                   className="font-serif text-xl tracking-tight text-off-white"
                 >
-                  {modal.event.title}
+                  {modal.occurrence.event.title}
                 </h2>
                 <p className="mt-1 text-sm text-off-white/55">
-                  {formatDayHeading(modal.event.start_date)}
+                  {formatDayHeading(modal.occurrence.occurrenceDate)}
                 </p>
 
                 <dl className="mt-5 space-y-3 text-sm">
@@ -473,11 +603,12 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                       Time
                     </dt>
                     <dd className="mt-1 text-off-white/85">
-                      {formatTime(modal.event.start_time) ||
-                      formatTime(modal.event.end_time)
+                      {formatTime(modal.occurrence.event.start_time) ||
+                      formatTime(modal.occurrence.event.end_time)
                         ? [
-                            formatTime(modal.event.start_time) ?? "—",
-                            formatTime(modal.event.end_time),
+                            formatTime(modal.occurrence.event.start_time) ??
+                              "—",
+                            formatTime(modal.occurrence.event.end_time),
                           ]
                             .filter(Boolean)
                             .join(" – ")
@@ -489,15 +620,26 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                       Notes
                     </dt>
                     <dd className="mt-1 whitespace-pre-wrap text-off-white/85">
-                      {modal.event.notes?.trim() || "—"}
+                      {modal.occurrence.event.notes?.trim() || "—"}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-xs tracking-wide text-off-white/45 uppercase">
                       Recurrence
                     </dt>
-                    <dd className="mt-1 capitalize text-off-white/85">
-                      {modal.event.recurrence}
+                    <dd className="mt-1 text-off-white/85">
+                      <span className="inline-flex items-center gap-1.5">
+                        {modal.occurrence.isRecurring ? <RepeatIcon /> : null}
+                        {recurrenceLabel(modal.occurrence.event.recurrence)}
+                      </span>
+                      {modal.occurrence.event.recurrence_end_date ? (
+                        <span className="mt-1 block text-xs text-off-white/50">
+                          Until{" "}
+                          {formatDayHeading(
+                            modal.occurrence.event.recurrence_end_date,
+                          )}
+                        </span>
+                      ) : null}
                     </dd>
                   </div>
                 </dl>
@@ -517,11 +659,15 @@ export function AdminCalendar({ year, month, events }: AdminCalendarProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(modal.event.id)}
+                    onClick={() => handleDelete(modal.occurrence.event)}
                     disabled={isPending}
                     className="rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-300 transition-opacity hover:opacity-90 disabled:opacity-60"
                   >
-                    {isPending ? "Deleting…" : "Delete"}
+                    {isPending
+                      ? "Deleting…"
+                      : modal.occurrence.isRecurring
+                        ? "Delete series"
+                        : "Delete"}
                   </button>
                 </div>
               </>

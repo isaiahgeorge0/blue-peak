@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type { CalendarEventRow } from "@/app/admin/calendar/actions";
 import { AdminCalendar } from "@/components/admin-calendar";
+import { toDateKey } from "@/lib/calendar-recurrence";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,11 +41,6 @@ function parseYearMonth(
   return { year: safeYear, month: safeMonth };
 }
 
-function toDateKey(year: number, month: number, day: number) {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${year}-${pad(month)}-${pad(day)}`;
-}
-
 function visibleRange(year: number, month: number) {
   const firstWeekday = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -73,6 +69,9 @@ function visibleRange(year: number, month: number) {
   return { rangeStart, rangeEnd };
 }
 
+const EVENT_SELECT =
+  "id, title, notes, start_date, start_time, end_time, recurrence, recurrence_days_of_week, recurrence_end_date, created_at";
+
 export default async function AdminCalendarPage({
   searchParams,
 }: {
@@ -89,22 +88,35 @@ export default async function AdminCalendarPage({
   const { year, month } = parseYearMonth(params.year, params.month);
   const { rangeStart, rangeEnd } = visibleRange(year, month);
 
-  const { data: events, error } = await supabase
-    .from("calendar_events")
-    .select(
-      "id, title, notes, start_date, start_time, end_time, recurrence, created_at",
-    )
-    .eq("recurrence", "none")
-    .gte("start_date", rangeStart)
-    .lte("start_date", rangeEnd)
-    .order("start_date", { ascending: true })
-    .order("start_time", { ascending: true });
+  const [oneOffResult, recurringResult] = await Promise.all([
+    supabase
+      .from("calendar_events")
+      .select(EVENT_SELECT)
+      .eq("recurrence", "none")
+      .gte("start_date", rangeStart)
+      .lte("start_date", rangeEnd)
+      .order("start_date", { ascending: true })
+      .order("start_time", { ascending: true }),
+    supabase
+      .from("calendar_events")
+      .select(EVENT_SELECT)
+      .neq("recurrence", "none")
+      .lte("start_date", rangeEnd)
+      .or(
+        `recurrence_end_date.is.null,recurrence_end_date.gte.${rangeStart}`,
+      )
+      .order("start_date", { ascending: true }),
+  ]);
 
+  const error = oneOffResult.error ?? recurringResult.error;
   if (error) {
     console.error("admin calendar: failed to load", error.message);
   }
 
-  const rows = (events ?? []) as CalendarEventRow[];
+  const rows = [
+    ...((oneOffResult.data ?? []) as CalendarEventRow[]),
+    ...((recurringResult.data ?? []) as CalendarEventRow[]),
+  ];
 
   return (
     <div>
@@ -114,7 +126,13 @@ export default async function AdminCalendarPage({
           table, apply the migration and refresh.
         </p>
       ) : null}
-      <AdminCalendar year={year} month={month} events={rows} />
+      <AdminCalendar
+        year={year}
+        month={month}
+        rangeStart={rangeStart}
+        rangeEnd={rangeEnd}
+        events={rows}
+      />
     </div>
   );
 }
