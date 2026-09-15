@@ -155,8 +155,8 @@ export default function HomePage() {
                 What&apos;s next for Blue Peak
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-off-white/70">
-                Tools we are building so quotes, crews, and referrals stay as
-                organised as the work on site.
+                Tools and ongoing work so quotes, crews, referrals, and local
+                search stay as organised as the work on site.
               </p>
             </div>
             <Link
@@ -166,7 +166,7 @@ export default function HomePage() {
               View the roadmap
             </Link>
           </div>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {roadmapFeatures.map((feature) => (
               <Link
                 key={feature.slug}

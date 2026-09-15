@@ -6,7 +6,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Roadmap",
     description:
-      "What Blue Peak Solutions is building next: tools for subcontractors, quotes and invoices, and referrals that run without the chase.",
+      "What Blue Peak Solutions is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
   };
 }
 
@@ -23,14 +23,17 @@ export default function RoadmapPage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-off-white/75">
             Blue Peak already runs on clear quotes and tidy sites. These are the
-            tools we are putting in place next so the business behind the build
-            stays as organised as the work on site.
+            next steps so the business behind the build stays as organised as
+            the work on site, and so local homeowners can find us when they
+            search.
           </p>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-off-white/70">
-            Nothing here is live yet. Each one is planned, scoped, and on the
-            way. If you are a homeowner, it simply means a smoother experience
-            as we grow. If you run a trade business yourself, it is a look at
-            the ceiling of what a small team can run with the right software.
+            Three of these are tools still on the way. Local SEO is ongoing
+            work we keep investing in, because search visibility does not stay
+            put on its own. If you are a homeowner, it simply means a smoother
+            experience as we grow. If you run a trade business yourself, it is
+            a look at the ceiling of what a small team can run with the right
+            systems.
           </p>
         </div>
       </section>
@@ -54,10 +57,16 @@ export default function RoadmapPage() {
               <h2 className="mt-4 text-2xl tracking-tight text-off-white sm:text-3xl">
                 {feature.name}
               </h2>
-              {feature.detail.map((paragraph) => (
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-off-white/80">
+                {feature.summary}
+              </p>
+              <h3 className="mt-8 text-sm font-medium tracking-wide text-baby-blue uppercase">
+                Why it matters
+              </h3>
+              {feature.whyItMatters.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="mt-4 max-w-2xl text-base leading-relaxed text-off-white/70"
+                  className="mt-3 max-w-2xl text-base leading-relaxed text-off-white/70"
                 >
                   {paragraph}
                 </p>
@@ -73,9 +82,9 @@ export default function RoadmapPage() {
             Still just want a quote?
           </h2>
           <p className="mt-4 max-w-xl text-base text-off-white/75">
-            The roadmap is for how we run the business. If you have a kitchen,
-            bathroom, extension, or refurb in mind, we are ready to price it
-            now.
+            The roadmap is for how we run and grow the business. If you have a
+            kitchen, bathroom, extension, or refurb in mind, we are ready to
+            price it now.
           </p>
           <div className="mt-8">
             <Link
