@@ -12,6 +12,11 @@ const primaryNav = [
     label: "Leads",
     match: (path: string) => path.startsWith("/admin/leads"),
   },
+  {
+    href: "/admin/calendar",
+    label: "Calendar",
+    match: (path: string) => path.startsWith("/admin/calendar"),
+  },
 ] as const;
 
 function navClass(active: boolean) {
