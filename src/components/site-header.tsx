@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { headerCtaClassName } from "@/components/cta-styles";
+import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,11 +16,14 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
         <Link
           href="/"
-          className="font-serif text-lg tracking-tight text-off-white"
+          className="font-serif text-lg tracking-tight text-off-white transition-colors hover:text-baby-blue"
         >
           Blue Peak Solutions
         </Link>
-        <nav aria-label="Primary" className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6">
+        <nav
+          aria-label="Primary"
+          className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6"
+        >
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -28,10 +33,13 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/contact"
-            className="rounded-full bg-baby-blue px-5 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90"
+          <a
+            href={`tel:${sitePhoneTel}`}
+            className="text-sm text-off-white/80 transition-colors hover:text-baby-blue"
           >
+            {sitePhoneDisplay}
+          </a>
+          <Link href="/contact" className={headerCtaClassName}>
             Get a quote
           </Link>
         </nav>

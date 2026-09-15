@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-
-const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90";
+import { primaryCtaClassName } from "@/components/cta-styles";
+import { teamMembers } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -91,34 +90,21 @@ export default function AboutPage() {
             The team
           </h2>
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
-            <div>
-              {/* Profile photo placeholder */}
-              <div className="aspect-square max-w-xs bg-gray-800" />
-              <h3 className="mt-5 font-serif text-2xl text-off-white">
-                Tom Harris
-              </h3>
-              <p className="mt-1 text-sm tracking-wide text-baby-blue">
-                Builder and co-founder
-              </p>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-off-white/70">
-                Handles structure, joinery, and the day-to-day sequencing on
-                site so each job stays tidy and on track.
-              </p>
-            </div>
-            <div>
-              {/* Profile photo placeholder */}
-              <div className="aspect-square max-w-xs bg-gray-800" />
-              <h3 className="mt-5 font-serif text-2xl text-off-white">
-                James Cole
-              </h3>
-              <p className="mt-1 text-sm tracking-wide text-baby-blue">
-                Builder and co-founder
-              </p>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-off-white/70">
-                Focuses on finishes, client updates, and making sure the written
-                quote matches what gets delivered.
-              </p>
-            </div>
+            {teamMembers.map((member) => (
+              <div key={member.name}>
+                {/* Profile photo placeholder */}
+                <div className="aspect-square max-w-xs bg-gray-800" />
+                <h3 className="mt-5 font-serif text-2xl text-off-white">
+                  {member.name}
+                </h3>
+                <p className="mt-1 text-sm tracking-wide text-baby-blue">
+                  {member.role}
+                </p>
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-off-white/70">
+                  {member.blurb}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -134,7 +120,7 @@ export default function AboutPage() {
             clear next step.
           </p>
           <div className="mt-8">
-            <Link href="/contact" className={quoteButtonClassName}>
+            <Link href="/contact" className={primaryCtaClassName}>
               Get a quote
             </Link>
           </div>

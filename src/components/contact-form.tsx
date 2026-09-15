@@ -26,7 +26,7 @@ const fieldClassName =
 const labelClassName = "block text-sm font-medium text-off-white/85";
 
 const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
 
 export function ContactForm({ services }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({

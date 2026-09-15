@@ -2,6 +2,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteUrl } from "@/lib/content";
+import { sitePhoneTel } from "@/lib/site";
 
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
@@ -10,7 +11,7 @@ const localBusinessJsonLd = {
   description:
     "Two-person building and renovation team covering Ipswich and the surrounding Suffolk area.",
   url: siteUrl,
-  telephone: "+441234567890",
+  telephone: sitePhoneTel,
   priceRange: "££",
   address: {
     "@type": "PostalAddress",

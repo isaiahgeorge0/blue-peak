@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 export function SiteFooter() {
   return (
@@ -22,7 +23,7 @@ export function SiteFooter() {
               </a>
             </li>
             <li>
-              <a href="tel:+441234567890">01234 567890</a>
+              <a href={`tel:${sitePhoneTel}`}>{sitePhoneDisplay}</a>
             </li>
           </ul>
         </div>
