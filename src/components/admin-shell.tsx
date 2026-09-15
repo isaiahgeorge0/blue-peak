@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/app/admin/actions";
+import { adminFeaturePreviews } from "@/lib/admin-feature-previews";
 
 const primaryNav = [
   { href: "/admin", label: "Dashboard", match: (path: string) => path === "/admin" },
@@ -11,13 +12,6 @@ const primaryNav = [
     label: "Leads",
     match: (path: string) => path.startsWith("/admin/leads"),
   },
-] as const;
-
-const upcomingNav = [
-  { label: "Subcontractors" },
-  { label: "Quotes & Invoices" },
-  { label: "Referrals" },
-  { label: "SEO & Visibility" },
 ] as const;
 
 function navClass(active: boolean) {
@@ -78,16 +72,28 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               Coming next
             </p>
             <ul className="mt-2 space-y-1">
-              {upcomingNav.map((item) => (
-                <li key={item.label}>
-                  <div className="flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm text-off-white/40">
-                    <span>{item.label}</span>
-                    <span className="shrink-0 rounded border border-off-white/10 px-1.5 py-0.5 text-[10px] tracking-wide text-off-white/35 uppercase">
-                      Soon
-                    </span>
-                  </div>
-                </li>
-              ))}
+              {adminFeaturePreviews.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={[
+                        "flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                        active
+                          ? "bg-off-white/5 text-off-white/70"
+                          : "text-off-white/40 hover:bg-off-white/5 hover:text-off-white/60",
+                      ].join(" ")}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <span>{item.navLabel}</span>
+                      <span className="shrink-0 rounded border border-off-white/10 px-1.5 py-0.5 text-[10px] tracking-wide text-off-white/35 uppercase">
+                        Soon
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
