@@ -16,7 +16,7 @@ const initialState: LoginState = { error: null };
 
 export function AdminLoginForm() {
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/admin/leads";
+  const nextPath = searchParams.get("next") || "/admin";
   const [state, formAction, isPending] = useActionState(
     loginAdmin,
     initialState,

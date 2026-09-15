@@ -61,10 +61,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLoginRoute && isAuthenticated) {
-    const leadsUrl = request.nextUrl.clone();
-    leadsUrl.pathname = "/admin/leads";
-    leadsUrl.search = "";
-    return NextResponse.redirect(leadsUrl);
+    const dashboardUrl = request.nextUrl.clone();
+    dashboardUrl.pathname = "/admin";
+    dashboardUrl.search = "";
+    return NextResponse.redirect(dashboardUrl);
   }
 
   return supabaseResponse;

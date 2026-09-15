@@ -13,7 +13,7 @@ export async function loginAdmin(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const nextPath = String(formData.get("next") ?? "/admin/leads");
+  const nextPath = String(formData.get("next") ?? "/admin");
 
   if (!email || !password) {
     return { error: "Email and password are required." };
@@ -30,7 +30,7 @@ export async function loginAdmin(
     return { error: "Invalid email or password." };
   }
 
-  redirect(nextPath.startsWith("/admin") ? nextPath : "/admin/leads");
+  redirect(nextPath.startsWith("/admin") ? nextPath : "/admin");
 }
 
 export async function logoutAdmin() {
