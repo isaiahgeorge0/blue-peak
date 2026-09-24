@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendNewLeadEmail } from "@/lib/send-new-lead-email";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type LeadBody = {
@@ -73,6 +74,22 @@ export async function POST(request: Request) {
             "Unable to submit your enquiry right now. Please try again later.",
         },
         { status: 500 },
+      );
+    }
+
+    try {
+      await sendNewLeadEmail({
+        name,
+        phone,
+        email,
+        postcode,
+        serviceType,
+        message,
+      });
+    } catch (notifyError) {
+      console.error(
+        "leads API: Resend notification failed",
+        notifyError instanceof Error ? notifyError.message : notifyError,
       );
     }
 
