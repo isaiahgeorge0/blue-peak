@@ -4,27 +4,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import {
-  createCalendarEvent,
   deleteCalendarEvent,
   type CalendarEventRow,
 } from "@/app/admin/calendar/actions";
-import { TimePicker } from "@/components/admin/time-picker";
+import { CalendarEventFormDialog } from "@/components/calendar-event-form-dialog";
 import {
   expandEventsForRange,
   groupOccurrencesByDate,
   recurrenceLabel,
   type CalendarOccurrence,
-  type RecurrenceValue,
-  weekdayFromDateKey,
 } from "@/lib/calendar-recurrence";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const RECURRENCE_OPTIONS = [
-  { value: "none", label: "Does not repeat" },
-  { value: "weekly", label: "Weekly" },
-  { value: "biweekly", label: "Every 2 weeks" },
-  { value: "monthly", label: "Monthly" },
-] as const;
 
 type AdminCalendarProps = {
   year: number;
@@ -34,10 +25,7 @@ type AdminCalendarProps = {
   events: CalendarEventRow[];
 };
 
-type ModalState =
-  | { type: "create"; date: string }
-  | { type: "view"; occurrence: CalendarOccurrence }
-  | null;
+type ViewModalState = { occurrence: CalendarOccurrence } | null;
 
 function pad2(value: number) {
   return String(value).padStart(2, "0");
@@ -155,14 +143,8 @@ export function AdminCalendar({
 }: AdminCalendarProps) {
   const router = useRouter();
   const titleId = useId();
-  const [modal, setModal] = useState<ModalState>(null);
-  const [title, setTitle] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [notes, setNotes] = useState("");
-  const [recurrence, setRecurrence] = useState<RecurrenceValue>("none");
-  const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
-  const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
+  const [createDate, setCreateDate] = useState<string | null>(null);
+  const [viewModal, setViewModal] = useState<ViewModalState>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -181,80 +163,32 @@ export function AdminCalendar({
   }, []);
 
   useEffect(() => {
-    if (!modal) return;
+    if (!viewModal) return;
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setModal(null);
+        setViewModal(null);
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [modal]);
+  }, [viewModal]);
 
   function openCreate(dateKey: string) {
-    setTitle("");
-    setStartTime("");
-    setEndTime("");
-    setNotes("");
-    setRecurrence("none");
-    setRecurrenceDays([weekdayFromDateKey(dateKey)]);
-    setRecurrenceEndDate("");
     setError(null);
-    setModal({ type: "create", date: dateKey });
+    setCreateDate(dateKey);
   }
 
   function openView(occurrence: CalendarOccurrence) {
     setError(null);
-    setModal({ type: "view", occurrence });
+    setViewModal({ occurrence });
   }
 
-  function closeModal() {
+  function closeViewModal() {
     if (isPending) return;
-    setModal(null);
+    setViewModal(null);
     setError(null);
-  }
-
-  function toggleWeekday(day: number) {
-    setRecurrenceDays((current) =>
-      current.includes(day)
-        ? current.filter((value) => value !== day)
-        : [...current, day].sort((a, b) => a - b),
-    );
-  }
-
-  function handleCreate(event: React.FormEvent) {
-    event.preventDefault();
-    if (!modal || modal.type !== "create") return;
-
-    setError(null);
-    startTransition(async () => {
-      const result = await createCalendarEvent({
-        title,
-        notes,
-        start_date: modal.date,
-        start_time: startTime || undefined,
-        end_time: endTime || undefined,
-        recurrence,
-        recurrence_days_of_week:
-          recurrence === "weekly" || recurrence === "biweekly"
-            ? recurrenceDays
-            : undefined,
-        recurrence_end_date:
-          recurrence !== "none" && recurrenceEndDate
-            ? recurrenceEndDate
-            : undefined,
-      });
-
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-
-      setModal(null);
-      router.refresh();
-    });
   }
 
   function handleDelete(eventRow: CalendarEventRow) {
@@ -273,14 +207,10 @@ export function AdminCalendar({
         setError(result.error);
         return;
       }
-      setModal(null);
+      setViewModal(null);
       router.refresh();
     });
   }
-
-  const showDayPicker =
-    recurrence === "weekly" || recurrence === "biweekly";
-  const showRepeatUntil = recurrence !== "none";
 
   return (
     <div>
@@ -400,11 +330,18 @@ export function AdminCalendar({
         </div>
       </div>
 
-      {modal ? (
+      <CalendarEventFormDialog
+        open={createDate !== null}
+        onClose={() => setCreateDate(null)}
+        prefill={{ start_date: createDate ?? todayKey }}
+        heading="New event"
+      />
+
+      {viewModal ? (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
           role="presentation"
-          onClick={closeModal}
+          onClick={closeViewModal}
         >
           <div
             role="dialog"
@@ -413,265 +350,89 @@ export function AdminCalendar({
             className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-off-white/15 bg-charcoal p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
-            {modal.type === "create" ? (
-              <>
-                <h2
-                  id={titleId}
-                  className="font-serif text-xl tracking-tight text-off-white"
-                >
-                  New event
-                </h2>
-                <p className="mt-1 text-sm text-off-white/55">
-                  {formatDayHeading(modal.date)}
-                </p>
+            <h2
+              id={titleId}
+              className="font-serif text-xl tracking-tight text-off-white"
+            >
+              {viewModal.occurrence.event.title}
+            </h2>
+            <p className="mt-1 text-sm text-off-white/55">
+              {formatDayHeading(viewModal.occurrence.occurrenceDate)}
+            </p>
 
-                <form onSubmit={handleCreate} className="mt-5 space-y-4">
-                  <label className="block">
-                    <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                      Title
+            <dl className="mt-5 space-y-3 text-sm">
+              <div>
+                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                  Time
+                </dt>
+                <dd className="mt-1 text-off-white/85">
+                  {formatTime(viewModal.occurrence.event.start_time) ||
+                  formatTime(viewModal.occurrence.event.end_time)
+                    ? [
+                        formatTime(viewModal.occurrence.event.start_time) ??
+                          "-",
+                        formatTime(viewModal.occurrence.event.end_time),
+                      ]
+                        .filter(Boolean)
+                        .join(" - ")
+                    : "All day / no time set"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                  Notes
+                </dt>
+                <dd className="mt-1 whitespace-pre-wrap text-off-white/85">
+                  {viewModal.occurrence.event.notes?.trim() || "-"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                  Recurrence
+                </dt>
+                <dd className="mt-1 text-off-white/85">
+                  <span className="inline-flex items-center gap-1.5">
+                    {viewModal.occurrence.isRecurring ? <RepeatIcon /> : null}
+                    {recurrenceLabel(viewModal.occurrence.event.recurrence)}
+                  </span>
+                  {viewModal.occurrence.event.recurrence_end_date ? (
+                    <span className="mt-1 block text-xs text-off-white/50">
+                      Until{" "}
+                      {formatDayHeading(
+                        viewModal.occurrence.event.recurrence_end_date,
+                      )}
                     </span>
-                    <input
-                      required
-                      value={title}
-                      onChange={(event) => setTitle(event.target.value)}
-                      className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
-                      placeholder="Site visit, follow-up…"
-                    />
-                  </label>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                        Start time
-                      </span>
-                      <TimePicker
-                        value={startTime}
-                        onChange={setStartTime}
-                        aria-label="Start time"
-                        disabled={isPending}
-                      />
-                    </div>
-                    <div>
-                      <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                        End time
-                      </span>
-                      <TimePicker
-                        value={endTime}
-                        onChange={setEndTime}
-                        aria-label="End time"
-                        disabled={isPending}
-                      />
-                    </div>
-                  </div>
-
-                  <label className="block">
-                    <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                      Notes
-                    </span>
-                    <textarea
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      rows={3}
-                      className="mt-1.5 w-full resize-y rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
-                      placeholder="Optional details"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                      Recurrence
-                    </span>
-                    <select
-                      value={recurrence}
-                      onChange={(event) => {
-                        const nextValue = event.target.value as RecurrenceValue;
-                        setRecurrence(nextValue);
-                        if (
-                          (nextValue === "weekly" ||
-                            nextValue === "biweekly") &&
-                          recurrenceDays.length === 0
-                        ) {
-                          setRecurrenceDays([
-                            weekdayFromDateKey(modal.date),
-                          ]);
-                        }
-                      }}
-                      className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
-                    >
-                      {RECURRENCE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  {showDayPicker ? (
-                    <fieldset>
-                      <legend className="text-xs tracking-wide text-off-white/55 uppercase">
-                        Repeat on
-                      </legend>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {WEEKDAY_LABELS.map((label, day) => {
-                          const selected = recurrenceDays.includes(day);
-                          return (
-                            <button
-                              key={label}
-                              type="button"
-                              onClick={() => toggleWeekday(day)}
-                              aria-pressed={selected}
-                              className={[
-                                "rounded-md border px-2.5 py-1.5 text-xs transition-colors",
-                                selected
-                                  ? "border-baby-blue/50 bg-baby-blue/15 text-baby-blue"
-                                  : "border-off-white/15 text-off-white/65 hover:border-off-white/30",
-                              ].join(" ")}
-                            >
-                              {label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </fieldset>
                   ) : null}
+                </dd>
+              </div>
+            </dl>
 
-                  {recurrence === "monthly" ? (
-                    <p className="text-xs text-off-white/50">
-                      Repeats on day {Number(modal.date.slice(-2))} each month.
-                    </p>
-                  ) : null}
+            {error ? (
+              <p className="mt-4 text-sm text-baby-blue">{error}</p>
+            ) : null}
 
-                  {showRepeatUntil ? (
-                    <label className="block">
-                      <span className="text-xs tracking-wide text-off-white/55 uppercase">
-                        Repeat until
-                      </span>
-                      <input
-                        type="date"
-                        value={recurrenceEndDate}
-                        min={modal.date}
-                        onChange={(event) =>
-                          setRecurrenceEndDate(event.target.value)
-                        }
-                        className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue [color-scheme:dark]"
-                      />
-                      <span className="mt-1 block text-[11px] text-off-white/40">
-                        Leave blank to repeat indefinitely (shown up to 12
-                        months from the start date).
-                      </span>
-                    </label>
-                  ) : null}
-
-                  {error ? (
-                    <p className="text-sm text-baby-blue">{error}</p>
-                  ) : null}
-
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      disabled={isPending}
-                      className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/70 transition-colors hover:border-off-white/30 disabled:opacity-60"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="rounded-md border border-baby-blue/40 bg-baby-blue/15 px-3 py-2 text-sm text-baby-blue transition-opacity hover:opacity-90 disabled:opacity-60"
-                    >
-                      {isPending ? "Saving…" : "Create event"}
-                    </button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <>
-                <h2
-                  id={titleId}
-                  className="font-serif text-xl tracking-tight text-off-white"
-                >
-                  {modal.occurrence.event.title}
-                </h2>
-                <p className="mt-1 text-sm text-off-white/55">
-                  {formatDayHeading(modal.occurrence.occurrenceDate)}
-                </p>
-
-                <dl className="mt-5 space-y-3 text-sm">
-                  <div>
-                    <dt className="text-xs tracking-wide text-off-white/45 uppercase">
-                      Time
-                    </dt>
-                    <dd className="mt-1 text-off-white/85">
-                      {formatTime(modal.occurrence.event.start_time) ||
-                      formatTime(modal.occurrence.event.end_time)
-                        ? [
-                            formatTime(modal.occurrence.event.start_time) ??
-                              "—",
-                            formatTime(modal.occurrence.event.end_time),
-                          ]
-                            .filter(Boolean)
-                            .join(" – ")
-                        : "All day / no time set"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs tracking-wide text-off-white/45 uppercase">
-                      Notes
-                    </dt>
-                    <dd className="mt-1 whitespace-pre-wrap text-off-white/85">
-                      {modal.occurrence.event.notes?.trim() || "—"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs tracking-wide text-off-white/45 uppercase">
-                      Recurrence
-                    </dt>
-                    <dd className="mt-1 text-off-white/85">
-                      <span className="inline-flex items-center gap-1.5">
-                        {modal.occurrence.isRecurring ? <RepeatIcon /> : null}
-                        {recurrenceLabel(modal.occurrence.event.recurrence)}
-                      </span>
-                      {modal.occurrence.event.recurrence_end_date ? (
-                        <span className="mt-1 block text-xs text-off-white/50">
-                          Until{" "}
-                          {formatDayHeading(
-                            modal.occurrence.event.recurrence_end_date,
-                          )}
-                        </span>
-                      ) : null}
-                    </dd>
-                  </div>
-                </dl>
-
-                {error ? (
-                  <p className="mt-4 text-sm text-baby-blue">{error}</p>
-                ) : null}
-
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    disabled={isPending}
-                    className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/70 transition-colors hover:border-off-white/30 disabled:opacity-60"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(modal.occurrence.event)}
-                    disabled={isPending}
-                    className="rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-300 transition-opacity hover:opacity-90 disabled:opacity-60"
-                  >
-                    {isPending
-                      ? "Deleting…"
-                      : modal.occurrence.isRecurring
-                        ? "Delete series"
-                        : "Delete"}
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeViewModal}
+                disabled={isPending}
+                className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/70 transition-colors hover:border-off-white/30 disabled:opacity-60"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(viewModal.occurrence.event)}
+                disabled={isPending}
+                className="rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-300 transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {isPending
+                  ? "Deleting..."
+                  : viewModal.occurrence.isRecurring
+                    ? "Delete series"
+                    : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

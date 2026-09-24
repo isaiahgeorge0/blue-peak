@@ -1,9 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { CalendarEventRow } from "@/app/admin/calendar/actions";
 import { addLeadNote, type LeadNoteRow } from "@/app/admin/leads/actions";
+import { CalendarEventFormDialog } from "@/components/calendar-event-form-dialog";
 import { LeadStatusSelect } from "@/components/lead-status-select";
+import {
+  buildSiteVisitNotes,
+  formatVisitIndicator,
+  pickNextUpcomingVisit,
+  todayDateKeyForPrefill,
+  type LeadVisitSummary,
+} from "@/lib/lead-visits";
 
 export type LeadTableRow = {
   id: string;
@@ -11,6 +20,7 @@ export type LeadTableRow = {
   name: string | null;
   phone: string | null;
   email: string | null;
+  postcode: string | null;
   service_type: string | null;
   status: string | null;
 };
@@ -18,6 +28,7 @@ export type LeadTableRow = {
 type LeadNotesPanelProps = {
   lead: LeadTableRow;
   notes: LeadNoteRow[];
+  nextVisit: LeadVisitSummary | null;
 };
 
 function formatDate(value: string) {
@@ -35,20 +46,44 @@ function displayValue(value: string | null) {
   return value && value.trim() ? value : "-";
 }
 
-export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
+export function LeadNotesPanel({
+  lead,
+  notes,
+  nextVisit,
+}: LeadNotesPanelProps) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [localNotes, setLocalNotes] = useState(notes);
+  const [localVisit, setLocalVisit] = useState(nextVisit);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   useEffect(() => {
     setLocalNotes(notes);
   }, [notes]);
 
+  useEffect(() => {
+    setLocalVisit(nextVisit);
+  }, [nextVisit]);
+
   const isNew = lead.status === "new" || !lead.status;
   const noteCount = localNotes.length;
+
+  const schedulePrefill = useMemo(
+    () => ({
+      start_date: todayDateKeyForPrefill(),
+      title: `Site visit - ${lead.name?.trim() || "Lead"}`,
+      notes: buildSiteVisitNotes({
+        phone: lead.phone,
+        postcode: lead.postcode,
+      }),
+      lead_id: lead.id,
+      recurrence: "none" as const,
+    }),
+    [lead.id, lead.name, lead.phone, lead.postcode],
+  );
 
   function toggleExpanded() {
     setExpanded((value) => !value);
@@ -74,6 +109,17 @@ export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
       setLocalNotes((prev) => [result.note, ...prev]);
       router.refresh();
     });
+  }
+
+  function handleVisitCreated(event: CalendarEventRow) {
+    const created: LeadVisitSummary = {
+      id: event.id,
+      start_date: event.start_date,
+      start_time: event.start_time,
+    };
+    setLocalVisit((prev) =>
+      pickNextUpcomingVisit(prev ? [prev, created] : [created]),
+    );
   }
 
   return (
@@ -113,6 +159,11 @@ export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
             {noteCount > 0 ? (
               <span className="ml-2 text-xs text-baby-blue/80">
                 {noteCount} note{noteCount === 1 ? "" : "s"}
+              </span>
+            ) : null}
+            {localVisit ? (
+              <span className="mt-1 block text-xs text-baby-blue/90">
+                {formatVisitIndicator(localVisit)}
               </span>
             ) : null}
           </button>
@@ -170,7 +221,7 @@ export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
                   disabled={isPending}
                   className="w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue disabled:opacity-60"
                 />
-                <div className="mt-2 flex items-center gap-3">
+                <div className="mt-2 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={handleAddNote}
@@ -178,6 +229,13 @@ export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
                     className="rounded-md border border-baby-blue/50 bg-baby-blue/15 px-3 py-1.5 text-sm text-baby-blue transition-colors hover:bg-baby-blue/25 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isPending ? "Adding..." : "Add note"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScheduleOpen(true)}
+                    className="rounded-md border border-off-white/20 px-3 py-1.5 text-sm text-off-white/80 transition-colors hover:border-baby-blue hover:text-baby-blue"
+                  >
+                    Schedule site visit
                   </button>
                   {error ? (
                     <span className="text-xs text-off-white/60" role="alert">
@@ -190,6 +248,14 @@ export function LeadNotesPanel({ lead, notes }: LeadNotesPanelProps) {
           </td>
         </tr>
       ) : null}
+
+      <CalendarEventFormDialog
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        prefill={schedulePrefill}
+        heading="Schedule site visit"
+        onCreated={handleVisitCreated}
+      />
     </>
   );
 }

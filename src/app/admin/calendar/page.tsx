@@ -70,7 +70,7 @@ function visibleRange(year: number, month: number) {
 }
 
 const EVENT_SELECT =
-  "id, title, notes, start_date, start_time, end_time, recurrence, recurrence_days_of_week, recurrence_end_date, created_at";
+  "id, title, notes, start_date, start_time, end_time, recurrence, recurrence_days_of_week, recurrence_end_date, lead_id, created_at";
 
 export default async function AdminCalendarPage({
   searchParams,

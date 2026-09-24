@@ -17,6 +17,7 @@ export type CalendarEventRow = {
   recurrence: string;
   recurrence_days_of_week: number[] | null;
   recurrence_end_date: string | null;
+  lead_id: string | null;
   created_at: string;
 };
 
@@ -30,13 +31,14 @@ export type CreateCalendarEventInput = {
   start_date: string;
   start_time?: string;
   end_time?: string;
+  lead_id?: string;
   recurrence?: RecurrenceValue;
   recurrence_days_of_week?: number[];
   recurrence_end_date?: string;
 };
 
 const EVENT_SELECT =
-  "id, title, notes, start_date, start_time, end_time, recurrence, recurrence_days_of_week, recurrence_end_date, created_at";
+  "id, title, notes, start_date, start_time, end_time, recurrence, recurrence_days_of_week, recurrence_end_date, lead_id, created_at";
 
 function isDateString(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -44,6 +46,12 @@ function isDateString(value: string) {
 
 function isTimeString(value: string) {
   return /^\d{2}:\d{2}(:\d{2})?$/.test(value);
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 }
 
 function isRecurrence(value: string): value is RecurrenceValue {
@@ -87,6 +95,7 @@ export async function createCalendarEvent(
   const recurrence = input.recurrence ?? "none";
   const recurrenceEndDate = input.recurrence_end_date?.trim() || null;
   const weekdays = normalizeWeekdays(input.recurrence_days_of_week);
+  const leadId = input.lead_id?.trim() || null;
 
   if (!isRecurrence(recurrence)) {
     return { ok: false, error: "Invalid recurrence." };
@@ -103,10 +112,7 @@ export async function createCalendarEvent(
     return { ok: false, error: "Invalid repeat-until date." };
   }
 
-  if (
-    recurrenceEndDate &&
-    recurrenceEndDate < input.start_date
-  ) {
+  if (recurrenceEndDate && recurrenceEndDate < input.start_date) {
     return { ok: false, error: "Repeat-until date must be on or after start." };
   }
 
@@ -115,6 +121,10 @@ export async function createCalendarEvent(
     (!weekdays || weekdays.length === 0)
   ) {
     return { ok: false, error: "Pick at least one day of the week." };
+  }
+
+  if (leadId && !isUuid(leadId)) {
+    return { ok: false, error: "Invalid lead id." };
   }
 
   const auth = await requireAuthenticatedClient();
@@ -130,6 +140,7 @@ export async function createCalendarEvent(
       start_date: input.start_date,
       start_time: startTime,
       end_time: endTime,
+      lead_id: leadId,
       recurrence,
       recurrence_days_of_week:
         recurrence === "weekly" || recurrence === "biweekly" ? weekdays : null,
@@ -148,6 +159,7 @@ export async function createCalendarEvent(
   }
 
   revalidatePath("/admin/calendar");
+  revalidatePath("/admin/leads");
   return { ok: true, event: data as CalendarEventRow };
 }
 
@@ -184,5 +196,6 @@ export async function deleteCalendarEvent(
   }
 
   revalidatePath("/admin/calendar");
+  revalidatePath("/admin/leads");
   return { ok: true };
 }

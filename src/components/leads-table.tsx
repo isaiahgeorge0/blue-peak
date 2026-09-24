@@ -7,12 +7,14 @@ import {
   type LeadTableRow,
 } from "@/components/lead-notes-panel";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
+import type { LeadVisitSummary } from "@/lib/lead-visits";
 
 type StatusFilter = "all" | LeadStatus;
 
 type LeadsTableProps = {
   leads: LeadTableRow[];
   notesByLead: Record<string, LeadNoteRow[]>;
+  nextVisitByLead: Record<string, LeadVisitSummary>;
 };
 
 function matchesSearch(lead: LeadTableRow, query: string) {
@@ -32,7 +34,11 @@ function matchesStatus(lead: LeadTableRow, status: StatusFilter) {
   return current === status;
 }
 
-export function LeadsTable({ leads, notesByLead }: LeadsTableProps) {
+export function LeadsTable({
+  leads,
+  notesByLead,
+  nextVisitByLead,
+}: LeadsTableProps) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
 
@@ -98,6 +104,7 @@ export function LeadsTable({ leads, notesByLead }: LeadsTableProps) {
                   key={lead.id}
                   lead={lead}
                   notes={notesByLead[lead.id] ?? []}
+                  nextVisit={nextVisitByLead[lead.id] ?? null}
                 />
               ))}
             </tbody>

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type { LeadNoteRow } from "@/app/admin/leads/actions";
 import { LeadsTable } from "@/components/leads-table";
+import type { LeadTableRow } from "@/components/lead-notes-panel";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
+import { groupNextVisitsByLead } from "@/lib/lead-visits";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -17,16 +19,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type LeadRow = {
-  id: string;
-  created_at: string;
-  name: string | null;
-  phone: string | null;
-  email: string | null;
-  service_type: string | null;
-  status: string | null;
-};
-
 const STATUS_RANK: Record<LeadStatus, number> = {
   new: 0,
   contacted: 1,
@@ -35,7 +27,7 @@ const STATUS_RANK: Record<LeadStatus, number> = {
   lost: 4,
 };
 
-function sortLeads(rows: LeadRow[]) {
+function sortLeads(rows: LeadTableRow[]) {
   return [...rows].sort((a, b) => {
     const aStatus = (
       a.status && (LEAD_STATUSES as readonly string[]).includes(a.status)
@@ -79,17 +71,28 @@ export default async function AdminLeadsPage() {
 
   // Authenticated admin only. Service role read bypasses RLS after auth check.
   const admin = getSupabaseAdmin();
-  const [{ data: leads, error }, { data: notes, error: notesError }] =
-    await Promise.all([
-      admin
-        .from("leads")
-        .select("id, created_at, name, phone, email, service_type, status")
-        .order("created_at", { ascending: false }),
-      admin
-        .from("lead_notes")
-        .select("id, lead_id, note, created_at")
-        .order("created_at", { ascending: false }),
-    ]);
+  const [
+    { data: leads, error },
+    { data: notes, error: notesError },
+    { data: visits, error: visitsError },
+  ] = await Promise.all([
+    admin
+      .from("leads")
+      .select(
+        "id, created_at, name, phone, email, postcode, service_type, status",
+      )
+      .order("created_at", { ascending: false }),
+    admin
+      .from("lead_notes")
+      .select("id, lead_id, note, created_at")
+      .order("created_at", { ascending: false }),
+    admin
+      .from("calendar_events")
+      .select("id, lead_id, start_date, start_time")
+      .not("lead_id", "is", null)
+      .order("start_date", { ascending: true })
+      .order("start_time", { ascending: true }),
+  ]);
 
   if (error) {
     console.error("admin leads: failed to load", error.message);
@@ -97,9 +100,13 @@ export default async function AdminLeadsPage() {
   if (notesError) {
     console.error("admin leads: failed to load notes", notesError.message);
   }
+  if (visitsError) {
+    console.error("admin leads: failed to load visits", visitsError.message);
+  }
 
-  const rows = sortLeads((leads ?? []) as LeadRow[]);
+  const rows = sortLeads((leads ?? []) as LeadTableRow[]);
   const notesByLead = groupNotesByLead((notes ?? []) as LeadNoteRow[]);
+  const nextVisitByLead = groupNextVisitsByLead(visits ?? []);
 
   return (
     <div>
@@ -122,7 +129,11 @@ export default async function AdminLeadsPage() {
       ) : null}
 
       {!error && rows.length > 0 ? (
-        <LeadsTable leads={rows} notesByLead={notesByLead} />
+        <LeadsTable
+          leads={rows}
+          notesByLead={notesByLead}
+          nextVisitByLead={nextVisitByLead}
+        />
       ) : null}
     </div>
   );
