@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import type { LeadNoteRow } from "@/app/admin/leads/actions";
-import { LeadNotesPanel } from "@/components/lead-notes-panel";
+import { LeadsTable } from "@/components/leads-table";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -60,13 +60,13 @@ function sortLeads(rows: LeadRow[]) {
 }
 
 function groupNotesByLead(notes: LeadNoteRow[]) {
-  const map = new Map<string, LeadNoteRow[]>();
+  const grouped: Record<string, LeadNoteRow[]> = {};
   for (const note of notes) {
-    const list = map.get(note.lead_id) ?? [];
+    const list = grouped[note.lead_id] ?? [];
     list.push(note);
-    map.set(note.lead_id, list);
+    grouped[note.lead_id] = list;
   }
-  return map;
+  return grouped;
 }
 
 export default async function AdminLeadsPage() {
@@ -122,29 +122,7 @@ export default async function AdminLeadsPage() {
       ) : null}
 
       {!error && rows.length > 0 ? (
-        <div className="mt-8 overflow-x-auto rounded-lg border border-off-white/10 bg-black">
-          <table className="min-w-full text-left text-sm text-off-white/85">
-            <thead className="border-b border-off-white/10 text-xs tracking-wide text-baby-blue uppercase">
-              <tr>
-                <th className="px-4 py-3 font-medium">Created</th>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Phone</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Service</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((lead) => (
-                <LeadNotesPanel
-                  key={lead.id}
-                  lead={lead}
-                  notes={notesByLead.get(lead.id) ?? []}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <LeadsTable leads={rows} notesByLead={notesByLead} />
       ) : null}
     </div>
   );
