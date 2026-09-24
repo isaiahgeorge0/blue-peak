@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { LeadStatusSelect } from "@/components/lead-status-select";
+import type { LeadNoteRow } from "@/app/admin/leads/actions";
+import { LeadNotesPanel } from "@/components/lead-notes-panel";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -34,21 +35,6 @@ const STATUS_RANK: Record<LeadStatus, number> = {
   lost: 4,
 };
 
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
-function displayValue(value: string | null) {
-  return value && value.trim() ? value : "-";
-}
-
 function sortLeads(rows: LeadRow[]) {
   return [...rows].sort((a, b) => {
     const aStatus = (
@@ -73,6 +59,16 @@ function sortLeads(rows: LeadRow[]) {
   });
 }
 
+function groupNotesByLead(notes: LeadNoteRow[]) {
+  const map = new Map<string, LeadNoteRow[]>();
+  for (const note of notes) {
+    const list = map.get(note.lead_id) ?? [];
+    list.push(note);
+    map.set(note.lead_id, list);
+  }
+  return map;
+}
+
 export default async function AdminLeadsPage() {
   const supabase = await createSupabaseServerClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -82,16 +78,28 @@ export default async function AdminLeadsPage() {
   }
 
   // Authenticated admin only. Service role read bypasses RLS after auth check.
-  const { data: leads, error } = await getSupabaseAdmin()
-    .from("leads")
-    .select("id, created_at, name, phone, email, service_type, status")
-    .order("created_at", { ascending: false });
+  const admin = getSupabaseAdmin();
+  const [{ data: leads, error }, { data: notes, error: notesError }] =
+    await Promise.all([
+      admin
+        .from("leads")
+        .select("id, created_at, name, phone, email, service_type, status")
+        .order("created_at", { ascending: false }),
+      admin
+        .from("lead_notes")
+        .select("id, lead_id, note, created_at")
+        .order("created_at", { ascending: false }),
+    ]);
 
   if (error) {
     console.error("admin leads: failed to load", error.message);
   }
+  if (notesError) {
+    console.error("admin leads: failed to load notes", notesError.message);
+  }
 
   const rows = sortLeads((leads ?? []) as LeadRow[]);
+  const notesByLead = groupNotesByLead((notes ?? []) as LeadNoteRow[]);
 
   return (
     <div>
@@ -99,7 +107,8 @@ export default async function AdminLeadsPage() {
         Leads
       </h1>
       <p className="mt-3 text-sm text-off-white/70">
-        Quote requests from the website. New leads are listed first.
+        Quote requests from the website. New leads are listed first. Expand a
+        row to view or add notes.
       </p>
 
       {error ? (
@@ -127,28 +136,11 @@ export default async function AdminLeadsPage() {
             </thead>
             <tbody>
               {rows.map((lead) => (
-                <tr
+                <LeadNotesPanel
                   key={lead.id}
-                  className={`border-b border-off-white/5 last:border-b-0 ${
-                    lead.status === "new" || !lead.status
-                      ? "bg-baby-blue/5"
-                      : ""
-                  }`}
-                >
-                  <td className="whitespace-nowrap px-4 py-3 text-off-white/70">
-                    {formatDate(lead.created_at)}
-                  </td>
-                  <td className="px-4 py-3">{displayValue(lead.name)}</td>
-                  <td className="px-4 py-3">{displayValue(lead.phone)}</td>
-                  <td className="px-4 py-3">{displayValue(lead.email)}</td>
-                  <td className="px-4 py-3">{displayValue(lead.service_type)}</td>
-                  <td className="px-4 py-3">
-                    <LeadStatusSelect
-                      leadId={lead.id}
-                      initialStatus={lead.status}
-                    />
-                  </td>
-                </tr>
+                  lead={lead}
+                  notes={notesByLead.get(lead.id) ?? []}
+                />
               ))}
             </tbody>
           </table>
