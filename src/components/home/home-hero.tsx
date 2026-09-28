@@ -58,7 +58,7 @@ export function HomeHero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-end px-5 pb-6 pt-[calc(var(--site-header-height,4.5rem)+0.75rem)] sm:px-6 sm:pb-8 lg:pb-10">
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height,4.5rem)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
         {/*
           Frosted glass: solid near-opaque fallback first, then blur where supported
           so content never sits on a fully transparent plate.

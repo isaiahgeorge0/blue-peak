@@ -23,6 +23,40 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Site header: solid bar at the top, transparent once compact so only the pills float */
+.site-header {
+  background-color: rgba(10, 10, 10, 0.9);
+  border-bottom: 1px solid rgba(244, 241, 234, 0.1);
+  transition:
+    background-color 350ms ease,
+    border-color 350ms ease;
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .site-header {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
+
+/*
+  A backdrop-filter on the bar would stop the pills' own blur at the bar, so it
+  has to be removed entirely (not blur(0)) for the pills to frost the page.
+*/
+.site-header[data-compact="true"] {
+  background-color: transparent;
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header {
+    transition: none;
+  }
+}
+
 /* Homepage frosted-glass hero card: solid fallback, blur where supported */
 .home-frost-card {
   background: rgba(10, 10, 10, 0.88);
