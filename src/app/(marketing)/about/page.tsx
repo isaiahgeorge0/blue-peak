@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { primaryCtaClassName } from "@/components/cta-styles";
 import { teamMembers } from "@/lib/site";
@@ -92,8 +93,15 @@ export default function AboutPage() {
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
             {teamMembers.map((member) => (
               <div key={member.name}>
-                {/* Profile photo placeholder */}
-                <div className="aspect-square max-w-xs bg-gray-800" />
+                <div className="relative aspect-square max-w-xs overflow-hidden bg-gray-800">
+                  <Image
+                    src={member.imageSrc}
+                    alt={`${member.name}, ${member.role}`}
+                    fill
+                    sizes="320px"
+                    className="object-cover"
+                  />
+                </div>
                 <h3 className="mt-5 font-serif text-2xl text-off-white">
                   {member.name}
                 </h3>

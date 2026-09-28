@@ -5,6 +5,7 @@
   --black: #0a0a0a;
   --baby-blue: #89cff0;
   --off-white: #f4f1ea;
+  --site-header-height: 4.5rem;
 }
 
 @theme inline {
@@ -20,6 +21,27 @@ body {
   background: var(--charcoal);
   color: var(--off-white);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Homepage frosted-glass hero card: solid fallback, blur where supported */
+.home-frost-card {
+  background: rgba(10, 10, 10, 0.88);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .home-frost-card {
+    background: rgba(10, 10, 10, 0.48);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+    backdrop-filter: blur(16px) saturate(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-frost-card {
+    background: rgba(10, 10, 10, 0.92);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 h1,
