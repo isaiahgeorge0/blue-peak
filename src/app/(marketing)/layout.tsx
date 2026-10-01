@@ -32,8 +32,16 @@ export default function MarketingLayout({
   return (
     <>
       <JsonLd data={localBusinessJsonLd} />
+      <a
+        href="#main"
+        className="sr-only rounded-full bg-baby-blue text-sm font-medium text-black focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:top-3 focus:left-3 focus:z-[60] focus:outline-none focus-visible:ring-2 focus-visible:ring-off-white"
+      >
+        Skip to content
+      </a>
       <SiteHeader />
-      <main className="w-full flex-1">{children}</main>
+      <main id="main" tabIndex={-1} className="w-full flex-1 outline-none">
+        {children}
+      </main>
       <SiteFooter />
     </>
   );

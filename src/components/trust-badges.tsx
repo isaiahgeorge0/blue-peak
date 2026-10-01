@@ -1,60 +1,60 @@
 /**
- * Placeholder accreditation copy for a UK domestic builder.
- * Replace with verified insurance, guarantee terms, Google rating, and DBS
- * status before presenting as fact to clients.
+ * Only process facts the site already commits to elsewhere. Credentials
+ * (insurance, guarantees, DBS, review scores) stay off until Blue Peak
+ * confirms them.
  */
 const trustBadges = [
   {
-    label: "Fully insured",
-    detail: "Public liability cover",
+    label: "Written quotes",
+    detail: "Before we start",
     icon: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
         <path
           fill="currentColor"
-          d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 2.2 6 2.2v4.7c0 3.9-2.5 7.4-6 8.9-3.5-1.5-6-5-6-8.9V6.4l6-2.2Z"
+          d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 1.5V9h5.5L13 3.5ZM8 13v2h8v-2H8Zm0 4v2h5v-2H8Z"
         />
       </svg>
     ),
   },
   {
-    label: "10-year guarantee",
-    detail: "On structural work",
+    label: "Free site visits",
+    detail: "To price it right",
     icon: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
         <path
           fill="currentColor"
-          d="M12 2a7 7 0 0 1 7 7c0 3.1-1.8 5.7-4.4 6.8L16 22H8l1.4-6.2A7 7 0 0 1 12 2Zm0 2a5 5 0 1 0 .01 10.01A5 5 0 0 0 12 4Z"
+          d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3L12 3Z"
         />
       </svg>
     ),
   },
   {
-    label: "Google rated",
-    detail: "Local review score",
+    label: "Friday photo updates",
+    detail: "While on site",
     icon: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
         <path
           fill="currentColor"
-          d="m12 3.2 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.5 7.2 18.1l.9-5.4L4.2 8.9l5.4-.8L12 3.2Z"
+          d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9Zm3 5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
         />
       </svg>
     ),
   },
   {
-    label: "DBS checked",
-    detail: "For work in the home",
+    label: "Based in Ipswich",
+    detail: "Across Suffolk",
     icon: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
         <path
           fill="currentColor"
-          d="M12 2a5 5 0 0 1 5 5v1h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v1h6V7a3 3 0 0 0-3-3Zm0 8a2 2 0 1 0 .01 4.01A2 2 0 0 0 12 12Z"
+          d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7Zm0 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
         />
       </svg>
     ),
   },
 ] as const;
 
-/** Compact strip under the hero — continuation, not a new section. */
+/** Compact strip under the hero - continuation, not a new section. */
 export function TrustBadges() {
   return (
     <div className="border-b border-off-white/10 bg-black">
@@ -68,7 +68,7 @@ export function TrustBadges() {
             <span className="text-xs font-medium whitespace-nowrap text-off-white sm:text-sm">
               {badge.label}
             </span>
-            <span className="hidden text-xs text-off-white/45 md:inline">
+            <span className="hidden text-xs text-off-white/60 md:inline">
               · {badge.detail}
             </span>
           </li>

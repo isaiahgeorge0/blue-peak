@@ -1,6 +1,15 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { LeadHoneypot } from "@/components/lead-honeypot";
+import { useTurnstile } from "@/components/use-turnstile";
+import {
+  LEAD_FIELD_LIMITS,
+  LEAD_HONEYPOT_FIELD,
+  LEAD_TURNSTILE_FIELD,
+  TURNSTILE_ACTIONS,
+} from "@/lib/lead-limits";
+import { sitePhoneDisplay } from "@/lib/site";
 
 type ServiceOption = {
   slug: string;
@@ -21,7 +30,7 @@ type FormState = {
 };
 
 const fieldClassName =
-  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue";
+  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue focus:ring-2 focus:ring-baby-blue/40";
 
 const labelClassName = "block text-sm font-medium text-off-white/85";
 
@@ -41,9 +50,16 @@ export function ContactForm({ services }: ContactFormProps) {
     name?: string;
     phone?: string;
   }>({});
+  const [honeypot, setHoneypot] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const {
+    attachContainer: attachTurnstile,
+    enabled: turnstileEnabled,
+    getToken: getTurnstileToken,
+    reset: resetTurnstile,
+  } = useTurnstile(TURNSTILE_ACTIONS.contact);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -68,6 +84,14 @@ export function ContactForm({ services }: ContactFormProps) {
 
     setIsSubmitting(true);
     try {
+      const turnstileToken = await getTurnstileToken();
+      if (turnstileEnabled && !turnstileToken) {
+        setSubmitError(
+          `We couldn't confirm this enquiry came from a person. Please try again, or call us on ${sitePhoneDisplay}.`,
+        );
+        return;
+      }
+
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,10 +102,14 @@ export function ContactForm({ services }: ContactFormProps) {
           postcode: form.postcode.trim(),
           service_type: form.service_type,
           message: form.message.trim(),
+          [LEAD_HONEYPOT_FIELD]: honeypot,
+          [LEAD_TURNSTILE_FIELD]: turnstileToken ?? "",
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
 
       if (!response.ok) {
         setSubmitError(
@@ -98,6 +126,7 @@ export function ContactForm({ services }: ContactFormProps) {
       );
     } finally {
       setIsSubmitting(false);
+      resetTurnstile();
     }
   }
 
@@ -117,6 +146,7 @@ export function ContactForm({ services }: ContactFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      <LeadHoneypot id="contact-company" value={honeypot} onChange={setHoneypot} />
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClassName}>
@@ -129,6 +159,7 @@ export function ContactForm({ services }: ContactFormProps) {
             autoComplete="name"
             value={form.name}
             onChange={(event) => updateField("name", event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.name}
             className={fieldClassName}
             aria-invalid={Boolean(fieldErrors.name)}
             aria-describedby={fieldErrors.name ? "name-error" : undefined}
@@ -151,6 +182,7 @@ export function ContactForm({ services }: ContactFormProps) {
             autoComplete="tel"
             value={form.phone}
             onChange={(event) => updateField("phone", event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.phone}
             className={fieldClassName}
             aria-invalid={Boolean(fieldErrors.phone)}
             aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
@@ -175,6 +207,7 @@ export function ContactForm({ services }: ContactFormProps) {
             autoComplete="email"
             value={form.email}
             onChange={(event) => updateField("email", event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.email}
             className={fieldClassName}
           />
         </div>
@@ -190,6 +223,7 @@ export function ContactForm({ services }: ContactFormProps) {
             autoComplete="postal-code"
             value={form.postcode}
             onChange={(event) => updateField("postcode", event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.postcode}
             className={fieldClassName}
           />
         </div>
@@ -225,10 +259,13 @@ export function ContactForm({ services }: ContactFormProps) {
           rows={5}
           value={form.message}
           onChange={(event) => updateField("message", event.target.value)}
+          maxLength={LEAD_FIELD_LIMITS.message}
           className={`${fieldClassName} resize-y`}
           placeholder="What do you want doing, and roughly when?"
         />
       </div>
+
+      <div ref={attachTurnstile} />
 
       {submitError ? (
         <p

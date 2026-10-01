@@ -11,15 +11,22 @@ type BeforeAfterSliderProps = {
   caption?: string;
 };
 
+const MIN_POSITION = 8;
+const MAX_POSITION = 92;
+const clampPosition = (value: number) =>
+  Math.min(MAX_POSITION, Math.max(MIN_POSITION, value));
+
 /**
- * Vertical divider between before/after photos. Pointer + touch draggable.
+ * Vertical divider between before/after photos. Pointer, touch and keyboard
+ * operable (the handle is an ARIA slider).
+ * The default pair is stock imagery; swap in a real Blue Peak project.
  */
 export function BeforeAfterSlider({
   beforeSrc = "/home/before.jpg",
   afterSrc = "/home/after.jpg",
   beforeAlt = "Kitchen before renovation",
   afterAlt = "Kitchen after renovation",
-  caption = "Stock before/after pair for layout - replace with a Blue Peak project.",
+  caption,
 }: BeforeAfterSliderProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(52);
@@ -30,7 +37,7 @@ export function BeforeAfterSlider({
     if (!frame) return;
     const rect = frame.getBoundingClientRect();
     const next = ((clientX - rect.left) / rect.width) * 100;
-    setPosition(Math.min(92, Math.max(8, next)));
+    setPosition(clampPosition(next));
   }, []);
 
   const onPointerDown = (event: React.PointerEvent) => {
@@ -52,6 +59,25 @@ export function BeforeAfterSlider({
     }
   };
 
+  const onHandleKeyDown = (event: React.KeyboardEvent) => {
+    const steps: Record<string, (current: number) => number> = {
+      ArrowLeft: (current) => current - 2,
+      ArrowDown: (current) => current - 2,
+      ArrowRight: (current) => current + 2,
+      ArrowUp: (current) => current + 2,
+      PageDown: (current) => current - 10,
+      PageUp: (current) => current + 10,
+      Home: () => MIN_POSITION,
+      End: () => MAX_POSITION,
+    };
+    const step = steps[event.key];
+    if (!step) return;
+    event.preventDefault();
+    setPosition((current) => clampPosition(step(current)));
+  };
+
+  const shownBefore = Math.round(position);
+
   return (
     <section className="bg-charcoal">
       <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
@@ -59,8 +85,7 @@ export function BeforeAfterSlider({
           Before and after
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-off-white/70">
-          Drag the handle to compare. Real Blue Peak project photos will replace
-          these stock images.
+          Drag the handle, or use the arrow keys, to compare.
         </p>
 
         <div
@@ -70,8 +95,6 @@ export function BeforeAfterSlider({
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          role="img"
-          aria-label="Before and after comparison slider"
         >
           <Image
             src={afterSrc}
@@ -99,15 +122,22 @@ export function BeforeAfterSlider({
             className="absolute inset-y-0 z-10 w-px bg-baby-blue"
             style={{ left: `${position}%` }}
           >
-            <button
-              type="button"
-              aria-label="Drag to compare before and after"
-              className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-baby-blue/60 bg-black/80 text-baby-blue shadow-lg"
+            <div
+              role="slider"
+              tabIndex={0}
+              aria-label="Before and after comparison"
+              aria-orientation="horizontal"
+              aria-valuemin={MIN_POSITION}
+              aria-valuemax={MAX_POSITION}
+              aria-valuenow={shownBefore}
+              aria-valuetext={`${shownBefore}% before, ${100 - shownBefore}% after`}
+              onKeyDown={onHandleKeyDown}
+              className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-baby-blue/60 bg-black/80 text-baby-blue shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-baby-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               <span aria-hidden className="text-sm tracking-tight">
                 {"< >"}
               </span>
-            </button>
+            </div>
           </div>
 
           <span className="pointer-events-none absolute top-3 left-3 rounded bg-black/70 px-2 py-1 text-[11px] tracking-wide text-off-white/80 uppercase">
@@ -117,7 +147,9 @@ export function BeforeAfterSlider({
             After
           </span>
         </div>
-        <p className="mt-3 text-xs text-off-white/45">{caption}</p>
+        {caption ? (
+          <p className="mt-3 text-xs text-off-white/60">{caption}</p>
+        ) : null}
       </div>
     </section>
   );

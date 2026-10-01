@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { projects } from "@/lib/content";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  return pageMetadata({
     title: "Work",
     description:
       "Recent kitchen, extension, bathroom, and refurb projects from Blue Peak Solutions across Ipswich and Suffolk.",
-  };
+    path: "/work",
+  });
 }
 
 export default function WorkPage() {

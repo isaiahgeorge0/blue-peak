@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { isAdminClaims } from "@/lib/admin-role";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export type LoginState = {
@@ -20,7 +21,7 @@ export async function loginAdmin(
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -28,6 +29,11 @@ export async function loginAdmin(
   if (error) {
     console.error("admin login failed", error.message);
     return { error: "Invalid email or password." };
+  }
+
+  if (!isAdminClaims({ app_metadata: data.user?.app_metadata })) {
+    await supabase.auth.signOut();
+    return { error: "This account does not have admin access." };
   }
 
   redirect(nextPath.startsWith("/admin") ? nextPath : "/admin");

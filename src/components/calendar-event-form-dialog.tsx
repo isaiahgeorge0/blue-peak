@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   createCalendarEvent,
@@ -80,24 +80,22 @@ export function CalendarEventFormDialog({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const prefillRef = useRef(prefill);
-  prefillRef.current = prefill;
-
-  useEffect(() => {
-    if (!open) return;
-    const next = prefillRef.current;
-    setStartDate(next.start_date || todayDateKey());
-    setTitle(next.title ?? "");
-    setStartTime(next.start_time ?? "");
-    setEndTime(next.end_time ?? "");
-    setNotes(next.notes ?? "");
-    setRecurrence(next.recurrence ?? "none");
-    setRecurrenceDays([
-      weekdayFromDateKey(next.start_date || todayDateKey()),
-    ]);
-    setRecurrenceEndDate("");
-    setError(null);
-  }, [open]);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      const startKey = prefill.start_date || todayDateKey();
+      setStartDate(startKey);
+      setTitle(prefill.title ?? "");
+      setStartTime(prefill.start_time ?? "");
+      setEndTime(prefill.end_time ?? "");
+      setNotes(prefill.notes ?? "");
+      setRecurrence(prefill.recurrence ?? "none");
+      setRecurrenceDays([weekdayFromDateKey(startKey)]);
+      setRecurrenceEndDate("");
+      setError(null);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;

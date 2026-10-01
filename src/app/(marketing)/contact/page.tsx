@@ -8,13 +8,15 @@ import { ContactForm } from "@/components/contact-form";
 import { Reveal } from "@/components/reveal";
 import { services } from "@/lib/content";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  return pageMetadata({
     title: "Contact",
     description:
       "Request a written quote for kitchen, bathroom, extension, or renovation work from Blue Peak Solutions.",
-  };
+    path: "/contact",
+  });
 }
 
 export default function ContactPage() {

@@ -45,7 +45,7 @@ export function HomeHero() {
         >
           <Image
             src="/home/hero.jpg"
-            alt="Finished renovation interior with open living space"
+            alt="Builder sketching a floor plan on a roll of drawings"
             fill
             priority
             sizes="100vw"

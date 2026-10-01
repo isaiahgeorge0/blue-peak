@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getAdminActionClient } from "@/lib/admin-auth";
+import { LEAD_STATUSES, SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
 
 export type UpdateLeadStatusResult =
   | { ok: true; status: LeadStatus }
@@ -18,6 +18,26 @@ export type LeadNoteRow = {
 export type AddLeadNoteResult =
   | { ok: true; note: LeadNoteRow }
   | { ok: false; error: string };
+
+export type BulkLeadsResult =
+  | { ok: true; count: number }
+  | { ok: false; error: string };
+
+const MAX_BULK_LEADS = 500;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function cleanLeadIds(ids: unknown): string[] | null {
+  if (!Array.isArray(ids)) return null;
+  const unique = [
+    ...new Set(
+      ids.filter(
+        (id): id is string => typeof id === "string" && UUID_PATTERN.test(id),
+      ),
+    ),
+  ];
+  return unique.length > 0 && unique.length <= MAX_BULK_LEADS ? unique : null;
+}
 
 function isLeadStatus(value: string): value is LeadStatus {
   return (LEAD_STATUSES as readonly string[]).includes(value);
@@ -35,11 +55,9 @@ export async function updateLeadStatus(
     return { ok: false, error: "Invalid status." };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    return { ok: false, error: "Not authenticated." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
   }
 
   // Select the updated row so a silent RLS miss surfaces as an error.
@@ -75,11 +93,9 @@ export async function addLeadNote(
     return { ok: false, error: "Note cannot be empty." };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    return { ok: false, error: "Not authenticated." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
   }
 
   const { data, error } = await supabase
@@ -99,4 +115,59 @@ export async function addLeadNote(
 
   revalidatePath("/admin/leads");
   return { ok: true, note: data as LeadNoteRow };
+}
+
+export async function markLeadsAsSpam(ids: string[]): Promise<BulkLeadsResult> {
+  const leadIds = cleanLeadIds(ids);
+  if (!leadIds) {
+    return { ok: false, error: `Select between 1 and ${MAX_BULK_LEADS} leads.` };
+  }
+
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
+  }
+
+  const { data, error } = await supabase
+    .from("leads")
+    .update({ status: SPAM_STATUS })
+    .in("id", leadIds)
+    .select("id");
+
+  if (error) {
+    console.error("markLeadsAsSpam failed", error.message);
+    return { ok: false, error: "Unable to mark those leads as spam." };
+  }
+
+  revalidatePath("/admin/leads");
+  revalidatePath("/admin");
+  return { ok: true, count: data?.length ?? 0 };
+}
+
+export async function deleteLeads(ids: string[]): Promise<BulkLeadsResult> {
+  const leadIds = cleanLeadIds(ids);
+  if (!leadIds) {
+    return { ok: false, error: `Select between 1 and ${MAX_BULK_LEADS} leads.` };
+  }
+
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
+  }
+
+  // Notes are removed with the lead; linked calendar events are kept.
+  const { data, error } = await supabase
+    .from("leads")
+    .delete()
+    .in("id", leadIds)
+    .select("id");
+
+  if (error) {
+    console.error("deleteLeads failed", error.message);
+    return { ok: false, error: "Unable to delete those leads." };
+  }
+
+  revalidatePath("/admin/leads");
+  revalidatePath("/admin");
+  return { ok: true, count: data?.length ?? 0 };
 }

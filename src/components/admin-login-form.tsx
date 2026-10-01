@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { loginAdmin, type LoginState } from "@/app/admin/actions";
 
 const fieldClassName =
-  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue";
+  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue focus:ring-2 focus:ring-baby-blue/40";
 
 const labelClassName = "block text-sm font-medium text-off-white/85";
 

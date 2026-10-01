@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { updateLeadStatus } from "@/app/admin/leads/actions";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 
@@ -26,9 +26,11 @@ export function LeadStatusSelect({
     normalizeStatus(initialStatus),
   );
 
-  useEffect(() => {
+  const [syncedInitialStatus, setSyncedInitialStatus] = useState(initialStatus);
+  if (initialStatus !== syncedInitialStatus) {
+    setSyncedInitialStatus(initialStatus);
     setStatus(normalizeStatus(initialStatus));
-  }, [initialStatus]);
+  }
   const [feedback, setFeedback] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );

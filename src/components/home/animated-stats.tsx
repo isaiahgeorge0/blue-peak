@@ -17,28 +17,10 @@ type StatDef = {
 };
 
 /*
- * Placeholder figures — swap for verified Blue Peak numbers when ready:
- * - 12 years trading
- * - 180 completed jobs
- * - 4 towns in the local patch
+ * Only add figures Blue Peak has confirmed (years trading, jobs completed).
+ * The section renders nothing while this list is empty.
  */
-const STATS: StatDef[] = [
-  {
-    value: 12,
-    suffix: " years",
-    label: "Trading as a two-person team in Ipswich",
-  },
-  {
-    value: 180,
-    suffix: "+",
-    label: "Kitchens, bathrooms, extensions, and full refurbs completed",
-  },
-  {
-    value: 4,
-    suffix: " towns",
-    label: "Ipswich, Felixstowe, Woodbridge, and Colchester",
-  },
-];
+const STATS: StatDef[] = [];
 
 function StatCard({
   stat,
@@ -98,6 +80,8 @@ function StatCard({
 
 export function AnimatedStats() {
   const reduceMotion = useHomeMotionPreference();
+
+  if (STATS.length === 0) return null;
 
   return (
     <section className="border-b border-off-white/10 bg-charcoal">

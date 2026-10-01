@@ -1,19 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAdminClaims } from "@/lib/admin-role";
 
 /**
  * Next.js 16 proxy (replaces deprecated middleware).
- * Refreshes the Supabase Auth session and protects /admin/* routes.
+ * Refreshes the Supabase Auth session and limits /admin/* to admin users.
  */
 export async function proxy(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-blue-peak-admin", "1");
-
-  let supabaseResponse = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -31,11 +25,7 @@ export async function proxy(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        supabaseResponse = NextResponse.next({
-          request: {
-            headers: requestHeaders,
-          },
-        });
+        supabaseResponse = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) => {
           supabaseResponse.cookies.set(name, value, options);
         });
@@ -47,20 +37,20 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(data?.claims);
+  const isAdmin = isAdminClaims(data?.claims);
 
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith("/admin");
   const isLoginRoute = pathname === "/admin/login";
 
-  if (isAdminRoute && !isLoginRoute && !isAuthenticated) {
+  if (isAdminRoute && !isLoginRoute && !isAdmin) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoginRoute && isAuthenticated) {
+  if (isLoginRoute && isAdmin) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = "/admin";
     dashboardUrl.search = "";

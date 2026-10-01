@@ -3,13 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { primaryCtaClassName } from "@/components/cta-styles";
 import { teamMembers } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  return pageMetadata({
     title: "About",
     description:
       "Meet the two-person Ipswich building team behind Blue Peak Solutions. Fixed written quotes, local Suffolk work, and the same people on every job.",
-  };
+    path: "/about",
+  });
 }
 
 export default function AboutPage() {

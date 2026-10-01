@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getAdminActionClient } from "@/lib/admin-auth";
 import {
   RECURRENCE_VALUES,
   type RecurrenceValue,
 } from "@/lib/calendar-recurrence";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export type CalendarEventRow = {
   id: string;
@@ -66,17 +66,6 @@ function normalizeWeekdays(days: number[] | undefined) {
   return unique.length ? unique : null;
 }
 
-async function requireAuthenticatedClient() {
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    return { ok: false as const, error: "Not authenticated.", supabase: null };
-  }
-
-  return { ok: true as const, error: null, supabase };
-}
-
 export async function createCalendarEvent(
   input: CreateCalendarEventInput,
 ): Promise<CalendarActionResult> {
@@ -127,12 +116,12 @@ export async function createCalendarEvent(
     return { ok: false, error: "Invalid lead id." };
   }
 
-  const auth = await requireAuthenticatedClient();
-  if (!auth.ok || !auth.supabase) {
-    return { ok: false, error: auth.error ?? "Not authenticated." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
   }
 
-  const { data, error } = await auth.supabase
+  const { data, error } = await supabase
     .from("calendar_events")
     .insert({
       title,
@@ -174,12 +163,12 @@ export async function deleteCalendarEvent(
     return { ok: false, error: "Missing event id." };
   }
 
-  const auth = await requireAuthenticatedClient();
-  if (!auth.ok || !auth.supabase) {
-    return { ok: false, error: auth.error ?? "Not authenticated." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
   }
 
-  const { data, error } = await auth.supabase
+  const { data, error } = await supabase
     .from("calendar_events")
     .delete()
     .eq("id", eventId)

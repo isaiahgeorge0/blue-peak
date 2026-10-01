@@ -1,7 +1,10 @@
 /* eslint-disable no-var, @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unused-vars */
 // @ts-nocheck - adapted from isometric-estimator.html prototype
 import * as THREE from "three";
-import type { EstimatorConfig } from "@/lib/isometric-estimator-config";
+import type {
+  EstimateSummary,
+  EstimatorConfig,
+} from "@/lib/isometric-estimator-config";
 
 type AddonMeshRecord = {
   solid: THREE.Group | THREE.Object3D;
@@ -14,10 +17,12 @@ type AddonMeshRecord = {
 /**
  * Mount the isometric estimator scene into a root element that contains the
  * expected markup (canvas + control ids). Returns a dispose function.
+ * `onEstimateChange` receives the current selection after every change.
  */
 export function mountIsometricEstimator(
   root: HTMLElement,
   config: EstimatorConfig,
+  onEstimateChange?: (estimate: EstimateSummary) => void,
 ): () => void {
   const ADDONS = config.addons;
   const SIZE_MULT = config.sizeMult;
@@ -542,33 +547,27 @@ export function mountIsometricEstimator(
   var sizeSeg = root.querySelector('#sizeSeg');
   var finishSeg = root.querySelector('#finishSeg');
   var daynightToggle = root.querySelector('#daynightToggle');
-  var ctaBtn = root.querySelector('#ctaBtn');
-  var ctaConfirm = root.querySelector('#ctaConfirm');
   var priceOut = root.querySelector('#priceOut');
   var weeksOut = root.querySelector('#weeksOut');
   var costBar = root.querySelector('#costBar');
   var costLegend = root.querySelector('#costLegend');
 
   // Strict Mode remounts the effect on the same DOM: clear leftovers first.
-  if (chipWrap) chipWrap.replaceChildren();
   if (costBar) costBar.replaceChildren();
   if (costLegend) costLegend.replaceChildren();
 
+  // Chips are server-rendered by React (so the layout doesn't shift); bind to them.
   var chipHandlers = [];
   ADDONS.forEach(function(a){
-    var chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'ie-chip';
+    var chip = chipWrap.querySelector('button[data-key="'+a.key+'"]');
+    if (!chip) return;
     chip.setAttribute('aria-pressed','false');
-    chip.dataset.key = a.key;
-    chip.innerHTML = '<span class="ie-dot"></span><span>'+a.label+'</span><span class="ie-price-tag">+£'+a.price.toLocaleString('en-GB')+'</span>';
     function onChipClick(){
       state.addons[a.key] = !state.addons[a.key];
       render();
     }
     chip.addEventListener('click', onChipClick);
     chipHandlers.push({ chip: chip, handler: onChipClick });
-    chipWrap.appendChild(chip);
   });
 
   function onSizeClick(e){
@@ -583,11 +582,6 @@ export function mountIsometricEstimator(
     state.finish = btn.dataset.finish;
     render();
   }
-  function onCtaClick(){
-    ctaConfirm.classList.add('ie-show');
-    window.clearTimeout(ctaBtn._t);
-    ctaBtn._t = window.setTimeout(function(){ ctaConfirm.classList.remove('ie-show'); }, 3200);
-  }
   function onDayNightClick(e){
     var btn = e.target.closest('button[data-mode]');
     if (!btn) return;
@@ -599,7 +593,6 @@ export function mountIsometricEstimator(
 
   sizeSeg.addEventListener('click', onSizeClick);
   finishSeg.addEventListener('click', onFinishClick);
-  ctaBtn.addEventListener('click', onCtaClick);
   daynightToggle.addEventListener('click', onDayNightClick);
 
   var sizeTargetScale = 1, sizeCurrentScale = 1;
@@ -627,6 +620,7 @@ export function mountIsometricEstimator(
     var basePrice = selected.reduce(function(s,a){ return s + a.price; }, 0);
     var total = Math.round(basePrice * SIZE_MULT[state.size] * FINISH_MULT[state.finish] / 500) * 500;
 
+    var weeksLabel = null;
     if (selected.length === 0){
       priceOut.textContent = "Select what you're building";
       priceOut.classList.add('ie-muted');
@@ -636,7 +630,18 @@ export function mountIsometricEstimator(
       priceOut.textContent = '£' + total.toLocaleString('en-GB');
       var baseWeeks = 3 + selected.reduce(function(s,a){ return s + a.weeks; }, 0);
       var weeks = Math.round(baseWeeks * SIZE_MULT[state.size]);
-      weeksOut.textContent = weeks + ' to ' + (weeks + 2) + ' weeks';
+      weeksLabel = weeks + ' to ' + (weeks + 2) + ' weeks';
+      weeksOut.textContent = weeksLabel;
+    }
+
+    if (onEstimateChange) {
+      onEstimateChange({
+        work: selected.map(function(a){ return a.label; }),
+        size: state.size,
+        finish: state.finish,
+        total: selected.length ? total : null,
+        weeks: weeksLabel
+      });
     }
 
     // cost breakdown bar - proportional segment per selected add-on
@@ -747,7 +752,6 @@ export function mountIsometricEstimator(
     cancelAnimationFrame(raf);
     clearTimeout(resizeTimer);
     clearTimeout(idleTimer);
-    if (ctaBtn && ctaBtn._t) window.clearTimeout(ctaBtn._t);
 
     window.removeEventListener('resize', resize);
     window.removeEventListener('pointerup', onPointerUp);
@@ -757,12 +761,11 @@ export function mountIsometricEstimator(
 
     sizeSeg.removeEventListener('click', onSizeClick);
     finishSeg.removeEventListener('click', onFinishClick);
-    ctaBtn.removeEventListener('click', onCtaClick);
     daynightToggle.removeEventListener('click', onDayNightClick);
     chipHandlers.forEach(function(entry){
       entry.chip.removeEventListener('click', entry.handler);
+      entry.chip.setAttribute('aria-pressed', 'false');
     });
-    if (chipWrap) chipWrap.replaceChildren();
     if (costBar) costBar.replaceChildren();
     if (costLegend) costLegend.replaceChildren();
     if (stageHost) stageHost.replaceChildren();

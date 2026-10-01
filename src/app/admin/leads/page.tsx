@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import type { LeadNoteRow } from "@/app/admin/leads/actions";
 import { LeadsTable } from "@/components/leads-table";
 import type { LeadTableRow } from "@/components/lead-notes-panel";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 import { groupNextVisitsByLead } from "@/lib/lead-visits";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -25,6 +24,7 @@ const STATUS_RANK: Record<LeadStatus, number> = {
   quoted: 2,
   won: 3,
   lost: 4,
+  spam: 5,
 };
 
 function sortLeads(rows: LeadTableRow[]) {
@@ -62,14 +62,9 @@ function groupNotesByLead(notes: LeadNoteRow[]) {
 }
 
 export default async function AdminLeadsPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
+  await requireAdminPage();
 
-  if (!claimsData?.claims) {
-    redirect("/admin/login");
-  }
-
-  // Authenticated admin only. Service role read bypasses RLS after auth check.
+  // Service role read bypasses RLS, so it must stay behind the admin check.
   const admin = getSupabaseAdmin();
   const [
     { data: leads, error },

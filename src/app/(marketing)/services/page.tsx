@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { services } from "@/lib/content";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  return pageMetadata({
     title: "Services",
     description:
       "Kitchen and bathroom renovations, extensions, conservatories, roofing, flooring, loft conversions, and general renovations from Blue Peak Solutions.",
-  };
+    path: "/services",
+  });
 }
 
 export default function ServicesPage() {

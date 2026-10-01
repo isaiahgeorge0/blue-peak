@@ -71,6 +71,28 @@ export const ESTIMATOR_FINISH_MULT = {
 export type EstimatorSize = keyof typeof ESTIMATOR_SIZE_MULT;
 export type EstimatorFinish = keyof typeof ESTIMATOR_FINISH_MULT;
 
+export const ESTIMATOR_SIZE_LABELS: Record<EstimatorSize, string> = {
+  compact: "Compact",
+  standard: "Standard",
+  large: "Large",
+};
+
+export const ESTIMATOR_FINISH_LABELS: Record<EstimatorFinish, string> = {
+  simple: "Simple",
+  quality: "Quality",
+  highend: "High-end",
+};
+
+/** Current calculator selection, reported by the scene after each change. */
+export type EstimateSummary = {
+  work: string[];
+  size: EstimatorSize;
+  finish: EstimatorFinish;
+  /** Rounded total in pounds, or null when nothing is selected. */
+  total: number | null;
+  weeks: string | null;
+};
+
 export type EstimatorConfig = {
   addons: EstimatorAddon[];
   sizeMult: typeof ESTIMATOR_SIZE_MULT;

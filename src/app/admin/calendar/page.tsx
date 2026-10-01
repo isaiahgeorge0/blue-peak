@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import type { CalendarEventRow } from "@/app/admin/calendar/actions";
 import { AdminCalendar } from "@/components/admin-calendar";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { toDateKey } from "@/lib/calendar-recurrence";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -77,12 +77,8 @@ export default async function AdminCalendarPage({
 }: {
   searchParams: SearchParams;
 }) {
+  await requireAdminPage();
   const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    redirect("/admin/login");
-  }
 
   const params = await searchParams;
   const { year, month } = parseYearMonth(params.year, params.month);

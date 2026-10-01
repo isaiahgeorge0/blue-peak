@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import type { CalendarEventRow } from "@/app/admin/calendar/actions";
 import { addLeadNote, type LeadNoteRow } from "@/app/admin/leads/actions";
 import { CalendarEventFormDialog } from "@/components/calendar-event-form-dialog";
@@ -29,6 +29,8 @@ type LeadNotesPanelProps = {
   lead: LeadTableRow;
   notes: LeadNoteRow[];
   nextVisit: LeadVisitSummary | null;
+  selected: boolean;
+  onSelectedChange: (selected: boolean) => void;
 };
 
 function formatDate(value: string) {
@@ -50,6 +52,8 @@ export function LeadNotesPanel({
   lead,
   notes,
   nextVisit,
+  selected,
+  onSelectedChange,
 }: LeadNotesPanelProps) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -60,13 +64,16 @@ export function LeadNotesPanel({
   const [localVisit, setLocalVisit] = useState(nextVisit);
   const [scheduleOpen, setScheduleOpen] = useState(false);
 
-  useEffect(() => {
+  const [syncedNotes, setSyncedNotes] = useState(notes);
+  const [syncedVisit, setSyncedVisit] = useState(nextVisit);
+  if (notes !== syncedNotes) {
+    setSyncedNotes(notes);
     setLocalNotes(notes);
-  }, [notes]);
-
-  useEffect(() => {
+  }
+  if (nextVisit !== syncedVisit) {
+    setSyncedVisit(nextVisit);
     setLocalVisit(nextVisit);
-  }, [nextVisit]);
+  }
 
   const isNew = lead.status === "new" || !lead.status;
   const noteCount = localNotes.length;
@@ -129,6 +136,15 @@ export function LeadNotesPanel({
           isNew ? "bg-baby-blue/5" : ""
         } ${expanded ? "" : "last:border-b-0"}`}
       >
+        <td className="w-10 py-3 pr-0 pl-4">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(event) => onSelectedChange(event.target.checked)}
+            aria-label={`Select lead ${lead.name?.trim() || "without a name"}`}
+            className="h-4 w-4 accent-baby-blue"
+          />
+        </td>
         <td className="whitespace-nowrap px-4 py-3 text-off-white/70">
           <button
             type="button"
@@ -180,7 +196,7 @@ export function LeadNotesPanel({
       </tr>
       {expanded ? (
         <tr className="border-b border-off-white/5 last:border-b-0 bg-charcoal/40">
-          <td colSpan={6} className="px-4 py-4">
+          <td colSpan={7} className="px-4 py-4">
             <div className="max-w-3xl">
               <p className="text-xs tracking-wide text-baby-blue uppercase">
                 Activity

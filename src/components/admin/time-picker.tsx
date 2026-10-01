@@ -86,12 +86,6 @@ export function TimePicker({
 
   useEffect(() => {
     if (!open) return;
-    setDraftHour(parsed?.hour ?? null);
-    setDraftMinute(parsed ? nearestQuarter(parsed.minute) : null);
-  }, [open, parsed]);
-
-  useEffect(() => {
-    if (!open) return;
 
     function onPointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -160,7 +154,12 @@ export function TimePicker({
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
         onClick={() => {
-          if (!disabled) setOpen((current) => !current);
+          if (disabled) return;
+          if (!open) {
+            setDraftHour(parsed?.hour ?? null);
+            setDraftMinute(parsed ? nearestQuarter(parsed.minute) : null);
+          }
+          setOpen(!open);
         }}
         className={[
           "flex w-full items-center justify-between rounded-md border bg-black px-3 py-2 text-left text-sm outline-none transition-colors",

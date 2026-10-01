@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   LeadVolumeChart,
   type LeadVolumePoint,
 } from "@/components/lead-volume-chart";
-import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
+import { requireAdminPage } from "@/lib/admin-auth";
+import { LEAD_STATUSES, SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -26,6 +25,7 @@ type LeadRow = {
   name: string | null;
   service_type: string | null;
   status: string | null;
+  notified_at: string | null;
 };
 
 function greetingForNow(now = new Date()) {
@@ -107,36 +107,36 @@ function placeholderLeadVolume(): LeadVolumePoint[] {
   return points;
 }
 
-export default async function AdminDashboardPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
+function countCreatedWithinDays(rows: LeadRow[], days: number) {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  return rows.filter((lead) => new Date(lead.created_at).getTime() >= cutoff)
+    .length;
+}
 
-  if (!claimsData?.claims) {
-    redirect("/admin/login");
-  }
+export default async function AdminDashboardPage() {
+  const { claims } = await requireAdminPage();
 
   const { data: leads, error } = await getSupabaseAdmin()
     .from("leads")
-    .select("id, created_at, name, service_type, status")
+    .select("id, created_at, name, service_type, status, notified_at")
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("admin dashboard: failed to load leads", error.message);
   }
 
-  const rows = (leads ?? []) as LeadRow[];
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
+  const allRows = (leads ?? []) as LeadRow[];
+  const rows = allRows.filter(
+    (lead) => normalizeStatus(lead.status) !== SPAM_STATUS,
+  );
   const totalLeads = rows.length;
-  const newThisWeek = rows.filter(
-    (lead) => new Date(lead.created_at).getTime() >= weekAgo,
-  ).length;
+  const newThisWeek = countCreatedWithinDays(rows, 7);
   const openNew = rows.filter(
     (lead) => normalizeStatus(lead.status) === "new",
   ).length;
   const statusCounts = LEAD_STATUSES.reduce(
     (acc, status) => {
-      acc[status] = rows.filter(
+      acc[status] = allRows.filter(
         (lead) => normalizeStatus(lead.status) === status,
       ).length;
       return acc;
@@ -145,10 +145,11 @@ export default async function AdminDashboardPage() {
   );
 
   const recent = rows.slice(0, 5);
+  const unnotified = rows.filter((lead) => !lead.notified_at);
   const chartData = placeholderLeadVolume();
   const greeting = greetingForNow();
   const displayName = displayNameFromClaims(
-    claimsData.claims as Record<string, unknown>,
+    claims as Record<string, unknown>,
   );
 
   return (
@@ -177,6 +178,30 @@ export default async function AdminDashboardPage() {
         <p className="mt-8 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white">
           Unable to load dashboard data right now.
         </p>
+      ) : null}
+
+      {unnotified.length > 0 ? (
+        <div
+          role="alert"
+          className="mt-8 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white"
+        >
+          <p>
+            {unnotified.length === 1
+              ? "1 lead arrived without an email notification:"
+              : `${unnotified.length} leads arrived without an email notification:`}{" "}
+            {unnotified
+              .slice(0, 5)
+              .map((lead) => lead.name?.trim() || "Unnamed lead")
+              .join(", ")}
+            {unnotified.length > 5 ? ", ..." : ""}
+          </p>
+          <Link
+            href="/admin/leads"
+            className="mt-2 inline-block text-baby-blue underline-offset-2 hover:underline"
+          >
+            Review in Leads
+          </Link>
+        </div>
       ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

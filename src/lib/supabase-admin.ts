@@ -32,9 +32,3 @@ export function getSupabaseAdmin(): SupabaseClient {
 
   return adminClient;
 }
-
-/** Server-only admin client. Created on first use via getSupabaseAdmin(). */
-export const supabaseAdmin = {
-  from: (...args: Parameters<SupabaseClient["from"]>) =>
-    getSupabaseAdmin().from(...args),
-};

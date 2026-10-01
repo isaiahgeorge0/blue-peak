@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { EstimatorBooking } from "@/components/estimator-booking";
 import {
   defaultEstimatorConfig,
+  type EstimateSummary,
   type EstimatorConfig,
 } from "@/lib/isometric-estimator-config";
-import { mountIsometricEstimator } from "@/lib/isometric-estimator-scene";
 import "./isometric-estimator.css";
 
 type IsometricEstimatorProps = {
@@ -16,22 +17,45 @@ type IsometricEstimatorProps = {
 };
 
 /**
- * Interactive 3D quote calculator. Client-only: mounts a three.js scene against
- * the canvas and control markup (adapted from isometric-estimator.html).
+ * Interactive 3D quote calculator. The markup is server-rendered so the page
+ * doesn't shift; three.js is loaded after hydration and mounted into it
+ * (adapted from isometric-estimator.html).
  */
 export function IsometricEstimator({
   config = defaultEstimatorConfig,
   hideIntro = false,
 }: IsometricEstimatorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const estimateRef = useRef<EstimateSummary | null>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [mountError, setMountError] = useState<unknown>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
-    // Mount returns a full teardown so React Strict Mode remounts (and route
-    // navigations) cannot leave a second chip set or WebGL context alive.
-    return mountIsometricEstimator(root, config);
+    let cancelled = false;
+    let dispose: (() => void) | undefined;
+    import("@/lib/isometric-estimator-scene")
+      .then(({ mountIsometricEstimator }) => {
+        if (cancelled) return;
+        // Mount returns a full teardown so React Strict Mode remounts (and
+        // route navigations) cannot leave a second WebGL context alive.
+        dispose = mountIsometricEstimator(root, config, (estimate) => {
+          estimateRef.current = estimate;
+        });
+        setSceneReady(true);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) setMountError(error ?? new Error("Estimator failed"));
+      });
+    return () => {
+      cancelled = true;
+      dispose?.();
+    };
   }, [config]);
+
+  // Rethrow during render so the surrounding error boundary shows the fallback.
+  if (mountError) throw mountError;
 
   return (
     <div ref={rootRef} className="ie-root">
@@ -65,6 +89,11 @@ export function IsometricEstimator({
                 </button>
               </div>
               <div id="stageHost" className="ie-stage-host" />
+              {sceneReady ? null : (
+                <p className="ie-stage-loading" role="status">
+                  Loading the 3D preview...
+                </p>
+              )}
               <div className="ie-stage-foot">
                 <span>Dashed wireframe - not selected</span>
                 <span>Solid &amp; lit - included</span>
@@ -88,19 +117,12 @@ export function IsometricEstimator({
               </div>
               <div className="ie-cost-bar" id="costBar" />
               <div className="ie-cost-legend" id="costLegend" />
-              <div className="ie-cta">
-                <span className="ie-confirm" id="ctaConfirm">
-                  Noted - we&apos;ll follow up to arrange a visit.
-                </span>
-                <button id="ctaBtn" type="button">
-                  Choose a visit
-                </button>
-              </div>
+              <EstimatorBooking getEstimate={() => estimateRef.current} />
               <p className="ie-note" style={{ marginTop: 16 }}>
                 Prefer to talk it through?{" "}
                 <Link
                   href="/contact"
-                  className="text-baby-blue underline-offset-2 hover:underline"
+                  className="text-baby-blue underline underline-offset-2 hover:text-off-white"
                 >
                   Send an enquiry
                 </Link>
@@ -119,7 +141,23 @@ export function IsometricEstimator({
             <div className="ie-panel">
               <h2>What are we building?</h2>
               <p className="ie-hint">Pick as many as you like.</p>
-              <div className="ie-chip-grid" id="addonChips" />
+              <div className="ie-chip-grid" id="addonChips">
+                {config.addons.map((addon) => (
+                  <button
+                    key={addon.key}
+                    type="button"
+                    className="ie-chip"
+                    data-key={addon.key}
+                    aria-pressed="false"
+                  >
+                    <span className="ie-dot" />
+                    <span>{addon.label}</span>
+                    <span className="ie-price-tag">
+                      +£{addon.price.toLocaleString("en-GB")}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="ie-panel">
               <h2>Size of the job</h2>

@@ -14,15 +14,16 @@ import { Reveal } from "@/components/reveal";
 import { TrustBadges } from "@/components/trust-badges";
 import { WorkCard } from "@/components/work-card";
 import { teamMembers } from "@/lib/site";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: {
-      absolute: "Blue Peak Solutions | Building and renovation in Ipswich",
-    },
+  return pageMetadata({
+    title: "Blue Peak Solutions | Building and renovation in Ipswich",
+    absoluteTitle: true,
     description:
       "Kitchens, extensions, bathrooms, and refurbs across Ipswich and Suffolk. Written quotes before we start.",
-  };
+    path: "/",
+  });
 }
 
 export default function HomePage() {

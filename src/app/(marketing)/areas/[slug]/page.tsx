@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServiceAreaBySlug, serviceAreas } from "@/lib/content";
+import { pageMetadata } from "@/lib/page-metadata";
 
 const quoteButtonClassName =
   "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90";
@@ -22,10 +23,11 @@ export async function generateMetadata({
     };
   }
 
-  return {
+  return pageMetadata({
     title: `Building work in ${area.name}`,
     description: area.shortDescription,
-  };
+    path: `/areas/${area.slug}`,
+  });
 }
 
 export default async function AreaDetailPage({

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { roadmapFeatures } from "@/lib/roadmap";
+import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
+  return pageMetadata({
     title: "Roadmap",
     description:
       "What Blue Peak Solutions is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
-  };
+    path: "/roadmap",
+  });
 }
 
 export default function RoadmapPage() {
