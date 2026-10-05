@@ -22,9 +22,12 @@ export function SiteFooter() {
           </h2>
           <ul className="mt-3 space-y-2 text-sm text-ink/80">
             <li>
-              <a href="mailto:hello@bluepeaksolutions.com">
-                hello@bluepeaksolutions.com
-              </a>
+              <Link
+                href="/contact#quote-form"
+                className="transition-colors hover:text-accent"
+              >
+                Send us a message
+              </Link>
             </li>
             <li>
               <a href={`tel:${sitePhoneTel}`}>{sitePhoneDisplay}</a>

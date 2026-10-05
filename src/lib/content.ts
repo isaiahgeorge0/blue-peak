@@ -192,4 +192,17 @@ export function getServiceAreaBySlug(slug: string): ServiceArea | undefined {
   return serviceAreas.find((area) => area.slug === slug);
 }
 
-export const siteUrl = "https://bluepeaksolutions.com";
+/*
+ * Base URL for canonical links, Open Graph tags, the sitemap and robots.txt.
+ * When the real domain is bought, update:
+ * - NEXT_PUBLIC_SITE_URL in Vercel (Production and Preview) and .env.example.
+ *   It is inlined at build time, so redeploy after changing it.
+ * - The public email address. None is shown yet; the footer and contact page
+ *   link to the contact form, and the privacy policy contact is still TBC.
+ * - The Resend sending domain. Lead notifications send from
+ *   notifications@skapa.uk in src/lib/send-new-lead-email.ts; verify the new
+ *   domain in Resend before switching the from address.
+ */
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://blue-peak-omega.vercel.app"
+).replace(/\/$/, "");

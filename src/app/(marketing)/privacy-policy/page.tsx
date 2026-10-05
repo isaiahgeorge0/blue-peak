@@ -130,8 +130,8 @@ export default function PrivacyPolicyPage() {
                 [Blue Peak Ltd — registered company name and number TBC]
               </Tbc>{" "}
               (&quot;Blue Peak&quot;, &quot;we&quot;, &quot;us&quot;) collects,
-              uses and protects personal data when you visit
-              bluepeaksolutions.com <em>(final domain pending)</em>, submit an
+              uses and protects personal data when you visit our website, submit
+              an
               enquiry through our contact form or quote estimator, or (once
               launched) use our website FAQ assistant. It applies to all
               visitors and enquirers, and is written to meet the UK General Data
@@ -167,7 +167,7 @@ export default function PrivacyPolicyPage() {
                 [
                   "Data protection contact",
                   <Tbc key="contact">
-                    [TBC — named email, e.g. privacy@bluepeaksolutions.com]
+                    [TBC: named email address]
                   </Tbc>,
                 ],
               ]}

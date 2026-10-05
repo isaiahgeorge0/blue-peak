@@ -57,13 +57,13 @@ export default function ContactPage() {
                 </a>
               </p>
               <p>
-                <span className="text-accent">Email</span>
+                <span className="text-accent">Message</span>
                 <br />
                 <a
-                  href="mailto:hello@bluepeaksolutions.com"
+                  href="#quote-form"
                   className="text-ink transition-colors hover:text-accent"
                 >
-                  hello@bluepeaksolutions.com
+                  Use the contact form
                 </a>
               </p>
             </div>
