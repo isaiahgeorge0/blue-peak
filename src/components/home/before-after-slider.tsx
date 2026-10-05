@@ -19,13 +19,13 @@ const clampPosition = (value: number) =>
 /**
  * Vertical divider between before/after photos. Pointer, touch and keyboard
  * operable (the handle is an ARIA slider).
- * The default pair is stock imagery; swap in a real Blue Peak project.
+ * The default pair is placeholder imagery; swap in a real Blue Peak project.
  */
 export function BeforeAfterSlider({
   beforeSrc = "/home/before.jpg",
   afterSrc = "/home/after.jpg",
-  beforeAlt = "Kitchen before renovation",
-  afterAlt = "Kitchen after renovation",
+  beforeAlt = "Living room before renovation",
+  afterAlt = "Living room after renovation",
   caption,
 }: BeforeAfterSliderProps) {
   const frameRef = useRef<HTMLDivElement>(null);

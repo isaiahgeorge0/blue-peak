@@ -127,7 +127,7 @@ export function PhotoGlide() {
         >
           <Image
             src="/home/before.jpg"
-            alt="Kitchen mid-renovation with new units going in"
+            alt="Living room before renovation"
             fill
             sizes="100vw"
             className="object-cover"

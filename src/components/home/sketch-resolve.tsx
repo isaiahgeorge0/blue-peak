@@ -10,12 +10,14 @@ import {
 
 /**
  * Fractions of the pinned travel (wrapper height minus one viewport). Each
- * stage starts at its bound; the drawing draws during stage 02 (with a short
- * hold on the finished lines), resolves into the photo during stage 03, and
+ * stage starts at its bound. The drawing starts almost as soon as the section
+ * pins, so the panel is never an empty grid for long; stage 01 stays active
+ * until it is well under way, and stage 02 covers the rest of it (with a short
+ * hold on the finished lines). It resolves into the photo during stage 03, and
  * stage 04 holds the finished photo until the section unpins.
  */
-const STAGE_BOUNDS = [0.15, 0.45, 0.85];
-const DRAW_START = 0.15;
+const STAGE_BOUNDS = [0.2, 0.45, 0.85];
+const DRAW_START = 0.05;
 const DRAW_END = 0.42;
 const PHOTO_START = 0.45;
 const PHOTO_END = 0.85;
@@ -241,7 +243,7 @@ export function SketchResolve() {
 
         <div
           ref={panelRef}
-          className="sketch-resolve-panel relative order-2 mt-6 aspect-[1100/1326] w-full origin-center overflow-hidden border border-ink/25 will-change-transform lg:mt-0 lg:max-h-[calc(100dvh-10rem)] motion-safe:max-lg:aspect-auto motion-safe:max-lg:min-h-0 motion-safe:max-lg:flex-1"
+          className="sketch-resolve-panel relative order-2 mt-6 aspect-[864/1042] w-full origin-center overflow-hidden border border-ink/25 will-change-transform lg:mt-0 lg:max-h-[calc(100dvh-10rem)] motion-safe:max-lg:aspect-auto motion-safe:max-lg:min-h-0 motion-safe:max-lg:flex-1"
         >
           <div
             className="pointer-events-none absolute inset-0"
@@ -260,7 +262,7 @@ export function SketchResolve() {
           >
             <Image
               src="/home/source.jpg"
-              alt="Finished kitchen project"
+              alt="Finished home office with a fireplace and an alcove desk"
               fill
               sizes="(max-width: 1023px) 92vw, 640px"
               className="object-cover"

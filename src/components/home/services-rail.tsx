@@ -48,6 +48,7 @@ export function ServicesRail() {
   const distance = useMotionValue(0);
   const swipeProgress = useMotionValue(0);
   const [current, setCurrent] = useState(1);
+  const [nearViewport, setNearViewport] = useState(false);
   const total = services.length;
 
   const { scrollYProgress } = useScroll({
@@ -82,6 +83,27 @@ export function ServicesRail() {
     observer.observe(track);
     return () => observer.disconnect();
   }, [distance]);
+
+  /**
+   * Native lazy loading fetches each card only as it nears the viewport, which
+   * in the pinned and swipe rows means mid-slide. Load all of them together
+   * once the section is within one screen instead.
+   */
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100% 0px" },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   const onViewportScroll = () => {
     const viewport = viewportRef.current;
@@ -194,6 +216,7 @@ export function ServicesRail() {
                             src={service.image}
                             alt={service.imageAlt ?? ""}
                             fill
+                            loading={nearViewport ? "eager" : "lazy"}
                             sizes="(max-width: 1023px) 78vw, 340px"
                             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
