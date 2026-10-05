@@ -34,7 +34,7 @@ export default function MarketingLayout({
       <JsonLd data={localBusinessJsonLd} />
       <a
         href="#main"
-        className="sr-only rounded-full bg-baby-blue text-sm font-medium text-black focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:top-3 focus:left-3 focus:z-[60] focus:outline-none focus-visible:ring-2 focus-visible:ring-off-white"
+        className="sr-only rounded-full bg-accent text-sm font-medium text-on-accent focus:not-sr-only focus:fixed focus:px-5 focus:py-3 focus:top-3 focus:left-3 focus:z-[60] focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
       >
         Skip to content
       </a>

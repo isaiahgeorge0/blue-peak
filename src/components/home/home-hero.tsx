@@ -9,6 +9,7 @@ import {
   type MotionStyle,
 } from "motion/react";
 import { useRef } from "react";
+import { BrandMark } from "@/components/brand/brand-logo";
 import {
   primaryCtaClassName,
   secondaryCtaClassName,
@@ -36,7 +37,7 @@ export function HomeHero() {
   return (
     <section
       ref={sectionRef}
-      className="relative isolate -mt-[var(--site-header-height,4.5rem)] h-[100dvh] overflow-hidden bg-black"
+      className="relative isolate -mt-[var(--site-header-height,4.5rem)] h-[100dvh] overflow-hidden bg-navy"
     >
       <div className="absolute inset-0">
         <motion.div
@@ -53,7 +54,7 @@ export function HomeHero() {
           />
         </motion.div>
         <div
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20"
+          className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/25 to-navy/10"
           aria-hidden
         />
       </div>
@@ -63,14 +64,12 @@ export function HomeHero() {
           Frosted glass: solid near-opaque fallback first, then blur where supported
           so content never sits on a fully transparent plate.
         */}
-        <div className="home-frost-card w-full max-w-xl rounded-2xl border border-off-white/15 p-5 sm:p-7 lg:p-8">
-          <p className="font-serif text-xl tracking-tight text-off-white sm:text-2xl lg:text-3xl">
-            Blue Peak Solutions
-          </p>
-          <h1 className="mt-3 max-w-lg text-2xl leading-tight tracking-tight text-off-white sm:mt-4 sm:text-3xl lg:text-4xl xl:text-5xl">
+        <div className="home-frost-card w-full max-w-xl rounded-2xl border border-white/60 p-5 shadow-2xl shadow-navy/25 sm:p-7 lg:p-8">
+          <BrandMark className="h-10 w-auto text-brand sm:h-12" />
+          <h1 className="mt-4 max-w-lg text-2xl leading-tight tracking-tight text-ink sm:mt-4 sm:text-3xl lg:text-4xl xl:text-5xl">
             Building work you don&apos;t have to worry about
           </h1>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-off-white/80 sm:mt-4 sm:text-base lg:text-lg">
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/80 sm:mt-4 sm:text-base lg:text-lg">
             Kitchens, extensions, and refurbs across Ipswich and Suffolk, quoted
             in writing before we start.
           </p>

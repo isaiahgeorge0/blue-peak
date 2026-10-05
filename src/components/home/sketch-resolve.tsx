@@ -146,18 +146,18 @@ export function SketchResolve() {
   return (
     <div
       ref={wrapperRef}
-      className="relative h-[280vh] bg-black"
+      className="theme-brand relative h-[280vh] bg-page"
       aria-label="Scroll to watch a project sketch resolve into a photo"
     >
       <div className="sticky top-0 flex h-[100dvh] flex-col items-center justify-center gap-4 overflow-hidden px-5 py-6 sm:gap-5 lg:flex-row lg:gap-8 lg:px-8 xl:gap-10">
         <aside className="w-full max-w-sm shrink-0 text-left lg:w-[min(22vw,240px)] lg:max-w-none">
-          <p className="text-[11px] font-medium tracking-wide text-baby-blue uppercase sm:text-xs">
+          <p className="text-[11px] font-medium tracking-wide text-accent uppercase sm:text-xs">
             How we work
           </p>
-          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-off-white sm:mt-2 sm:text-2xl xl:text-3xl">
+          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-ink sm:mt-2 sm:text-2xl xl:text-3xl">
             Every job starts on paper
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-off-white/70 sm:mt-3 sm:text-sm">
+          <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:mt-3 sm:text-sm">
             We sketch the layout, cost it properly, and agree it with you in
             writing before anything gets stripped out.
           </p>
@@ -165,15 +165,15 @@ export function SketchResolve() {
 
         <div
           ref={panelRef}
-          className="sketch-resolve-panel relative aspect-[1100/1326] w-[min(68vw,260px)] max-h-[38vh] origin-center overflow-hidden border border-off-white/12 will-change-transform sm:w-[min(60vw,340px)] sm:max-h-[46vh] lg:w-[min(28vw,420px)] lg:max-h-[62vh]"
+          className="sketch-resolve-panel relative aspect-[1100/1326] w-[min(68vw,260px)] max-h-[38vh] origin-center overflow-hidden border border-ink/25 will-change-transform sm:w-[min(60vw,340px)] sm:max-h-[46vh] lg:w-[min(28vw,420px)] lg:max-h-[62vh]"
         >
           <div
             className="pointer-events-none absolute inset-0"
             aria-hidden
             style={{
-              backgroundColor: "var(--charcoal)",
+              backgroundColor: "var(--page)",
               backgroundImage:
-                "linear-gradient(rgba(244,241,234,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(244,241,234,0.07) 1px, transparent 1px)",
+                "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
               backgroundSize: "22px 22px",
             }}
           />
@@ -200,7 +200,7 @@ export function SketchResolve() {
           >
             <g
               fill="none"
-              stroke="var(--off-white)"
+              stroke="var(--ink)"
               strokeWidth={1.15}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -214,13 +214,13 @@ export function SketchResolve() {
         </div>
 
         <aside className="w-full max-w-sm shrink-0 text-left lg:w-[min(22vw,240px)] lg:max-w-none lg:text-right">
-          <p className="text-[11px] font-medium tracking-wide text-baby-blue uppercase sm:text-xs">
+          <p className="text-[11px] font-medium tracking-wide text-accent uppercase sm:text-xs">
             Then it happens
           </p>
-          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-off-white sm:mt-2 sm:text-2xl xl:text-3xl">
+          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-ink sm:mt-2 sm:text-2xl xl:text-3xl">
             You get photos, not surprises
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-off-white/70 sm:mt-3 sm:text-sm lg:ml-auto lg:max-w-[22ch]">
+          <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:mt-3 sm:text-sm lg:ml-auto lg:max-w-[22ch]">
             We send a photo update every Friday so you always know exactly where
             the job&apos;s at.
           </p>
@@ -228,14 +228,14 @@ export function SketchResolve() {
 
         <div
           ref={barRef}
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left bg-baby-blue/80"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left bg-accent/80"
           style={{ transform: "scaleX(0)" }}
           aria-hidden
         />
 
         <span
           ref={pctRef}
-          className="pointer-events-none absolute right-5 bottom-5 font-sans text-xs tracking-widest text-off-white/55 tabular-nums sm:right-8 sm:bottom-8"
+          className="pointer-events-none absolute right-5 bottom-5 font-sans text-xs tracking-widest text-ink/70 tabular-nums sm:right-8 sm:bottom-8"
           aria-hidden
         >
           0%

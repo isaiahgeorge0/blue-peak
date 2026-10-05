@@ -123,7 +123,7 @@ function RepeatIcon() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="h-3 w-3 shrink-0 text-baby-blue"
+      className="h-3 w-3 shrink-0 text-accent"
       aria-hidden
     >
       <path
@@ -216,10 +216,10 @@ export function AdminCalendar({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl tracking-tight text-off-white sm:text-4xl">
+          <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
             Calendar
           </h1>
-          <p className="mt-3 text-sm text-off-white/70">
+          <p className="mt-3 text-sm text-ink/70">
             Internal planning view. Recurring events expand across the month
             without duplicating rows.
           </p>
@@ -228,17 +228,17 @@ export function AdminCalendar({
         <div className="flex items-center gap-2">
           <Link
             href={monthHref(prev.year, prev.month)}
-            className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/75 transition-colors hover:border-baby-blue hover:text-baby-blue"
+            className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/75 transition-colors hover:border-accent hover:text-accent"
             aria-label="Previous month"
           >
             Prev
           </Link>
-          <p className="min-w-40 text-center font-serif text-lg text-off-white">
+          <p className="min-w-40 text-center font-serif text-lg text-ink">
             {formatMonthLabel(year, month)}
           </p>
           <Link
             href={monthHref(next.year, next.month)}
-            className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/75 transition-colors hover:border-baby-blue hover:text-baby-blue"
+            className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/75 transition-colors hover:border-accent hover:text-accent"
             aria-label="Next month"
           >
             Next
@@ -246,12 +246,12 @@ export function AdminCalendar({
         </div>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-lg border border-off-white/10 bg-black">
-        <div className="grid grid-cols-7 border-b border-off-white/10">
+      <div className="mt-8 overflow-hidden rounded-lg border border-ink/10 bg-panel">
+        <div className="grid grid-cols-7 border-b border-ink/10">
           {WEEKDAY_LABELS.map((label) => (
             <div
               key={label}
-              className="px-2 py-2 text-center text-[11px] tracking-wide text-off-white/45 uppercase"
+              className="px-2 py-2 text-center text-[11px] tracking-wide text-ink/45 uppercase"
             >
               {label}
             </div>
@@ -267,25 +267,25 @@ export function AdminCalendar({
               <div
                 key={cell.key}
                 className={[
-                  "relative min-h-28 border-r border-b border-off-white/10 p-2 last:border-r-0",
-                  cell.inMonth ? "bg-black" : "bg-charcoal/40",
+                  "relative min-h-28 border-r border-b border-ink/10 p-2 last:border-r-0",
+                  cell.inMonth ? "bg-panel" : "bg-page/40",
                 ].join(" ")}
               >
                 <button
                   type="button"
                   onClick={() => openCreate(cell.dateKey)}
                   aria-label={`Add event on ${formatDayHeading(cell.dateKey)}`}
-                  className="absolute inset-0 z-0 transition-colors hover:bg-off-white/5 focus-visible:bg-off-white/5 focus-visible:outline-none"
+                  className="absolute inset-0 z-0 transition-colors hover:bg-ink/5 focus-visible:bg-ink/5 focus-visible:outline-none"
                 />
                 <div className="relative z-10 pointer-events-none">
                   <span
                     className={[
                       "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-xs",
                       isToday
-                        ? "bg-baby-blue/20 text-baby-blue"
+                        ? "bg-accent/20 text-accent"
                         : cell.inMonth
-                          ? "text-off-white/80"
-                          : "text-off-white/35",
+                          ? "text-ink/80"
+                          : "text-ink/35",
                     ].join(" ")}
                   >
                     {cell.day}
@@ -302,10 +302,10 @@ export function AdminCalendar({
                             type="button"
                             onClick={() => openView(occurrence)}
                             className={[
-                              "pointer-events-auto flex w-full items-center gap-1 truncate rounded border px-1.5 py-0.5 text-left text-[11px] text-off-white/90 hover:border-baby-blue/50",
+                              "pointer-events-auto flex w-full items-center gap-1 truncate rounded border px-1.5 py-0.5 text-left text-[11px] text-ink/90 hover:border-accent/50",
                               occurrence.isRecurring
-                                ? "border-baby-blue/40 bg-baby-blue/15"
-                                : "border-baby-blue/25 bg-baby-blue/10",
+                                ? "border-accent/40 bg-accent/15"
+                                : "border-accent/25 bg-accent/10",
                             ].join(" ")}
                             title={
                               occurrence.isRecurring
@@ -339,7 +339,7 @@ export function AdminCalendar({
 
       {viewModal ? (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-panel/70 p-4 sm:items-center"
           role="presentation"
           onClick={closeViewModal}
         >
@@ -347,25 +347,25 @@ export function AdminCalendar({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-off-white/15 bg-charcoal p-5 shadow-xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-ink/15 bg-page p-5 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h2
               id={titleId}
-              className="font-serif text-xl tracking-tight text-off-white"
+              className="font-serif text-xl tracking-tight text-ink"
             >
               {viewModal.occurrence.event.title}
             </h2>
-            <p className="mt-1 text-sm text-off-white/55">
+            <p className="mt-1 text-sm text-ink/55">
               {formatDayHeading(viewModal.occurrence.occurrenceDate)}
             </p>
 
             <dl className="mt-5 space-y-3 text-sm">
               <div>
-                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                <dt className="text-xs tracking-wide text-ink/45 uppercase">
                   Time
                 </dt>
-                <dd className="mt-1 text-off-white/85">
+                <dd className="mt-1 text-ink/85">
                   {formatTime(viewModal.occurrence.event.start_time) ||
                   formatTime(viewModal.occurrence.event.end_time)
                     ? [
@@ -379,24 +379,24 @@ export function AdminCalendar({
                 </dd>
               </div>
               <div>
-                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                <dt className="text-xs tracking-wide text-ink/45 uppercase">
                   Notes
                 </dt>
-                <dd className="mt-1 whitespace-pre-wrap text-off-white/85">
+                <dd className="mt-1 whitespace-pre-wrap text-ink/85">
                   {viewModal.occurrence.event.notes?.trim() || "-"}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs tracking-wide text-off-white/45 uppercase">
+                <dt className="text-xs tracking-wide text-ink/45 uppercase">
                   Recurrence
                 </dt>
-                <dd className="mt-1 text-off-white/85">
+                <dd className="mt-1 text-ink/85">
                   <span className="inline-flex items-center gap-1.5">
                     {viewModal.occurrence.isRecurring ? <RepeatIcon /> : null}
                     {recurrenceLabel(viewModal.occurrence.event.recurrence)}
                   </span>
                   {viewModal.occurrence.event.recurrence_end_date ? (
-                    <span className="mt-1 block text-xs text-off-white/50">
+                    <span className="mt-1 block text-xs text-ink/50">
                       Until{" "}
                       {formatDayHeading(
                         viewModal.occurrence.event.recurrence_end_date,
@@ -408,7 +408,7 @@ export function AdminCalendar({
             </dl>
 
             {error ? (
-              <p className="mt-4 text-sm text-baby-blue">{error}</p>
+              <p className="mt-4 text-sm text-accent">{error}</p>
             ) : null}
 
             <div className="mt-6 flex justify-end gap-2">
@@ -416,7 +416,7 @@ export function AdminCalendar({
                 type="button"
                 onClick={closeViewModal}
                 disabled={isPending}
-                className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/70 transition-colors hover:border-off-white/30 disabled:opacity-60"
+                className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/70 transition-colors hover:border-ink/30 disabled:opacity-60"
               >
                 Close
               </button>

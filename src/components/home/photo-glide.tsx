@@ -64,7 +64,7 @@ export function PhotoGlide() {
       panel.style.borderRadius = `${radius}px`;
       panel.style.boxShadow =
         growP < 0.98
-          ? `0 ${24 * (1 - growP)}px ${64 * (1 - growP)}px rgba(0,0,0,${0.45 * (1 - growP)})`
+          ? `0 ${24 * (1 - growP)}px ${64 * (1 - growP)}px rgba(14,34,64,${0.28 * (1 - growP)})`
           : "none";
 
       const textP = easeInOut(mapRange(progress, COPY_START, 1));
@@ -112,17 +112,17 @@ export function PhotoGlide() {
   return (
     <div
       ref={wrapperRef}
-      className="relative h-[220vh] bg-black"
+      className="relative h-[220vh] bg-panel"
       aria-label="Scroll to expand a project photo"
     >
-      <div className="sticky top-0 h-[100dvh] overflow-hidden bg-black">
+      <div className="sticky top-0 h-[100dvh] overflow-hidden bg-panel">
         <div
           ref={panelRef}
           className="absolute overflow-hidden will-change-[inset,border-radius]"
           style={{
             inset: PAD_FROM,
             borderRadius: `${RADIUS_FROM}px`,
-            boxShadow: "0 24px 64px rgba(0,0,0,0.45)",
+            boxShadow: "0 24px 64px rgba(14,34,64,0.28)",
           }}
         >
           <Image
@@ -143,17 +143,17 @@ export function PhotoGlide() {
 
           <div
             ref={copyRef}
-            className="absolute bottom-0 left-0 max-w-lg px-6 pb-8 pt-16 sm:px-10 sm:pb-12 lg:px-14 lg:pb-14"
+            className="theme-photo absolute bottom-0 left-0 max-w-lg px-6 pb-8 pt-16 sm:px-10 sm:pb-12 lg:px-14 lg:pb-14"
             style={{ opacity: 0, transform: "translateY(28px)" }}
           >
-            <p className="text-xs font-medium tracking-wide text-baby-blue uppercase">
+            <p className="text-xs font-medium tracking-wide text-accent uppercase">
               Week 3 · Ipswich
             </p>
-            <h2 className="mt-3 font-serif text-3xl leading-tight tracking-tight text-off-white sm:text-4xl lg:text-5xl">
+            <h2 className="mt-3 font-serif text-3xl leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
               Stripped back,{" "}
-              <em className="text-baby-blue italic">built</em> properly
+              <em className="text-accent italic">built</em> properly
             </h2>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-off-white/80 sm:text-base">
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-ink/80 sm:text-base">
               Bare plaster, new units, light pouring back in. This is the stage
               most builders go quiet - it&apos;s where we send you a photo update
               every Friday.

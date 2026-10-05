@@ -74,7 +74,7 @@ export function LeadStatusSelect({
         onChange={(event) => handleChange(event.target.value)}
         disabled={showSaving}
         aria-label="Lead status"
-        className="rounded-md border border-off-white/15 bg-charcoal px-2 py-1.5 text-sm text-off-white outline-none transition-colors focus:border-baby-blue disabled:opacity-60"
+        className="rounded-md border border-ink/15 bg-page px-2 py-1.5 text-sm text-ink outline-none transition-colors focus:border-accent disabled:opacity-60"
       >
         {LEAD_STATUSES.map((option) => (
           <option key={option} value={option}>
@@ -82,7 +82,7 @@ export function LeadStatusSelect({
           </option>
         ))}
       </select>
-      <span className="min-w-14 text-xs text-off-white/60" aria-live="polite">
+      <span className="min-w-14 text-xs text-ink/60" aria-live="polite">
         {showSaving
           ? "Saving..."
           : feedback === "saved"

@@ -132,8 +132,8 @@ export function LeadNotesPanel({
   return (
     <>
       <tr
-        className={`border-b border-off-white/5 ${
-          isNew ? "bg-baby-blue/5" : ""
+        className={`border-b border-ink/5 ${
+          isNew ? "bg-accent/5" : ""
         } ${expanded ? "" : "last:border-b-0"}`}
       >
         <td className="w-10 py-3 pr-0 pl-4">
@@ -142,16 +142,16 @@ export function LeadNotesPanel({
             checked={selected}
             onChange={(event) => onSelectedChange(event.target.checked)}
             aria-label={`Select lead ${lead.name?.trim() || "without a name"}`}
-            className="h-4 w-4 accent-baby-blue"
+            className="h-4 w-4 accent-accent"
           />
         </td>
-        <td className="whitespace-nowrap px-4 py-3 text-off-white/70">
+        <td className="whitespace-nowrap px-4 py-3 text-ink/70">
           <button
             type="button"
             onClick={toggleExpanded}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse lead notes" : "Expand lead notes"}
-            className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded border border-off-white/15 text-baby-blue transition-colors hover:border-baby-blue hover:bg-baby-blue/10"
+            className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded border border-ink/15 text-accent transition-colors hover:border-accent hover:bg-accent/10"
           >
             <span aria-hidden className="text-xs leading-none">
               {expanded ? "−" : "+"}
@@ -160,7 +160,7 @@ export function LeadNotesPanel({
           <button
             type="button"
             onClick={toggleExpanded}
-            className="text-left text-off-white/70 transition-colors hover:text-off-white"
+            className="text-left text-ink/70 transition-colors hover:text-ink"
           >
             {formatDate(lead.created_at)}
           </button>
@@ -169,16 +169,16 @@ export function LeadNotesPanel({
           <button
             type="button"
             onClick={toggleExpanded}
-            className="text-left transition-colors hover:text-baby-blue"
+            className="text-left transition-colors hover:text-accent"
           >
             {displayValue(lead.name)}
             {noteCount > 0 ? (
-              <span className="ml-2 text-xs text-baby-blue/80">
+              <span className="ml-2 text-xs text-accent/80">
                 {noteCount} note{noteCount === 1 ? "" : "s"}
               </span>
             ) : null}
             {localVisit ? (
-              <span className="mt-1 block text-xs text-baby-blue/90">
+              <span className="mt-1 block text-xs text-accent/90">
                 {formatVisitIndicator(localVisit)}
               </span>
             ) : null}
@@ -195,15 +195,15 @@ export function LeadNotesPanel({
         </td>
       </tr>
       {expanded ? (
-        <tr className="border-b border-off-white/5 last:border-b-0 bg-charcoal/40">
+        <tr className="border-b border-ink/5 last:border-b-0 bg-page/40">
           <td colSpan={7} className="px-4 py-4">
             <div className="max-w-3xl">
-              <p className="text-xs tracking-wide text-baby-blue uppercase">
+              <p className="text-xs tracking-wide text-accent uppercase">
                 Activity
               </p>
 
               {localNotes.length === 0 ? (
-                <p className="mt-3 text-sm text-off-white/55">
+                <p className="mt-3 text-sm text-ink/55">
                   No notes yet. Add the first update below.
                 </p>
               ) : (
@@ -211,12 +211,12 @@ export function LeadNotesPanel({
                   {localNotes.map((item) => (
                     <li
                       key={item.id}
-                      className="border-l-2 border-baby-blue/50 pl-3"
+                      className="border-l-2 border-accent/50 pl-3"
                     >
-                      <p className="text-xs text-off-white/50">
+                      <p className="text-xs text-ink/50">
                         {formatDate(item.created_at)}
                       </p>
-                      <p className="mt-1 whitespace-pre-wrap text-sm text-off-white/85">
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-ink/85">
                         {item.note}
                       </p>
                     </li>
@@ -235,26 +235,26 @@ export function LeadNotesPanel({
                   rows={3}
                   placeholder="Add a note..."
                   disabled={isPending}
-                  className="w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue disabled:opacity-60"
+                  className="w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent disabled:opacity-60"
                 />
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={handleAddNote}
                     disabled={isPending || !draft.trim()}
-                    className="rounded-md border border-baby-blue/50 bg-baby-blue/15 px-3 py-1.5 text-sm text-baby-blue transition-colors hover:bg-baby-blue/25 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-accent/50 bg-accent/15 px-3 py-1.5 text-sm text-accent transition-colors hover:bg-accent/25 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isPending ? "Adding..." : "Add note"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setScheduleOpen(true)}
-                    className="rounded-md border border-off-white/20 px-3 py-1.5 text-sm text-off-white/80 transition-colors hover:border-baby-blue hover:text-baby-blue"
+                    className="rounded-md border border-ink/20 px-3 py-1.5 text-sm text-ink/80 transition-colors hover:border-accent hover:text-accent"
                   >
                     Schedule site visit
                   </button>
                   {error ? (
-                    <span className="text-xs text-off-white/60" role="alert">
+                    <span className="text-xs text-ink/60" role="alert">
                       {error}
                     </span>
                   ) : null}

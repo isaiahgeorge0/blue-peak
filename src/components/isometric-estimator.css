@@ -1,14 +1,14 @@
 /* Adapted from isometric-estimator.html — scoped under .ie-root */
 .ie-root {
-  --ie-bg: #0b0b0c;
-  --ie-surface: #17181a;
-  --ie-surface-2: #1f2023;
-  --ie-line: #2c2d30;
-  --ie-text: var(--off-white, #f4f1ea);
-  --ie-text-dim: rgba(244, 241, 234, 0.62);
-  --ie-text-faint: rgba(244, 241, 234, 0.55);
-  --ie-accent: var(--baby-blue, #89cff0);
-  --ie-accent-dim: rgba(137, 207, 240, 0.28);
+  --ie-bg: var(--page, #fefefe);
+  --ie-surface: #ffffff;
+  --ie-surface-2: var(--panel, #e9f7f7);
+  --ie-line: rgba(14, 34, 64, 0.14);
+  --ie-text: var(--ink, #0e2240);
+  --ie-text-dim: rgba(14, 34, 64, 0.74);
+  --ie-text-faint: rgba(14, 34, 64, 0.66);
+  --ie-accent: var(--accent, #1800ad);
+  --ie-accent-dim: rgba(24, 0, 173, 0.2);
   color: var(--ie-text);
   font-family: var(--font-sans), Helvetica, Arial, sans-serif;
 }
@@ -123,7 +123,7 @@
 }
 
 .ie-chip:hover {
-  border-color: rgba(137, 207, 240, 0.4);
+  border-color: rgba(24, 0, 173, 0.4);
 }
 
 .ie-dot {
@@ -136,7 +136,7 @@
 }
 
 .ie-chip[aria-pressed="true"] {
-  background: rgba(137, 207, 240, 0.1);
+  background: rgba(24, 0, 173, 0.07);
   border-color: var(--ie-accent);
   color: var(--ie-text);
 }
@@ -181,12 +181,12 @@
 
 .ie-seg button[aria-pressed="true"] {
   background: var(--ie-accent);
-  color: #0a0a0a;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .ie-stage-panel {
-  background: #0e0e0f;
+  background: #dfe9ee;
   border: 1px solid var(--ie-line);
   border-radius: 10px;
   overflow: hidden;
@@ -239,8 +239,8 @@
   top: 14px;
   left: 14px;
   font-size: 11px;
-  color: var(--ie-text-faint);
-  background: rgba(11, 11, 12, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(14, 34, 64, 0.6);
   padding: 5px 9px;
   border-radius: 5px;
   pointer-events: none;
@@ -252,8 +252,8 @@
   right: 12px;
   display: flex;
   gap: 2px;
-  background: rgba(11, 11, 12, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(14, 34, 64, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 20px;
   padding: 3px;
   backdrop-filter: blur(4px);
@@ -262,7 +262,7 @@
 .ie-daynight button {
   border: 0;
   background: transparent;
-  color: var(--ie-text-dim);
+  color: rgba(255, 255, 255, 0.85);
   font-family: inherit;
   font-size: 11.5px;
   font-weight: 600;
@@ -276,8 +276,8 @@
 }
 
 .ie-daynight button[aria-pressed="true"] {
-  background: var(--ie-accent);
-  color: #0a0a0a;
+  background: #ffffff;
+  color: var(--ie-accent);
 }
 
 .ie-price-panel {

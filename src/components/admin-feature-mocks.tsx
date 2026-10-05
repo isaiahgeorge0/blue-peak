@@ -95,10 +95,10 @@ function MiniBarChart({
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-off-white/10 bg-black px-4 py-3">
-      <p className="text-[11px] tracking-wide text-off-white/45 uppercase">{label}</p>
-      <p className="mt-2 font-serif text-2xl text-off-white">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-off-white/45">{hint}</p> : null}
+    <div className="rounded-lg border border-ink/10 bg-panel px-4 py-3">
+      <p className="text-[11px] tracking-wide text-ink/45 uppercase">{label}</p>
+      <p className="mt-2 font-serif text-2xl text-ink">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-ink/45">{hint}</p> : null}
     </div>
   );
 }
@@ -111,9 +111,9 @@ function MockTable({
   rows: string[][];
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-off-white/10 bg-black">
-      <table className="min-w-full text-left text-sm text-off-white/80">
-        <thead className="border-b border-off-white/10 text-[11px] tracking-wide text-baby-blue uppercase">
+    <div className="overflow-hidden rounded-lg border border-ink/10 bg-panel">
+      <table className="min-w-full text-left text-sm text-ink/80">
+        <thead className="border-b border-ink/10 text-[11px] tracking-wide text-accent uppercase">
           <tr>
             {columns.map((column) => (
               <th key={column} className="px-4 py-3 font-medium">
@@ -124,7 +124,7 @@ function MockTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.join("-")} className="border-b border-off-white/5 last:border-b-0">
+            <tr key={row.join("-")} className="border-b border-ink/5 last:border-b-0">
               {row.map((cell) => (
                 <td key={cell} className="px-4 py-3">
                   {cell}
@@ -147,8 +147,8 @@ function SubcontractorsMock() {
         <StatCard label="Available this week" value="7" hint="Marked free" />
         <StatCard label="Avg rating" value="4.7" hint="Internal score" />
       </div>
-      <div className="rounded-lg border border-off-white/10 bg-black px-4 py-4">
-        <p className="text-sm text-off-white/70">Jobs assigned · last 8 weeks</p>
+      <div className="rounded-lg border border-ink/10 bg-panel px-4 py-4">
+        <p className="text-sm text-ink/70">Jobs assigned · last 8 weeks</p>
         <div className="mt-3">
           <MiniBarChart
             dataKey="jobs"
@@ -185,8 +185,8 @@ function QuotesMock() {
         <StatCard label="Open value" value="£86k" hint="Awaiting reply" />
         <StatCard label="Unpaid invoices" value="£12.4k" hint="3 overdue" />
       </div>
-      <div className="rounded-lg border border-off-white/10 bg-black px-4 py-4">
-        <p className="text-sm text-off-white/70">Quotes accepted · last 8 weeks</p>
+      <div className="rounded-lg border border-ink/10 bg-panel px-4 py-4">
+        <p className="text-sm text-ink/70">Quotes accepted · last 8 weeks</p>
         <div className="mt-3">
           <MiniLineChart
             dataKey="accepted"
@@ -223,8 +223,8 @@ function ReferralsMock() {
         <StatCard label="Warm intros" value="9" hint="This quarter" />
         <StatCard label="Reward cost" value="£450" hint="Paid out" />
       </div>
-      <div className="rounded-lg border border-off-white/10 bg-black px-4 py-4">
-        <p className="text-sm text-off-white/70">Referrals received · last 8 weeks</p>
+      <div className="rounded-lg border border-ink/10 bg-panel px-4 py-4">
+        <p className="text-sm text-ink/70">Referrals received · last 8 weeks</p>
         <div className="mt-3">
           <MiniLineChart
             dataKey="referrals"
@@ -261,8 +261,8 @@ function SeoMock() {
         <StatCard label="Reviews (90d)" value="11" hint="New Google reviews" />
         <StatCard label="Top keywords" value="6" hint="In local pack" />
       </div>
-      <div className="rounded-lg border border-off-white/10 bg-black px-4 py-4">
-        <p className="text-sm text-off-white/70">Profile views · last 8 weeks</p>
+      <div className="rounded-lg border border-ink/10 bg-panel px-4 py-4">
+        <p className="text-sm text-ink/70">Profile views · last 8 weeks</p>
         <div className="mt-3">
           <MiniBarChart
             dataKey="views"

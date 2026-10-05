@@ -67,13 +67,13 @@ function StatCard({
         delay: reduceMotion ? 0 : index * 0.08,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="rounded-xl border border-off-white/10 bg-black/40 px-5 py-6"
+      className="rounded-xl border border-ink/10 bg-panel/40 px-5 py-6"
     >
-      <p className="font-serif text-3xl text-off-white sm:text-4xl">
+      <p className="font-serif text-3xl text-ink sm:text-4xl">
         <span className="tabular-nums">{display}</span>
         {stat.suffix}
       </p>
-      <p className="mt-2 text-sm text-off-white/65">{stat.label}</p>
+      <p className="mt-2 text-sm text-ink/65">{stat.label}</p>
     </motion.div>
   );
 }
@@ -84,7 +84,7 @@ export function AnimatedStats() {
   if (STATS.length === 0) return null;
 
   return (
-    <section className="border-b border-off-white/10 bg-charcoal">
+    <section className="border-b border-ink/10 bg-page">
       <div className="mx-auto grid max-w-6xl gap-4 px-6 py-12 sm:grid-cols-3 sm:gap-6">
         {STATS.map((stat, index) => (
           <StatCard

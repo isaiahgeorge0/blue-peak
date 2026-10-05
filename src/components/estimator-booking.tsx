@@ -28,10 +28,10 @@ const SUBMIT_ERROR =
   "Unable to send your request right now. Please try again, or call us.";
 
 const fieldClassName =
-  "mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2.5 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue focus-visible:ring-2 focus-visible:ring-baby-blue/40";
+  "mt-1.5 w-full rounded-md border border-ink/20 bg-page px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/40";
 
 const buttonClassName =
-  "inline-flex items-center justify-center rounded-[7px] bg-baby-blue px-5 py-3 text-[13.5px] font-semibold text-black transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-[7px] bg-accent px-5 py-3 text-[13.5px] font-semibold text-on-accent transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
 
 function describeEstimate(estimate: EstimateSummary | null) {
   const lines = ["Site visit request from the quote calculator."];
@@ -141,7 +141,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
   function renderStep() {
     if (step === "sent") {
       return (
-        <p role="status" className="text-sm text-baby-blue">
+        <p role="status" className="text-sm text-accent">
           Noted - we&apos;ll follow up to arrange a visit.
         </p>
       );
@@ -168,16 +168,16 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
           value={honeypot}
           onChange={setHoneypot}
         />
-        <p className="text-sm text-off-white/75">
+        <p className="text-sm text-ink/75">
           Leave your details and we&apos;ll call to book a free site visit.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="estimator-name"
-              className="block text-xs font-medium text-off-white/85"
+              className="block text-xs font-medium text-ink/85"
             >
-              Name <span className="text-baby-blue">*</span>
+              Name <span className="text-accent">*</span>
             </label>
             <input
               ref={nameRef}
@@ -197,7 +197,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
             {fieldErrors.name ? (
               <p
                 id="estimator-name-error"
-                className="mt-1.5 text-xs text-baby-blue"
+                className="mt-1.5 text-xs text-accent"
               >
                 {fieldErrors.name}
               </p>
@@ -206,9 +206,9 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
           <div>
             <label
               htmlFor="estimator-phone"
-              className="block text-xs font-medium text-off-white/85"
+              className="block text-xs font-medium text-ink/85"
             >
-              Phone <span className="text-baby-blue">*</span>
+              Phone <span className="text-accent">*</span>
             </label>
             <input
               id="estimator-phone"
@@ -227,7 +227,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
             {fieldErrors.phone ? (
               <p
                 id="estimator-phone-error"
-                className="mt-1.5 text-xs text-baby-blue"
+                className="mt-1.5 text-xs text-accent"
               >
                 {fieldErrors.phone}
               </p>
@@ -238,7 +238,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
         {submitError ? (
           <p
             role="alert"
-            className="rounded-md border border-baby-blue/40 bg-black px-3 py-2.5 text-sm text-off-white"
+            className="rounded-md border border-accent/40 bg-page px-3 py-2.5 text-sm text-ink"
           >
             {submitError}
           </p>
@@ -254,7 +254,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
           </button>
           <button
             type="button"
-            className="text-sm text-off-white/70 underline-offset-2 hover:text-off-white hover:underline"
+            className="text-sm text-ink/70 underline-offset-2 hover:text-ink hover:underline"
             onClick={() => {
               setStep("closed");
               setSubmitError(null);

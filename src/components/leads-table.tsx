@@ -46,7 +46,7 @@ function matchesStatus(lead: LeadTableRow, status: StatusFilter) {
 }
 
 const bulkButtonClassName =
-  "rounded-md border border-off-white/15 px-3 py-1.5 text-sm text-off-white transition-colors hover:border-baby-blue hover:text-baby-blue disabled:opacity-60";
+  "rounded-md border border-ink/15 px-3 py-1.5 text-sm text-ink transition-colors hover:border-accent hover:text-accent disabled:opacity-60";
 
 export function LeadsTable({
   leads,
@@ -129,7 +129,7 @@ export function LeadsTable({
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search name, phone, email, service..."
-          className="w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue sm:max-w-sm"
+          className="w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent sm:max-w-sm"
         />
         <label className="sr-only" htmlFor="leads-status-filter">
           Filter by status
@@ -138,7 +138,7 @@ export function LeadsTable({
           id="leads-status-filter"
           value={status}
           onChange={(event) => setStatus(event.target.value as StatusFilter)}
-          className="rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none transition-colors focus:border-baby-blue sm:w-44"
+          className="rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-accent sm:w-44"
         >
           <option value="all">All except spam</option>
           {LEAD_STATUSES.map((option) => (
@@ -150,8 +150,8 @@ export function LeadsTable({
       </div>
 
       {selectedCount > 0 ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-baby-blue/30 bg-black px-4 py-3 text-sm">
-          <span className="text-off-white">{plural(selectedCount)} selected</span>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-accent/30 bg-panel px-4 py-3 text-sm">
+          <span className="text-ink">{plural(selectedCount)} selected</span>
           <button
             type="button"
             className={bulkButtonClassName}
@@ -194,7 +194,7 @@ export function LeadsTable({
           )}
           <button
             type="button"
-            className="ml-auto text-sm text-off-white/70 underline-offset-2 hover:text-off-white hover:underline"
+            className="ml-auto text-sm text-ink/70 underline-offset-2 hover:text-ink hover:underline"
             onClick={() => setAllVisibleSelected(false)}
           >
             Clear selection
@@ -203,19 +203,19 @@ export function LeadsTable({
       ) : null}
 
       {bulkMessage ? (
-        <p role="status" className="mt-3 text-sm text-baby-blue">
+        <p role="status" className="mt-3 text-sm text-accent">
           {bulkMessage}
         </p>
       ) : null}
 
       {filtered.length === 0 ? (
-        <p className="mt-6 text-sm text-off-white/65">
+        <p className="mt-6 text-sm text-ink/65">
           No leads match your search
         </p>
       ) : (
-        <div className="mt-4 overflow-x-auto rounded-lg border border-off-white/10 bg-black">
-          <table className="min-w-full text-left text-sm text-off-white/85">
-            <thead className="border-b border-off-white/10 text-xs tracking-wide text-baby-blue uppercase">
+        <div className="mt-4 overflow-x-auto rounded-lg border border-ink/10 bg-panel">
+          <table className="min-w-full text-left text-sm text-ink/85">
+            <thead className="border-b border-ink/10 text-xs tracking-wide text-accent uppercase">
               <tr>
                 <th className="w-10 py-3 pr-0 pl-4">
                   <input
@@ -225,7 +225,7 @@ export function LeadsTable({
                       setAllVisibleSelected(event.target.checked)
                     }
                     aria-label="Select all listed leads"
-                    className="h-4 w-4 accent-baby-blue"
+                    className="h-4 w-4 accent-accent"
                   />
                 </th>
                 <th className="px-4 py-3 font-medium">Created</th>

@@ -23,8 +23,8 @@ function navClass(active: boolean) {
   return [
     "block rounded-md px-3 py-2 text-sm transition-colors",
     active
-      ? "bg-baby-blue/15 text-baby-blue"
-      : "text-off-white/75 hover:bg-off-white/5 hover:text-off-white",
+      ? "bg-accent/15 text-accent"
+      : "text-ink/75 hover:bg-ink/5 hover:text-ink",
   ].join(" ");
 }
 
@@ -34,9 +34,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (isLogin) {
     return (
-      <div className="flex min-h-full flex-1 flex-col bg-charcoal">
-        <div className="border-b border-off-white/10 bg-black px-6 py-4">
-          <p className="font-serif text-lg tracking-tight text-off-white">
+      <div className="theme-admin flex min-h-full flex-1 flex-col bg-page">
+        <div className="border-b border-ink/10 bg-panel px-6 py-4">
+          <p className="font-serif text-lg tracking-tight text-ink">
             Blue Peak Admin
           </p>
         </div>
@@ -46,13 +46,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-charcoal md:flex-row">
-      <aside className="flex w-full flex-col border-b border-off-white/10 bg-black md:w-60 md:border-r md:border-b-0">
-        <div className="border-b border-off-white/10 px-5 py-5">
-          <p className="font-serif text-lg tracking-tight text-off-white">
+    <div className="theme-admin flex min-h-full flex-1 flex-col bg-page md:flex-row">
+      <aside className="flex w-full flex-col border-b border-ink/10 bg-panel md:w-60 md:border-r md:border-b-0">
+        <div className="border-b border-ink/10 px-5 py-5">
+          <p className="font-serif text-lg tracking-tight text-ink">
             Blue Peak Admin
           </p>
-          <p className="mt-1 text-xs text-off-white/45">Internal tools</p>
+          <p className="mt-1 text-xs text-ink/45">Internal tools</p>
         </div>
 
         <nav aria-label="Admin" className="flex flex-1 flex-col px-3 py-4">
@@ -72,8 +72,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             })}
           </div>
 
-          <div className="mt-6 border-t border-off-white/10 pt-5">
-            <p className="px-3 text-[11px] font-medium tracking-wide text-off-white/35 uppercase">
+          <div className="mt-6 border-t border-ink/10 pt-5">
+            <p className="px-3 text-[11px] font-medium tracking-wide text-ink/35 uppercase">
               Coming next
             </p>
             <ul className="mt-2 space-y-1">
@@ -86,13 +86,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                       className={[
                         "flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition-colors",
                         active
-                          ? "bg-off-white/5 text-off-white/70"
-                          : "text-off-white/40 hover:bg-off-white/5 hover:text-off-white/60",
+                          ? "bg-ink/5 text-ink/70"
+                          : "text-ink/40 hover:bg-ink/5 hover:text-ink/60",
                       ].join(" ")}
                       aria-current={active ? "page" : undefined}
                     >
                       <span>{item.navLabel}</span>
-                      <span className="shrink-0 rounded border border-off-white/10 px-1.5 py-0.5 text-[10px] tracking-wide text-off-white/35 uppercase">
+                      <span className="shrink-0 rounded border border-ink/10 px-1.5 py-0.5 text-[10px] tracking-wide text-ink/35 uppercase">
                         Soon
                       </span>
                     </Link>
@@ -102,11 +102,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </ul>
           </div>
 
-          <div className="mt-auto border-t border-off-white/10 pt-4">
+          <div className="mt-auto border-t border-ink/10 pt-4">
             <form action={logoutAdmin}>
               <button
                 type="submit"
-                className="w-full rounded-md border border-off-white/15 px-3 py-2 text-left text-sm text-off-white/70 transition-colors hover:border-baby-blue hover:text-baby-blue"
+                className="w-full rounded-md border border-ink/15 px-3 py-2 text-left text-sm text-ink/70 transition-colors hover:border-accent hover:text-accent"
               >
                 Log out
               </button>

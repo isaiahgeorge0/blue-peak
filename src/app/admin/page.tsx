@@ -156,26 +156,26 @@ export default async function AdminDashboardPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm tracking-wide text-baby-blue uppercase">
+          <p className="text-sm tracking-wide text-accent uppercase">
             Dashboard
           </p>
-          <h1 className="mt-2 font-serif text-3xl tracking-tight text-off-white sm:text-4xl">
+          <h1 className="mt-2 font-serif text-3xl tracking-tight text-ink sm:text-4xl">
             {greeting}, {displayName}
           </h1>
-          <p className="mt-3 text-sm text-off-white/65">
+          <p className="mt-3 text-sm text-ink/65">
             Overview of quote requests coming in from the site.
           </p>
         </div>
         <Link
           href="/admin/leads"
-          className="text-sm font-medium text-baby-blue transition-opacity hover:opacity-80"
+          className="text-sm font-medium text-accent transition-opacity hover:opacity-80"
         >
           View all leads
         </Link>
       </div>
 
       {error ? (
-        <p className="mt-8 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white">
+        <p className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
           Unable to load dashboard data right now.
         </p>
       ) : null}
@@ -183,7 +183,7 @@ export default async function AdminDashboardPage() {
       {unnotified.length > 0 ? (
         <div
           role="alert"
-          className="mt-8 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white"
+          className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink"
         >
           <p>
             {unnotified.length === 1
@@ -197,7 +197,7 @@ export default async function AdminDashboardPage() {
           </p>
           <Link
             href="/admin/leads"
-            className="mt-2 inline-block text-baby-blue underline-offset-2 hover:underline"
+            className="mt-2 inline-block text-accent underline-offset-2 hover:underline"
           >
             Review in Leads
           </Link>
@@ -205,35 +205,35 @@ export default async function AdminDashboardPage() {
       ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-off-white/10 bg-black px-5 py-4">
-          <p className="text-xs tracking-wide text-off-white/45 uppercase">
+        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
+          <p className="text-xs tracking-wide text-ink/45 uppercase">
             Total leads
           </p>
-          <p className="mt-3 font-serif text-3xl text-off-white">{totalLeads}</p>
+          <p className="mt-3 font-serif text-3xl text-ink">{totalLeads}</p>
         </div>
-        <div className="rounded-lg border border-off-white/10 bg-black px-5 py-4">
-          <p className="text-xs tracking-wide text-off-white/45 uppercase">
+        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
+          <p className="text-xs tracking-wide text-ink/45 uppercase">
             New this week
           </p>
-          <p className="mt-3 font-serif text-3xl text-off-white">{newThisWeek}</p>
-          <p className="mt-2 text-xs text-off-white/45">Created in the last 7 days</p>
+          <p className="mt-3 font-serif text-3xl text-ink">{newThisWeek}</p>
+          <p className="mt-2 text-xs text-ink/45">Created in the last 7 days</p>
         </div>
-        <div className="rounded-lg border border-off-white/10 bg-black px-5 py-4">
-          <p className="text-xs tracking-wide text-off-white/45 uppercase">
+        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
+          <p className="text-xs tracking-wide text-ink/45 uppercase">
             Status: new
           </p>
-          <p className="mt-3 font-serif text-3xl text-off-white">{openNew}</p>
-          <p className="mt-2 text-xs text-off-white/45">Still marked as new</p>
+          <p className="mt-3 font-serif text-3xl text-ink">{openNew}</p>
+          <p className="mt-2 text-xs text-ink/45">Still marked as new</p>
         </div>
-        <div className="rounded-lg border border-off-white/10 bg-black px-5 py-4">
-          <p className="text-xs tracking-wide text-off-white/45 uppercase">
+        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
+          <p className="text-xs tracking-wide text-ink/45 uppercase">
             By status
           </p>
-          <dl className="mt-3 space-y-1.5 text-sm text-off-white/75">
+          <dl className="mt-3 space-y-1.5 text-sm text-ink/75">
             {LEAD_STATUSES.map((status) => (
               <div key={status} className="flex items-center justify-between gap-3">
-                <dt className="capitalize text-off-white/55">{status}</dt>
-                <dd className="tabular-nums text-off-white">
+                <dt className="capitalize text-ink/55">{status}</dt>
+                <dd className="tabular-nums text-ink">
                   {statusCounts[status]}
                 </dd>
               </div>
@@ -243,11 +243,11 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <section className="rounded-lg border border-off-white/10 bg-black px-5 py-5">
+        <section className="rounded-lg border border-ink/10 bg-panel px-5 py-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="font-serif text-xl text-off-white">Lead volume</h2>
-              <p className="mt-1 text-xs text-off-white/45">
+              <h2 className="font-serif text-xl text-ink">Lead volume</h2>
+              <p className="mt-1 text-xs text-ink/45">
                 Last 8 weeks (placeholder trend until history builds up)
               </p>
             </div>
@@ -257,34 +257,34 @@ export default async function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-lg border border-off-white/10 bg-black px-5 py-5">
+        <section className="rounded-lg border border-ink/10 bg-panel px-5 py-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-serif text-xl text-off-white">Recent leads</h2>
+            <h2 className="font-serif text-xl text-ink">Recent leads</h2>
             <Link
               href="/admin/leads"
-              className="text-xs font-medium text-baby-blue transition-opacity hover:opacity-80"
+              className="text-xs font-medium text-accent transition-opacity hover:opacity-80"
             >
               Full list
             </Link>
           </div>
 
           {recent.length === 0 ? (
-            <p className="mt-6 text-sm text-off-white/55">No leads yet.</p>
+            <p className="mt-6 text-sm text-ink/55">No leads yet.</p>
           ) : (
-            <ul className="mt-5 divide-y divide-off-white/10">
+            <ul className="mt-5 divide-y divide-ink/10">
               {recent.map((lead) => (
                 <li key={lead.id} className="py-3 first:pt-0 last:pb-0">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm text-off-white">
+                      <p className="truncate text-sm text-ink">
                         {lead.name?.trim() || "Unnamed lead"}
                       </p>
-                      <p className="mt-1 truncate text-xs text-off-white/50">
+                      <p className="mt-1 truncate text-xs text-ink/50">
                         {lead.service_type?.trim() || "Service not set"} ·{" "}
                         {formatDate(lead.created_at)}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded border border-off-white/10 px-2 py-0.5 text-[11px] capitalize text-off-white/60">
+                    <span className="shrink-0 rounded border border-ink/10 px-2 py-0.5 text-[11px] capitalize text-ink/60">
                       {normalizeStatus(lead.status)}
                     </span>
                   </div>

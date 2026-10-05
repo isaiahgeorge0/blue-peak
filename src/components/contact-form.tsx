@@ -30,12 +30,12 @@ type FormState = {
 };
 
 const fieldClassName =
-  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue focus:ring-2 focus:ring-baby-blue/40";
+  "mt-2 w-full rounded-md border border-ink/20 bg-page px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/40";
 
-const labelClassName = "block text-sm font-medium text-off-white/85";
+const labelClassName = "block text-sm font-medium text-ink/85";
 
 const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
+  "inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
 
 export function ContactForm({ services }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
@@ -132,11 +132,11 @@ export function ContactForm({ services }: ContactFormProps) {
 
   if (isSuccess) {
     return (
-      <div className="rounded-lg border border-baby-blue/30 bg-black px-6 py-10">
-        <h2 className="font-serif text-3xl tracking-tight text-off-white">
+      <div className="rounded-lg border border-accent/30 bg-panel px-6 py-10">
+        <h2 className="font-serif text-3xl tracking-tight text-ink">
           Thanks, we have your enquiry
         </h2>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-off-white/75">
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/75">
           We usually reply the same working day with next steps or a time to
           visit. If it is urgent, call us and mention you sent this form.
         </p>
@@ -150,7 +150,7 @@ export function ContactForm({ services }: ContactFormProps) {
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClassName}>
-            Name <span className="text-baby-blue">*</span>
+            Name <span className="text-accent">*</span>
           </label>
           <input
             id="name"
@@ -165,7 +165,7 @@ export function ContactForm({ services }: ContactFormProps) {
             aria-describedby={fieldErrors.name ? "name-error" : undefined}
           />
           {fieldErrors.name ? (
-            <p id="name-error" className="mt-2 text-sm text-baby-blue">
+            <p id="name-error" className="mt-2 text-sm text-accent">
               {fieldErrors.name}
             </p>
           ) : null}
@@ -173,7 +173,7 @@ export function ContactForm({ services }: ContactFormProps) {
 
         <div>
           <label htmlFor="phone" className={labelClassName}>
-            Phone <span className="text-baby-blue">*</span>
+            Phone <span className="text-accent">*</span>
           </label>
           <input
             id="phone"
@@ -188,7 +188,7 @@ export function ContactForm({ services }: ContactFormProps) {
             aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
           />
           {fieldErrors.phone ? (
-            <p id="phone-error" className="mt-2 text-sm text-baby-blue">
+            <p id="phone-error" className="mt-2 text-sm text-accent">
               {fieldErrors.phone}
             </p>
           ) : null}
@@ -270,7 +270,7 @@ export function ContactForm({ services }: ContactFormProps) {
       {submitError ? (
         <p
           role="alert"
-          className="rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white"
+          className="rounded-md border border-accent/40 bg-page px-4 py-3 text-sm text-ink"
         >
           {submitError}
         </p>

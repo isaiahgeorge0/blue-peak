@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /** Unfilled legal detail. Styled to stand out so it can't ship unnoticed. */
 function Tbc({ children }: { children: string }) {
   return (
-    <strong className="rounded bg-baby-blue/15 px-1.5 py-0.5 font-medium text-baby-blue ring-1 ring-baby-blue/40">
+    <strong className="rounded bg-accent/15 px-1.5 py-0.5 font-medium text-accent ring-1 ring-accent/40">
       {children}
     </strong>
   );
@@ -27,8 +27,8 @@ function Tbc({ children }: { children: string }) {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-t border-off-white/10 pt-10 first:border-t-0 first:pt-0">
-      <h2 className="text-2xl tracking-tight text-off-white sm:text-3xl">
+    <section className="border-t border-ink/10 pt-10 first:border-t-0 first:pt-0">
+      <h2 className="text-2xl tracking-tight text-ink sm:text-3xl">
         {title}
       </h2>
       <div className="mt-5 space-y-4">{children}</div>
@@ -38,7 +38,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function P({ children }: { children: ReactNode }) {
   return (
-    <p className="max-w-3xl text-base leading-relaxed text-off-white/80">
+    <p className="max-w-3xl text-base leading-relaxed text-ink/80">
       {children}
     </p>
   );
@@ -46,7 +46,7 @@ function P({ children }: { children: ReactNode }) {
 
 function List({ items }: { items: ReactNode[] }) {
   return (
-    <ul className="max-w-3xl list-disc space-y-2 pl-5 text-base leading-relaxed text-off-white/80 marker:text-baby-blue">
+    <ul className="max-w-3xl list-disc space-y-2 pl-5 text-base leading-relaxed text-ink/80 marker:text-accent">
       {items.map((item, index) => (
         <li key={index}>{item}</li>
       ))}
@@ -64,11 +64,11 @@ function Table({ head, rows }: TableProps) {
   return (
     <div
       tabIndex={0}
-      className="overflow-x-auto rounded-lg border border-off-white/10 bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-baby-blue"
+      className="overflow-x-auto rounded-lg border border-ink/10 bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      <table className="min-w-full text-left text-sm leading-relaxed text-off-white/80">
+      <table className="min-w-full text-left text-sm leading-relaxed text-ink/80">
         {head ? (
-          <thead className="border-b border-off-white/10 text-xs tracking-wide text-baby-blue uppercase">
+          <thead className="border-b border-ink/10 text-xs tracking-wide text-accent uppercase">
             <tr>
               {head.map((cell) => (
                 <th key={cell} scope="col" className="px-4 py-3 font-medium">
@@ -82,14 +82,14 @@ function Table({ head, rows }: TableProps) {
           {rows.map((row, rowIndex) => (
             <tr
               key={rowIndex}
-              className="border-b border-off-white/5 align-top last:border-b-0"
+              className="border-b border-ink/5 align-top last:border-b-0"
             >
               {row.map((cell, cellIndex) =>
                 cellIndex === 0 ? (
                   <th
                     key={cellIndex}
                     scope="row"
-                    className="px-4 py-3 font-medium whitespace-nowrap text-off-white"
+                    className="px-4 py-3 font-medium whitespace-nowrap text-ink"
                   >
                     {cell}
                   </th>
@@ -107,20 +107,20 @@ function Table({ head, rows }: TableProps) {
   );
 }
 
-const planned = <em className="text-off-white/60">(planned)</em>;
+const planned = <em className="text-ink/70">(planned)</em>;
 
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <section className="bg-black">
+      <section className="bg-panel">
         <div className="mx-auto max-w-4xl px-6 py-16 lg:py-24">
-          <p className="text-sm font-medium tracking-wide text-baby-blue uppercase">
+          <p className="text-sm font-medium tracking-wide text-accent uppercase">
             Blue Peak
           </p>
-          <h1 className="mt-3 text-4xl tracking-tight text-off-white sm:text-5xl">
+          <h1 className="mt-3 text-4xl tracking-tight text-ink sm:text-5xl">
             Privacy policy
           </h1>
-          <p className="mt-4 text-sm text-off-white/60">
+          <p className="mt-4 text-sm text-ink/70">
             <em>Last updated: 1 October 2026</em>
           </p>
           <div className="mt-8 space-y-4">
@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </section>
 
-      <section className="bg-charcoal">
+      <section className="bg-page">
         <div className="mx-auto max-w-4xl space-y-12 px-6 py-16 lg:py-20">
           <Section title="Who we are">
             <P>
@@ -303,7 +303,7 @@ export default function PrivacyPolicyPage() {
               ]}
             />
             <P>
-              <strong className="text-off-white">
+              <strong className="text-ink">
                 ntfy.sh, important note:
               </strong>{" "}
               we send a push notification to our team for every new enquiry,
@@ -434,7 +434,7 @@ export default function PrivacyPolicyPage() {
                 ],
               ].map(([right, detail]) => (
                 <>
-                  <strong className="text-off-white">{right}:</strong> {detail}
+                  <strong className="text-ink">{right}:</strong> {detail}
                 </>
               ))}
             />
@@ -446,7 +446,7 @@ export default function PrivacyPolicyPage() {
               to the ICO at{" "}
               <a
                 href="https://ico.org.uk"
-                className="text-baby-blue underline underline-offset-2 hover:text-off-white"
+                className="text-accent underline underline-offset-2 hover:text-ink"
               >
                 ico.org.uk
               </a>{" "}
@@ -456,12 +456,12 @@ export default function PrivacyPolicyPage() {
 
           <Section title="Other important information">
             <P>
-              <strong className="text-off-white">Children&apos;s data.</strong>{" "}
+              <strong className="text-ink">Children&apos;s data.</strong>{" "}
               Our services are aimed at adults seeking building and renovation
               work, and we do not knowingly collect personal data from children.
             </P>
             <P>
-              <strong className="text-off-white">
+              <strong className="text-ink">
                 International transfers.
               </strong>{" "}
               Our service providers (Supabase, Resend, Vercel, Cloudflare,
@@ -471,7 +471,7 @@ export default function PrivacyPolicyPage() {
               otherwise above (see ntfy.sh).
             </P>
             <P>
-              <strong className="text-off-white">
+              <strong className="text-ink">
                 Changes to this policy.
               </strong>{" "}
               We may update this policy from time to time, for example as our
@@ -480,7 +480,7 @@ export default function PrivacyPolicyPage() {
               we&apos;ll make this clear on our website.
             </P>
             <P>
-              <strong className="text-off-white">Contact us.</strong> For any
+              <strong className="text-ink">Contact us.</strong> For any
               question about this policy or how we handle your data:
             </P>
             <List

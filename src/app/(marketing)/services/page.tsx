@@ -15,10 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function ServicesPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-6 py-16">
-      <h1 className="text-4xl tracking-tight text-off-white sm:text-5xl">
+      <h1 className="text-4xl tracking-tight text-ink sm:text-5xl">
         Services
       </h1>
-      <p className="mt-4 max-w-2xl text-base text-off-white/75">
+      <p className="mt-4 max-w-2xl text-base text-ink/75">
         The jobs we take on most often. Every price is fixed in writing after a
         site visit.
       </p>
@@ -26,10 +26,10 @@ export default function ServicesPage() {
         {services.map((service) => (
           <li key={service.slug}>
             <Link href={`/services/${service.slug}`} className="group block">
-              <h2 className="font-serif text-2xl text-off-white group-hover:text-baby-blue">
+              <h2 className="font-serif text-2xl text-ink group-hover:text-accent">
                 {service.name}
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+              <p className="mt-3 text-sm leading-relaxed text-ink/70">
                 {service.shortDescription}
               </p>
             </Link>

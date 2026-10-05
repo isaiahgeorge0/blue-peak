@@ -17,7 +17,7 @@ export const ESTIMATOR_ADDONS: EstimatorAddon[] = [
     label: "Loft conversion",
     price: 45000,
     weeks: 5,
-    color: "#89cff0",
+    color: "#43b7d4",
   },
   {
     key: "extension",

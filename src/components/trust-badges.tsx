@@ -57,18 +57,18 @@ const trustBadges = [
 /** Compact strip under the hero - continuation, not a new section. */
 export function TrustBadges() {
   return (
-    <div className="border-b border-off-white/10 bg-black">
+    <div className="theme-brand bg-page">
       <ul className="mx-auto flex max-w-6xl items-center gap-x-6 overflow-x-auto px-5 py-3 sm:gap-x-8 sm:px-6 sm:py-3.5 lg:justify-between lg:gap-x-4">
         {trustBadges.map((badge) => (
           <li
             key={badge.label}
-            className="flex shrink-0 items-center gap-2 text-off-white/75"
+            className="flex shrink-0 items-center gap-2 text-ink/75"
           >
-            <span className="text-baby-blue/90">{badge.icon}</span>
-            <span className="text-xs font-medium whitespace-nowrap text-off-white sm:text-sm">
+            <span className="text-accent">{badge.icon}</span>
+            <span className="text-xs font-medium whitespace-nowrap text-ink sm:text-sm">
               {badge.label}
             </span>
-            <span className="hidden text-xs text-off-white/60 md:inline">
+            <span className="hidden text-xs text-ink/75 md:inline">
               · {badge.detail}
             </span>
           </li>

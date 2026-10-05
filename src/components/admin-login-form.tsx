@@ -5,12 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { loginAdmin, type LoginState } from "@/app/admin/actions";
 
 const fieldClassName =
-  "mt-2 w-full rounded-md border border-off-white/15 bg-black px-4 py-3 text-sm text-off-white outline-none transition-colors placeholder:text-off-white/35 focus:border-baby-blue focus:ring-2 focus:ring-baby-blue/40";
+  "mt-2 w-full rounded-md border border-ink/15 bg-panel px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/40";
 
-const labelClassName = "block text-sm font-medium text-off-white/85";
+const labelClassName = "block text-sm font-medium text-ink/85";
 
 const buttonClassName =
-  "inline-flex w-full items-center justify-center rounded-full bg-baby-blue px-6 py-3 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex w-full items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
 
 const initialState: LoginState = { error: null };
 
@@ -54,7 +54,7 @@ export function AdminLoginForm() {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-baby-blue/40 bg-charcoal px-4 py-3 text-sm text-off-white"
+          className="rounded-md border border-accent/40 bg-page px-4 py-3 text-sm text-ink"
         >
           {state.error}
         </p>

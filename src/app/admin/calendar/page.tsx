@@ -117,7 +117,7 @@ export default async function AdminCalendarPage({
   return (
     <div>
       {error ? (
-        <p className="mb-6 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white">
+        <p className="mb-6 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
           Unable to load calendar events right now. If you just created the
           table, apply the migration and refresh.
         </p>

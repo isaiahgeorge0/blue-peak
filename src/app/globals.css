@@ -1,32 +1,97 @@
 @import "tailwindcss";
 
+/*
+  Blue Peak brand palette ("Deep Contour"), from the brand guidelines.
+  Use the semantic tokens (page, panel, ink, accent) in components so a
+  section can be re-themed by adding one class to its wrapper:
+
+    (default)     white page, navy text, Blue Solution accents
+    .theme-brand  Blue Solution background, white text (footer, menu, bands)
+    .theme-photo  text sitting on a photograph
+    .theme-admin  the dark admin dashboard
+*/
 :root {
-  --charcoal: #2a2a2a;
-  --black: #0a0a0a;
-  --baby-blue: #89cff0;
-  --off-white: #f4f1ea;
+  --peak-white: #fefefe;
+  --frost-white: #e9f7f7;
+  --ridge-cyan: #35dede;
+  --peak-fleet: #43b7d4;
+  --traverse-blue: #004aad;
+  --blue-solution: #1800ad;
+  --navy: #0e2240;
+
+  --page: var(--peak-white);
+  --panel: var(--frost-white);
+  --ink: var(--navy);
+  --accent: var(--blue-solution);
+  --on-accent: #ffffff;
+
   --site-header-height: 4.5rem;
 }
 
+.theme-brand {
+  --page: var(--blue-solution);
+  --panel: #2412b8;
+  --ink: #ffffff;
+  --accent: var(--peak-fleet);
+  --on-accent: var(--navy);
+  color: var(--ink);
+}
+
+.theme-photo {
+  --page: #0a0a0a;
+  --panel: #0a0a0a;
+  --ink: #ffffff;
+  --accent: var(--peak-fleet);
+  --on-accent: var(--navy);
+  color: var(--ink);
+}
+
+.theme-admin {
+  --page: #2a2a2a;
+  --panel: #0a0a0a;
+  --ink: #f4f1ea;
+  --accent: #89cff0;
+  --on-accent: #0a0a0a;
+  color: var(--ink);
+}
+
 @theme inline {
-  --color-charcoal: var(--charcoal);
-  --color-black: var(--black);
-  --color-baby-blue: var(--baby-blue);
-  --color-off-white: var(--off-white);
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+
+  --color-brand: var(--blue-solution);
+  --color-traverse: var(--traverse-blue);
+  --color-peak-fleet: var(--peak-fleet);
+  --color-ridge-cyan: var(--ridge-cyan);
+  --color-frost: var(--frost-white);
+  --color-peak-white: var(--peak-white);
+  --color-navy: var(--navy);
+
   --font-sans: var(--font-inter);
   --font-serif: var(--font-fraunces);
 }
 
 body {
-  background: var(--charcoal);
-  color: var(--off-white);
+  background: var(--page);
+  color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+  The pitch: the 31 degree roofline cut from the top of the logo mark.
+  Add to a block to cut its top edge along the pitch.
+*/
+.pitch-top {
+  clip-path: polygon(0 var(--pitch-drop, 12vw), 100% 0, 100% 100%, 0 100%);
 }
 
 /* Site header: solid bar at the top, transparent once compact so only the pills float */
 .site-header {
-  background-color: rgba(10, 10, 10, 0.9);
-  border-bottom: 1px solid rgba(244, 241, 234, 0.1);
+  background-color: rgba(254, 254, 254, 0.92);
+  border-bottom: 1px solid rgba(14, 34, 64, 0.1);
   transition:
     background-color 350ms ease,
     border-color 350ms ease;
@@ -51,20 +116,28 @@ body {
   pointer-events: none;
 }
 
+/* Menu open: the bar clears so the logo and close button sit on the blue menu */
+.site-header[data-menu-open="true"] {
+  background-color: transparent;
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .site-header {
     transition: none;
   }
 }
 
-/* Homepage frosted-glass hero card: solid fallback, blur where supported */
+/* Homepage hero card: near-solid white fallback, frosted where supported */
 .home-frost-card {
-  background: rgba(10, 10, 10, 0.88);
+  background: rgba(254, 254, 254, 0.96);
 }
 
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .home-frost-card {
-    background: rgba(10, 10, 10, 0.48);
+    background: rgba(254, 254, 254, 0.88);
     -webkit-backdrop-filter: blur(16px) saturate(1.15);
     backdrop-filter: blur(16px) saturate(1.15);
   }
@@ -72,7 +145,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .home-frost-card {
-    background: rgba(10, 10, 10, 0.92);
+    background: rgba(254, 254, 254, 0.97);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }

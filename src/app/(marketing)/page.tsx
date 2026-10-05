@@ -34,9 +34,9 @@ export default function HomePage() {
       <TrustBadges />
 
       <Reveal>
-        <section className="bg-black">
+        <section className="bg-page">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
-            <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            <h2 className="text-3xl tracking-tight text-ink sm:text-4xl">
               Recent work
             </h2>
             <div className="mt-10 grid gap-8 sm:grid-cols-3">
@@ -73,38 +73,38 @@ export default function HomePage() {
       <AnimatedStats />
 
       <Reveal>
-        <section className="bg-black">
+        <section className="bg-panel">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
-            <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            <h2 className="text-3xl tracking-tight text-ink sm:text-4xl">
               How we work
             </h2>
             <ol className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
               <li>
-                <p className="text-sm font-medium tracking-wide text-baby-blue">
+                <p className="text-sm font-medium tracking-wide text-accent">
                   01
                 </p>
-                <h3 className="mt-3 text-xl text-off-white">Enquire</h3>
-                <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                <h3 className="mt-3 text-xl text-ink">Enquire</h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
                   Tell us what you want doing and send a few photos. We will say
                   quickly whether it is a job we can take on.
                 </p>
               </li>
               <li>
-                <p className="text-sm font-medium tracking-wide text-baby-blue">
+                <p className="text-sm font-medium tracking-wide text-accent">
                   02
                 </p>
-                <h3 className="mt-3 text-xl text-off-white">Get a fixed quote</h3>
-                <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                <h3 className="mt-3 text-xl text-ink">Get a fixed quote</h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
                   We visit the property, measure up, and send a written price
                   before any work is booked.
                 </p>
               </li>
               <li>
-                <p className="text-sm font-medium tracking-wide text-baby-blue">
+                <p className="text-sm font-medium tracking-wide text-accent">
                   03
                 </p>
-                <h3 className="mt-3 text-xl text-off-white">Book the work</h3>
-                <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                <h3 className="mt-3 text-xl text-ink">Book the work</h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
                   Agree a start date, we protect the house, and we stay on it
                   until the job is finished.
                 </p>
@@ -115,19 +115,19 @@ export default function HomePage() {
       </Reveal>
 
       <Reveal>
-        <section className="bg-charcoal">
+        <section className="bg-page">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
-            <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            <h2 className="text-3xl tracking-tight text-ink sm:text-4xl">
               Who you&apos;ll actually be dealing with
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-off-white/70">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink/70">
               Blue Peak is two people on every job. You speak to the same pair
               from the first site visit through to the final tidy-up.
             </p>
             <div className="mt-10 grid gap-10 sm:grid-cols-2">
               {teamMembers.map((member) => (
                 <div key={member.name} className="flex gap-5">
-                  <div className="relative aspect-square h-24 w-24 shrink-0 overflow-hidden bg-gray-800 sm:h-28 sm:w-28">
+                  <div className="relative aspect-square h-24 w-24 shrink-0 overflow-hidden bg-ink/10 sm:h-28 sm:w-28">
                     <Image
                       src={member.imageSrc}
                       alt={`${member.name}, ${member.role}`}
@@ -137,13 +137,13 @@ export default function HomePage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-serif text-2xl text-off-white">
+                    <h3 className="font-serif text-2xl text-ink">
                       {member.name}
                     </h3>
-                    <p className="mt-1 text-sm tracking-wide text-baby-blue">
+                    <p className="mt-1 text-sm tracking-wide text-accent">
                       {member.role}
                     </p>
-                    <p className="mt-3 text-sm leading-relaxed text-off-white/70">
+                    <p className="mt-3 text-sm leading-relaxed text-ink/70">
                       {member.blurb}
                     </p>
                   </div>
@@ -157,16 +157,16 @@ export default function HomePage() {
       <SketchResolve />
 
       <Reveal>
-        <section className="bg-black">
+        <section className="bg-panel">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-2 lg:gap-14 lg:py-20">
             <div>
-              <p className="text-xs font-medium tracking-wide text-baby-blue uppercase">
+              <p className="text-xs font-medium tracking-wide text-accent uppercase">
                 Quote calculator
               </p>
-              <h2 className="mt-3 text-3xl tracking-tight text-off-white sm:text-4xl">
+              <h2 className="mt-3 text-3xl tracking-tight text-ink sm:text-4xl">
                 See a live estimate in 3D
               </h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-off-white/70">
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/70">
                 Toggle loft conversions, extensions, and finishes on a house you
                 can orbit. Figures are for scoping a conversation, then we visit
                 for a written price.
@@ -179,7 +179,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/quote"
-              className="relative block aspect-[4/3] overflow-hidden rounded-xl border border-off-white/10 bg-charcoal"
+              className="relative block aspect-[4/3] overflow-hidden rounded-xl border border-ink/10 bg-page shadow-xl shadow-navy/10"
             >
               <Image
                 src="/home/quote-preview.jpg"
@@ -194,12 +194,12 @@ export default function HomePage() {
       </Reveal>
 
       <Reveal>
-        <section className="bg-black">
+        <section className="border-t border-ink/10 bg-page">
           <div className="mx-auto max-w-6xl px-6 py-16 text-center lg:py-20">
-            <h2 className="text-3xl tracking-tight text-off-white sm:text-4xl">
+            <h2 className="text-3xl tracking-tight text-ink sm:text-4xl">
               Ready to get a price on the job?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base text-off-white/75">
+            <p className="mx-auto mt-4 max-w-xl text-base text-ink/75">
               Tell us what you are planning. We usually reply the same working
               day.
             </p>

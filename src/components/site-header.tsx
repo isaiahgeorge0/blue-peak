@@ -14,6 +14,7 @@ import {
   headerCtaClassName,
   primaryCtaClassName,
 } from "@/components/cta-styles";
+import { BrandMark, BrandWordmark } from "@/components/brand/brand-logo";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 const navLinks = [
@@ -99,7 +100,7 @@ export function SiteHeader() {
         id={menuId}
         ref={panelRef}
         inert={!menuOpen}
-        className={`fixed inset-0 z-40 bg-black/92 backdrop-blur-xl duration-300 ease-out motion-reduce:transition-none ${
+        className={`theme-brand fixed inset-0 z-40 bg-page/95 backdrop-blur-xl duration-300 ease-out motion-reduce:transition-none ${
           menuOpen
             ? "visible opacity-100 transition-opacity"
             : "invisible opacity-0 transition-[opacity,visibility]"
@@ -116,10 +117,10 @@ export function SiteHeader() {
                   href={link.href}
                   onClick={() => closeMenu()}
                   aria-current={isActive(pathname, link.href) ? "page" : undefined}
-                  className={`inline-block font-serif text-4xl tracking-tight transition-[opacity,translate,color] duration-500 ease-out hover:text-baby-blue motion-reduce:transition-none sm:text-5xl ${
+                  className={`inline-block font-serif text-4xl tracking-tight transition-[opacity,translate,color] duration-500 ease-out hover:text-accent motion-reduce:transition-none sm:text-5xl ${
                     isActive(pathname, link.href)
-                      ? "text-baby-blue"
-                      : "text-off-white"
+                      ? "text-ridge-cyan"
+                      : "text-ink"
                   } ${menuOpen ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}
                   style={{
                     transitionDelay: menuOpen ? `${80 + index * 40}ms` : "0ms",
@@ -140,7 +141,7 @@ export function SiteHeader() {
             </Link>
             <a
               href={`tel:${sitePhoneTel}`}
-              className="text-sm text-off-white/75 transition-colors hover:text-baby-blue"
+              className="text-sm text-ink/75 transition-colors hover:text-accent"
             >
               {sitePhoneDisplay}
             </a>
@@ -150,15 +151,29 @@ export function SiteHeader() {
 
       <header
         data-compact={compact ? "true" : "false"}
+        data-menu-open={menuOpen ? "true" : "false"}
         className="site-header group sticky top-0 z-50 h-[var(--site-header-height)]"
       >
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
           <Link
             href="/"
             onClick={() => closeMenu()}
-            className="pointer-events-auto shrink-0 rounded-full border border-transparent font-serif text-base tracking-tight text-off-white transition-all duration-300 ease-out hover:text-baby-blue motion-reduce:transition-none sm:text-lg group-data-[compact=true]:border-off-white/15 group-data-[compact=true]:bg-black/45 group-data-[compact=true]:px-4 group-data-[compact=true]:py-2 group-data-[compact=true]:text-sm group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-black/30 group-data-[compact=true]:backdrop-blur-md"
+            aria-label="Blue Peak, home"
+            className={`pointer-events-auto flex shrink-0 items-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none ${
+              menuOpen
+                ? "text-white"
+                : "text-brand hover:text-traverse group-data-[compact=true]:border-ink/10 group-data-[compact=true]:bg-page/85 group-data-[compact=true]:px-3.5 group-data-[compact=true]:py-2 group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-navy/15 group-data-[compact=true]:backdrop-blur-md"
+            }`}
           >
-            Blue Peak Solutions
+            <BrandWordmark
+              title=""
+              peakClassName={menuOpen ? "text-ridge-cyan" : "text-peak-fleet"}
+              className={`h-[1.05rem] w-auto sm:h-5 ${menuOpen ? "" : "group-data-[compact=true]:hidden"}`}
+            />
+            <BrandMark
+              title=""
+              className={`hidden h-6 w-auto ${menuOpen ? "" : "group-data-[compact=true]:block"}`}
+            />
           </Link>
 
           <div className="relative flex min-h-10 min-w-10 items-center justify-end">
@@ -171,14 +186,14 @@ export function SiteHeader() {
                   key={link.href}
                   href={link.href}
                   aria-current={isActive(pathname, link.href) ? "page" : undefined}
-                  className="text-sm text-off-white/80 transition-colors hover:text-baby-blue aria-[current=page]:text-off-white"
+                  className="text-sm font-medium text-ink/75 transition-colors hover:text-accent aria-[current=page]:text-accent"
                 >
                   {link.label}
                 </Link>
               ))}
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="text-sm text-off-white/80 transition-colors hover:text-baby-blue"
+                className="text-sm font-medium text-ink/75 transition-colors hover:text-accent"
               >
                 {sitePhoneDisplay}
               </a>
@@ -194,7 +209,11 @@ export function SiteHeader() {
               aria-controls={menuId}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               onClick={() => setMenuOpen((open) => !open)}
-              className="pointer-events-auto absolute top-1/2 right-0 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-transparent text-off-white transition-all duration-300 ease-out hover:text-baby-blue motion-reduce:transition-none group-data-[compact=true]:border-off-white/15 group-data-[compact=true]:bg-black/45 group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-black/30 group-data-[compact=true]:backdrop-blur-md lg:group-data-[compact=false]:invisible lg:group-data-[compact=false]:scale-90 lg:group-data-[compact=false]:opacity-0"
+              className={`pointer-events-auto absolute top-1/2 right-0 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none lg:group-data-[compact=false]:invisible lg:group-data-[compact=false]:scale-90 lg:group-data-[compact=false]:opacity-0 ${
+                menuOpen
+                  ? "text-white"
+                  : "text-brand hover:text-traverse group-data-[compact=true]:border-ink/10 group-data-[compact=true]:bg-page/85 group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-navy/15 group-data-[compact=true]:backdrop-blur-md"
+              }`}
             >
               <span aria-hidden className="relative block h-3.5 w-5">
                 <span

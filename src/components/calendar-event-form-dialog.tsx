@@ -166,7 +166,7 @@ export function CalendarEventFormDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-panel/70 p-4 sm:items-center"
       role="presentation"
       onClick={handleClose}
     >
@@ -174,22 +174,22 @@ export function CalendarEventFormDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-off-white/15 bg-charcoal p-5 shadow-xl"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-ink/15 bg-page p-5 shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <h2
           id={titleId}
-          className="font-serif text-xl tracking-tight text-off-white"
+          className="font-serif text-xl tracking-tight text-ink"
         >
           {heading}
         </h2>
-        <p className="mt-1 text-sm text-off-white/55">
+        <p className="mt-1 text-sm text-ink/55">
           {formatDayHeading(startDate)}
         </p>
 
         <form onSubmit={handleCreate} className="mt-5 space-y-4">
           <label className="block">
-            <span className="text-xs tracking-wide text-off-white/55 uppercase">
+            <span className="text-xs tracking-wide text-ink/55 uppercase">
               Date
             </span>
             <input
@@ -206,26 +206,26 @@ export function CalendarEventFormDialog({
                   setRecurrenceDays([weekdayFromDateKey(nextDate)]);
                 }
               }}
-              className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue [color-scheme:dark]"
+              className="mt-1.5 w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none focus:border-accent [color-scheme:dark]"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs tracking-wide text-off-white/55 uppercase">
+            <span className="text-xs tracking-wide text-ink/55 uppercase">
               Title
             </span>
             <input
               required
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
+              className="mt-1.5 w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none focus:border-accent"
               placeholder="Site visit, follow-up..."
             />
           </label>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <span className="text-xs tracking-wide text-off-white/55 uppercase">
+              <span className="text-xs tracking-wide text-ink/55 uppercase">
                 Start time
               </span>
               <TimePicker
@@ -236,7 +236,7 @@ export function CalendarEventFormDialog({
               />
             </div>
             <div>
-              <span className="text-xs tracking-wide text-off-white/55 uppercase">
+              <span className="text-xs tracking-wide text-ink/55 uppercase">
                 End time
               </span>
               <TimePicker
@@ -249,20 +249,20 @@ export function CalendarEventFormDialog({
           </div>
 
           <label className="block">
-            <span className="text-xs tracking-wide text-off-white/55 uppercase">
+            <span className="text-xs tracking-wide text-ink/55 uppercase">
               Notes
             </span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
-              className="mt-1.5 w-full resize-y rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
+              className="mt-1.5 w-full resize-y rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none focus:border-accent"
               placeholder="Optional details"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs tracking-wide text-off-white/55 uppercase">
+            <span className="text-xs tracking-wide text-ink/55 uppercase">
               Recurrence
             </span>
             <select
@@ -277,7 +277,7 @@ export function CalendarEventFormDialog({
                   setRecurrenceDays([weekdayFromDateKey(startDate)]);
                 }
               }}
-              className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue"
+              className="mt-1.5 w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none focus:border-accent"
             >
               {RECURRENCE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -289,7 +289,7 @@ export function CalendarEventFormDialog({
 
           {showDayPicker ? (
             <fieldset>
-              <legend className="text-xs tracking-wide text-off-white/55 uppercase">
+              <legend className="text-xs tracking-wide text-ink/55 uppercase">
                 Repeat on
               </legend>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -304,8 +304,8 @@ export function CalendarEventFormDialog({
                       className={[
                         "rounded-md border px-2.5 py-1.5 text-xs transition-colors",
                         selected
-                          ? "border-baby-blue/50 bg-baby-blue/15 text-baby-blue"
-                          : "border-off-white/15 text-off-white/65 hover:border-off-white/30",
+                          ? "border-accent/50 bg-accent/15 text-accent"
+                          : "border-ink/15 text-ink/65 hover:border-ink/30",
                       ].join(" ")}
                     >
                       {label}
@@ -317,14 +317,14 @@ export function CalendarEventFormDialog({
           ) : null}
 
           {recurrence === "monthly" ? (
-            <p className="text-xs text-off-white/50">
+            <p className="text-xs text-ink/50">
               Repeats on day {Number(startDate.slice(-2))} each month.
             </p>
           ) : null}
 
           {showRepeatUntil ? (
             <label className="block">
-              <span className="text-xs tracking-wide text-off-white/55 uppercase">
+              <span className="text-xs tracking-wide text-ink/55 uppercase">
                 Repeat until
               </span>
               <input
@@ -332,30 +332,30 @@ export function CalendarEventFormDialog({
                 value={recurrenceEndDate}
                 min={startDate}
                 onChange={(event) => setRecurrenceEndDate(event.target.value)}
-                className="mt-1.5 w-full rounded-md border border-off-white/15 bg-black px-3 py-2 text-sm text-off-white outline-none focus:border-baby-blue [color-scheme:dark]"
+                className="mt-1.5 w-full rounded-md border border-ink/15 bg-panel px-3 py-2 text-sm text-ink outline-none focus:border-accent [color-scheme:dark]"
               />
-              <span className="mt-1 block text-[11px] text-off-white/40">
+              <span className="mt-1 block text-[11px] text-ink/40">
                 Leave blank to repeat indefinitely (shown up to 12 months from
                 the start date).
               </span>
             </label>
           ) : null}
 
-          {error ? <p className="text-sm text-baby-blue">{error}</p> : null}
+          {error ? <p className="text-sm text-accent">{error}</p> : null}
 
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
               onClick={handleClose}
               disabled={isPending}
-              className="rounded-md border border-off-white/15 px-3 py-2 text-sm text-off-white/70 transition-colors hover:border-off-white/30 disabled:opacity-60"
+              className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/70 transition-colors hover:border-ink/30 disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md border border-baby-blue/40 bg-baby-blue/15 px-3 py-2 text-sm text-baby-blue transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-sm text-accent transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {isPending ? "Saving..." : "Create event"}
             </button>

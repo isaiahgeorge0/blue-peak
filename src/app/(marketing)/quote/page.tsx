@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function QuotePage() {
   return (
-    <section className="bg-black">
+    <section className="bg-panel">
       <div className="mx-auto max-w-[1180px] px-6 py-12 lg:py-16">
         <QuoteEstimatorLoader />
       </div>

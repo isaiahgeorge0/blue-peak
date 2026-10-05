@@ -16,14 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function AdminLoginPage() {
   return (
     <div className="mx-auto max-w-md">
-      <h1 className="font-serif text-3xl tracking-tight text-off-white">
+      <h1 className="font-serif text-3xl tracking-tight text-ink">
         Admin login
       </h1>
-      <p className="mt-3 text-sm text-off-white/70">
+      <p className="mt-3 text-sm text-ink/70">
         Sign in with your Blue Peak admin account.
       </p>
-      <div className="mt-8 rounded-lg border border-off-white/10 bg-black px-6 py-8">
-        <Suspense fallback={<p className="text-sm text-off-white/60">Loading...</p>}>
+      <div className="mt-8 rounded-lg border border-ink/10 bg-panel px-6 py-8">
+        <Suspense fallback={<p className="text-sm text-ink/60">Loading...</p>}>
           <AdminLoginForm />
         </Suspense>
       </div>

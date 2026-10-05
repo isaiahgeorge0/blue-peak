@@ -162,14 +162,14 @@ export function TimePicker({
           setOpen(!open);
         }}
         className={[
-          "flex w-full items-center justify-between rounded-md border bg-black px-3 py-2 text-left text-sm outline-none transition-colors",
-          open ? "border-baby-blue" : "border-off-white/15 hover:border-off-white/30",
-          formatDisplayTime(value) ? "text-off-white" : "text-off-white/45",
+          "flex w-full items-center justify-between rounded-md border bg-panel px-3 py-2 text-left text-sm outline-none transition-colors",
+          open ? "border-accent" : "border-ink/15 hover:border-ink/30",
+          formatDisplayTime(value) ? "text-ink" : "text-ink/45",
           disabled ? "cursor-not-allowed opacity-60" : "",
         ].join(" ")}
       >
         <span>{display}</span>
-        <span className="text-off-white/35" aria-hidden>
+        <span className="text-ink/35" aria-hidden>
           ▾
         </span>
       </button>
@@ -179,11 +179,11 @@ export function TimePicker({
           id={listboxId}
           role="listbox"
           aria-label={`${ariaLabel} options`}
-          className="absolute z-20 mt-1.5 grid w-full min-w-[11rem] grid-cols-2 gap-1 rounded-md border border-off-white/15 bg-black p-1.5 shadow-xl"
+          className="absolute z-20 mt-1.5 grid w-full min-w-[11rem] grid-cols-2 gap-1 rounded-md border border-ink/15 bg-panel p-1.5 shadow-xl"
         >
           <div
             ref={hourListRef}
-            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-off-white/10"
+            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-ink/10"
           >
             {HOURS.map((hour) => {
               const selected = draftHour === hour;
@@ -198,8 +198,8 @@ export function TimePicker({
                   className={[
                     "block w-full px-2.5 py-1.5 text-left text-sm transition-colors",
                     selected
-                      ? "bg-baby-blue/20 text-baby-blue"
-                      : "text-off-white/75 hover:bg-off-white/5 hover:text-off-white",
+                      ? "bg-accent/20 text-accent"
+                      : "text-ink/75 hover:bg-ink/5 hover:text-ink",
                   ].join(" ")}
                 >
                   {hourLabel(hour)}
@@ -210,7 +210,7 @@ export function TimePicker({
 
           <div
             ref={minuteListRef}
-            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-off-white/10"
+            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-ink/10"
           >
             {MINUTES.map((minute) => {
               const selected = draftMinute === minute;
@@ -225,8 +225,8 @@ export function TimePicker({
                   className={[
                     "block w-full px-2.5 py-1.5 text-left text-sm tabular-nums transition-colors",
                     selected
-                      ? "bg-baby-blue/20 text-baby-blue"
-                      : "text-off-white/75 hover:bg-off-white/5 hover:text-off-white",
+                      ? "bg-accent/20 text-accent"
+                      : "text-ink/75 hover:bg-ink/5 hover:text-ink",
                   ].join(" ")}
                 >
                   :{pad2(minute)}

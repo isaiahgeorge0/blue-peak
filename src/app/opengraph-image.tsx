@@ -7,10 +7,11 @@ export const alt = OG_IMAGE_ALT;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const [fraunces, inter, hero] = await Promise.all([
+const [fraunces, inter, hero, wordmark] = await Promise.all([
   readFile(join(process.cwd(), "assets/og/fraunces-latin-400-normal.woff")),
   readFile(join(process.cwd(), "assets/og/inter-latin-500-normal.woff")),
   readFile(join(process.cwd(), "public/home/hero.jpg"), "base64"),
+  readFile(join(process.cwd(), "public/brand/wordmark-white.svg"), "base64"),
 ]);
 
 export default function OpengraphImage() {
@@ -22,7 +23,7 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           position: "relative",
-          backgroundColor: "#0a0a0a",
+          backgroundColor: "#1800ad",
         }}
       >
         <img
@@ -41,7 +42,7 @@ export default function OpengraphImage() {
             height: "100%",
             display: "flex",
             backgroundImage:
-              "linear-gradient(90deg, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.88) 50%, rgba(10,10,10,0.4) 100%)",
+              "linear-gradient(90deg, rgba(24,0,173,0.97) 0%, rgba(24,0,173,0.92) 52%, rgba(24,0,173,0.35) 100%)",
           }}
         />
         <div
@@ -54,24 +55,19 @@ export default function OpengraphImage() {
             width: 760,
           }}
         >
+          <img
+            src={`data:image/svg+xml;base64,${wordmark}`}
+            alt=""
+            width={300}
+            height={46}
+          />
           <div
             style={{
-              fontFamily: "Inter",
-              fontSize: 22,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: "#89cff0",
-            }}
-          >
-            Blue Peak Solutions
-          </div>
-          <div
-            style={{
-              marginTop: 24,
+              marginTop: 36,
               fontFamily: "Fraunces",
               fontSize: 64,
               lineHeight: 1.1,
-              color: "#f4f1ea",
+              color: "#ffffff",
             }}
           >
             Building and renovation across Ipswich and Suffolk
@@ -81,7 +77,7 @@ export default function OpengraphImage() {
               marginTop: 28,
               fontFamily: "Inter",
               fontSize: 26,
-              color: "rgba(244,241,234,0.78)",
+              color: "rgba(255,255,255,0.85)",
             }}
           >
             Written quotes before we start. Free site visits.

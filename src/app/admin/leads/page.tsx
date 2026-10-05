@@ -105,22 +105,22 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl tracking-tight text-off-white sm:text-4xl">
+      <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
         Leads
       </h1>
-      <p className="mt-3 text-sm text-off-white/70">
+      <p className="mt-3 text-sm text-ink/70">
         Quote requests from the website. New leads are listed first. Expand a
         row to view or add notes.
       </p>
 
       {error ? (
-        <p className="mt-8 rounded-md border border-baby-blue/40 bg-black px-4 py-3 text-sm text-off-white">
+        <p className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
           Unable to load leads right now.
         </p>
       ) : null}
 
       {!error && rows.length === 0 ? (
-        <p className="mt-8 text-sm text-off-white/65">No leads yet.</p>
+        <p className="mt-8 text-sm text-ink/65">No leads yet.</p>
       ) : null}
 
       {!error && rows.length > 0 ? (

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0a0a",
+  themeColor: "#1800ad",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-charcoal font-sans text-off-white">
+      <body className="flex min-h-full flex-col bg-page font-sans text-ink">
         {children}
       </body>
     </html>

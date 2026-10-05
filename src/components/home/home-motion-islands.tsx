@@ -10,8 +10,8 @@ const BeforeAfterSlider = dynamic(
   {
     ssr: false,
     loading: () => (
-      <section className="bg-charcoal">
-        <div className="mx-auto max-w-6xl px-6 py-16 text-sm text-off-white/50">
+      <section className="bg-page">
+        <div className="mx-auto max-w-6xl px-6 py-16 text-sm text-ink/70">
           Loading before and after...
         </div>
       </section>
