@@ -164,10 +164,25 @@ body {
   Homepage intro, first visit of a session only. The inline script in the root
   layout sets html[data-intro="play"]; nothing below applies without it, so the
   page is never left hidden if that script does not run. Timeline (ms):
-    0-300 logo fades in, 550-950 logo lifts out, 550-1250 photo opens from a
-    rounded rectangle to full bleed, 1250-1750 header and hero card rise in
-    (shortened below md, see the second block).
-  Only opacity, transform on non-scroll-linked elements, and clip-path animate.
+    0-200 logo fades in (ease-out), 200-1200 holds at full opacity, 1200-1500
+      lifts 40px and fades out (below 15% opacity by ~1366).
+    1350-1600 photo fades in, small (scaled to --intro-scale) and still, so it
+      never visibly overlaps the logo and is fully opaque before it grows.
+      Both fades are tuned against each other: the logo leaves on ease and the
+      photo arrives on ease-in-out, so neither is above 15% while the other is.
+    1600-2500 photo grows to full bleed on a near-linear glide. It scales as a
+      whole rather than being clipped, so it grows evenly on every frame.
+    2350 header bar fades in; wordmark slides in from the left, then nav items
+      fade in left to right, 40ms apart (done by 2980).
+    2450 hero card rises 48px; its five children (mark, eyebrow, headline,
+      supporting line, buttons) rise 12px, 70ms apart (done by 3000).
+    3000 scroll lock ends and the head script marks the intro done.
+  Everything after the logo's hold is keyed off the hold's end: lengthening
+  the hold means shifting every later delay by the same amount.
+  Shortened below md, see the second block. Only opacity and transform on
+  non-scroll-linked elements animate, so nothing shifts layout. The reveal
+  scales .home-hero-media; the scroll-linked zoom is on .home-hero-image inside
+  it, so the two never write the same transform.
 */
 .home-intro {
   display: none;
@@ -175,62 +190,137 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   html[data-intro="play"] {
-    --intro-ease: cubic-bezier(0.76, 0, 0.24, 1);
+    --intro-glide: cubic-bezier(0.37, 0, 0.63, 1);
+    --intro-settle: cubic-bezier(0.22, 1, 0.36, 1);
+    --intro-scale: 0.3;
+    --intro-header-at: 2350ms;
+    --intro-card-at: 2450ms;
     scrollbar-gutter: stable;
-    animation: home-intro-lock 1750ms;
+    animation: home-intro-lock 3000ms;
   }
 
   html[data-intro="play"] .home-intro {
     display: grid;
   }
 
+  /* Easing is set per phase inside the keyframes. */
   html[data-intro="play"] .home-intro > svg {
     opacity: 0;
-    animation: home-intro-logo 950ms var(--intro-ease) backwards;
+    animation: home-intro-logo 1500ms linear backwards;
   }
 
   html[data-intro="play"] .home-hero {
-    animation: home-intro-underlay 1250ms;
+    animation: home-intro-underlay 2500ms;
   }
 
   html[data-intro="play"] .home-hero-media {
+    overflow: hidden;
+    transform-origin: 50% 50%;
+    will-change: transform;
     animation:
-      home-intro-reveal 700ms var(--intro-ease) 550ms backwards,
-      home-intro-fade 200ms var(--intro-ease) 550ms backwards;
+      home-intro-reveal 900ms var(--intro-glide) 1600ms backwards,
+      home-intro-fade 250ms ease-in-out 1350ms backwards;
   }
 
-  html[data-intro="play"] .site-header,
+  html[data-intro="play"] .site-header {
+    animation: home-intro-fade 350ms ease-out var(--intro-header-at) backwards;
+  }
+
+  html[data-intro="play"] .site-header-brand {
+    animation: home-intro-slide 450ms var(--intro-settle)
+      calc(var(--intro-header-at) + 30ms) backwards;
+  }
+
+  /* --i is set inline on each nav item, in reading order. */
+  html[data-intro="play"] .site-header-nav > * {
+    animation: home-intro-fade 250ms ease-out
+      calc(var(--intro-header-at) + 100ms + var(--i, 0) * 40ms) backwards;
+  }
+
+  html[data-intro="play"] .site-header-toggle {
+    animation: home-intro-fade 300ms ease-out
+      calc(var(--intro-header-at) + 100ms) backwards;
+  }
+
   html[data-intro="play"] .home-hero-card {
-    animation: home-intro-rise 500ms var(--intro-ease) 1250ms backwards;
+    animation: home-intro-card 550ms var(--intro-settle) var(--intro-card-at)
+      backwards;
+  }
+
+  html[data-intro="play"] .home-hero-card > * {
+    animation: home-intro-item 270ms var(--intro-settle)
+      calc(var(--intro-card-at) + var(--i, 0) * var(--intro-stagger, 70ms))
+      backwards;
+  }
+
+  /* The buttons share one wrapper, the last child, so they arrive together. */
+  html[data-intro="play"] .home-hero-card > :nth-child(2) {
+    --i: 1;
+  }
+
+  html[data-intro="play"] .home-hero-card > :nth-child(3) {
+    --i: 2;
+  }
+
+  html[data-intro="play"] .home-hero-card > :nth-child(4) {
+    --i: 3;
+  }
+
+  html[data-intro="play"] .home-hero-card > :nth-child(5) {
+    --i: 4;
   }
 }
 
 /*
-  Below md the same sequence finishes by 1.15s, leaving headroom for the 1.2s
-  limit measured from navigation: logo 0-620, photo 360-840, rise 840-1150.
+  Below md the same sequence settles by 2.18s: logo in 0-150, holds to 900,
+  out 900-1120 (its own keyframes, since the phase split differs); photo fades
+  in 1000-1180 and grows 1180-1830; header 1730-2100, card 1830-2180. The card's
+  children stagger 40ms here, not 70ms: four 70ms steps would not leave room
+  for the rise itself inside the card's 350ms.
 */
 @media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
   html[data-intro="play"] {
-    animation-duration: 1150ms;
+    --intro-scale: 0.42;
+    --intro-header-at: 1730ms;
+    --intro-card-at: 1830ms;
+    --intro-stagger: 40ms;
+    animation-duration: 2180ms;
   }
 
   html[data-intro="play"] .home-intro > svg {
-    animation-duration: 620ms;
+    animation-name: home-intro-logo-phone;
+    animation-duration: 1120ms;
   }
 
   html[data-intro="play"] .home-hero {
-    animation-duration: 840ms;
+    animation-duration: 1830ms;
   }
 
   html[data-intro="play"] .home-hero-media {
-    animation-duration: 480ms, 140ms;
-    animation-delay: 360ms;
+    animation-duration: 650ms, 180ms;
+    animation-delay: 1180ms, 1000ms;
   }
 
-  html[data-intro="play"] .site-header,
+  html[data-intro="play"] .site-header {
+    animation-duration: 250ms;
+  }
+
+  html[data-intro="play"] .site-header-brand {
+    animation-duration: 350ms;
+    animation-delay: calc(var(--intro-header-at) + 20ms);
+  }
+
+  html[data-intro="play"] .site-header-toggle {
+    animation-duration: 250ms;
+    animation-delay: calc(var(--intro-header-at) + 80ms);
+  }
+
   html[data-intro="play"] .home-hero-card {
-    animation-duration: 310ms;
-    animation-delay: 840ms;
+    animation-duration: 350ms;
+  }
+
+  html[data-intro="play"] .home-hero-card > * {
+    animation-duration: 190ms;
   }
 }
 
@@ -241,15 +331,47 @@ body {
   }
 }
 
+/* Each keyframe's timing function eases the phase that starts there: fade in
+   on ease-out, a linear hold at exactly 1, then lift and fade out on ease. */
 @keyframes home-intro-logo {
   0% {
     opacity: 0;
     transform: translateY(0);
+    animation-timing-function: ease-out;
   }
-  32%,
-  58% {
+  13.3333% {
     opacity: 1;
     transform: translateY(0);
+    animation-timing-function: linear;
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+    animation-timing-function: ease;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}
+
+/* Phones: in 0-150, hold to 900, out 900-1120 of 1120ms. The stops are
+   rounded inwards (149.999 and 900.001ms) so the hold covers both ends. */
+@keyframes home-intro-logo-phone {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+    animation-timing-function: ease-out;
+  }
+  13.3928% {
+    opacity: 1;
+    transform: translateY(0);
+    animation-timing-function: linear;
+  }
+  80.3572% {
+    opacity: 1;
+    transform: translateY(0);
+    animation-timing-function: ease;
   }
   100% {
     opacity: 0;
@@ -264,14 +386,15 @@ body {
   }
 }
 
+/* The radius is divided by the scale so the corners read as 16px on screen. */
 @keyframes home-intro-reveal {
   from {
-    clip-path: inset(
-      calc(50% - max(11.25vw, 68px)) calc(50% - max(15vw, 90px)) round 16px
-    );
+    transform: scale(var(--intro-scale));
+    border-radius: calc(16px / var(--intro-scale));
   }
   to {
-    clip-path: inset(0 round 0);
+    transform: scale(1);
+    border-radius: 0px;
   }
 }
 
@@ -281,12 +404,27 @@ body {
   }
 }
 
-/* Starts at 0.01, not 0: Chrome never counts text first painted at opacity 0
-   toward LCP, and the full-bleed hero photo is excluded as a background. */
-@keyframes home-intro-rise {
+@keyframes home-intro-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+/* The card and its children start at 0.01, not 0: Chrome never counts text
+   first painted at opacity 0 toward LCP, and the full-bleed hero photo is
+   excluded as a background. */
+@keyframes home-intro-card {
   from {
     opacity: 0.01;
-    transform: translateY(16px);
+    transform: translateY(48px);
+  }
+}
+
+@keyframes home-intro-item {
+  from {
+    opacity: 0.01;
+    transform: translateY(12px);
   }
 }
 

@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type CSSProperties,
 } from "react";
 import {
   headerCtaClassName,
@@ -159,7 +160,7 @@ export function SiteHeader() {
             href="/"
             onClick={() => closeMenu()}
             aria-label="Blue Peak, home"
-            className={`pointer-events-auto flex shrink-0 items-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none ${
+            className={`site-header-brand pointer-events-auto flex shrink-0 items-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none ${
               menuOpen
                 ? "text-white"
                 : "text-brand hover:text-traverse group-data-[compact=true]:border-ink/10 group-data-[compact=true]:bg-page/85 group-data-[compact=true]:px-3.5 group-data-[compact=true]:py-2 group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-navy/15 group-data-[compact=true]:backdrop-blur-md"
@@ -179,14 +180,15 @@ export function SiteHeader() {
           <div className="relative flex min-h-10 min-w-10 items-center justify-end">
             <nav
               aria-label="Primary"
-              className="hidden items-center gap-5 whitespace-nowrap transition-[opacity,translate,visibility] duration-300 ease-out motion-reduce:transition-none lg:flex group-data-[compact=true]:invisible group-data-[compact=true]:-translate-y-1 group-data-[compact=true]:opacity-0"
+              className="site-header-nav hidden items-center gap-5 whitespace-nowrap transition-[opacity,translate,visibility] duration-300 ease-out motion-reduce:transition-none lg:flex group-data-[compact=true]:invisible group-data-[compact=true]:-translate-y-1 group-data-[compact=true]:opacity-0"
             >
-              {navLinks.map((link) => (
+              {navLinks.map((link, index) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   aria-current={isActive(pathname, link.href) ? "page" : undefined}
                   className="text-sm font-medium text-ink/75 transition-colors hover:text-accent aria-[current=page]:text-accent"
+                  style={{ "--i": index } as CSSProperties}
                 >
                   {link.label}
                 </Link>
@@ -194,10 +196,15 @@ export function SiteHeader() {
               <a
                 href={`tel:${sitePhoneTel}`}
                 className="text-sm font-medium text-ink/75 transition-colors hover:text-accent"
+                style={{ "--i": navLinks.length } as CSSProperties}
               >
                 {sitePhoneDisplay}
               </a>
-              <Link href="/contact" className={headerCtaClassName}>
+              <Link
+                href="/contact"
+                className={headerCtaClassName}
+                style={{ "--i": navLinks.length + 1 } as CSSProperties}
+              >
                 Get a quote
               </Link>
             </nav>
@@ -209,7 +216,7 @@ export function SiteHeader() {
               aria-controls={menuId}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               onClick={() => setMenuOpen((open) => !open)}
-              className={`pointer-events-auto absolute top-1/2 right-0 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none lg:group-data-[compact=false]:invisible lg:group-data-[compact=false]:scale-90 lg:group-data-[compact=false]:opacity-0 ${
+              className={`site-header-toggle pointer-events-auto absolute top-1/2 right-0 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none lg:group-data-[compact=false]:invisible lg:group-data-[compact=false]:scale-90 lg:group-data-[compact=false]:opacity-0 ${
                 menuOpen
                   ? "text-white"
                   : "text-brand hover:text-traverse group-data-[compact=true]:border-ink/10 group-data-[compact=true]:bg-page/85 group-data-[compact=true]:shadow-lg group-data-[compact=true]:shadow-navy/15 group-data-[compact=true]:backdrop-blur-md"
