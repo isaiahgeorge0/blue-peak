@@ -8,7 +8,7 @@ import {
   useTransform,
   type MotionStyle,
 } from "motion/react";
-import { useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { BrandMark } from "@/components/brand/brand-logo";
 import {
   primaryCtaClassName,
@@ -16,12 +16,24 @@ import {
 } from "@/components/cta-styles";
 import { useHomeMotionPreference } from "@/components/home/use-home-motion";
 
+const subscribeNever = () => () => {};
+
+/** False on the server and during hydration, true once mounted in the browser. */
+function useHasMounted() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * Full-bleed hero locked to one dynamic viewport height.
  * Pulls under the sticky header so the first screen is exactly the hero.
  */
 export function HomeHero() {
   const reduceMotion = useHomeMotionPreference();
+  const mounted = useHasMounted();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -30,9 +42,10 @@ export function HomeHero() {
   const imageScale = useTransform(scrollYProgress, [0, 1], [1.08, 1]);
   const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
 
-  const imageMotionStyle: MotionStyle | undefined = reduceMotion
-    ? undefined
-    : { scale: imageScale, y: imageY };
+  // The reduced-motion preference is unknown on the server, so the first render
+  // has no inline transform; .home-hero-image holds the starting frame until then.
+  const imageMotionStyle: MotionStyle | undefined =
+    mounted && !reduceMotion ? { scale: imageScale, y: imageY } : undefined;
 
   return (
     <section
@@ -41,7 +54,7 @@ export function HomeHero() {
     >
       <div className="home-hero-media absolute inset-0">
         <motion.div
-          className="absolute inset-0 origin-center will-change-transform"
+          className="home-hero-image absolute inset-0 origin-center will-change-transform"
           style={imageMotionStyle}
         >
           <Image

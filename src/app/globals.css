@@ -151,6 +151,15 @@ body {
   }
 }
 
+/* Starting frame of the hero's scroll-linked zoom. The server and first client
+   render carry no inline transform, so this holds the frame until Motion's
+   inline style takes over after mount. */
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-image {
+    transform: scale(1.08);
+  }
+}
+
 /*
   Homepage intro, first visit of a session only. The inline script in the root
   layout sets html[data-intro="play"]; nothing below applies without it, so the
