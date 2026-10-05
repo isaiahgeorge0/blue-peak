@@ -21,10 +21,7 @@ const trustBadges = [
     detail: "To price it right",
     icon: (
       <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
-        <path
-          fill="currentColor"
-          d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3L12 3Z"
-        />
+        <path fill="currentColor" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3L12 3Z" />
       </svg>
     ),
   },
@@ -58,14 +55,14 @@ const trustBadges = [
 export function TrustBadges() {
   return (
     <div className="theme-brand bg-page">
-      <ul className="mx-auto flex max-w-6xl items-center gap-x-6 overflow-x-auto px-5 py-3 sm:gap-x-8 sm:px-6 sm:py-3.5 lg:justify-between lg:gap-x-4">
+      <ul className="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-8 sm:px-6 lg:flex lg:items-center lg:justify-between lg:gap-x-4 lg:py-3.5">
         {trustBadges.map((badge) => (
           <li
             key={badge.label}
-            className="flex shrink-0 items-center gap-2 text-ink/75"
+            className="flex min-w-0 items-center gap-2 text-ink/75 lg:shrink-0"
           >
-            <span className="text-accent">{badge.icon}</span>
-            <span className="text-xs font-medium whitespace-nowrap text-ink sm:text-sm">
+            <span className="shrink-0 text-accent">{badge.icon}</span>
+            <span className="text-xs font-medium text-ink sm:text-sm lg:whitespace-nowrap">
               {badge.label}
             </span>
             <span className="hidden text-xs text-ink/75 md:inline">

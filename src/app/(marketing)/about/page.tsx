@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/brand-logo";
 import { primaryCtaClassName } from "@/components/cta-styles";
 import { teamMembers } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "About",
     description:
-      "Meet the two-person Ipswich building team behind Blue Peak Solutions. Fixed written quotes, local Suffolk work, and the same people on every job.",
+      "Meet the Ipswich building and renovation team behind Blue Peak Solutions. Every trade under one roof, a written quote before we start, and a founder running every job.",
     path: "/about",
   });
 }
@@ -27,10 +27,10 @@ export default function AboutPage() {
             A small Ipswich team that stays on the job
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink/75">
-            Blue Peak Solutions is a two-person building and renovation company
-            based in Ipswich. We take on kitchens, bathrooms, extensions, and
-            full refurbs ourselves, so you deal with the people who actually do
-            the work.
+            Blue Peak Solutions is a building and renovation team covering
+            Ipswich and the surrounding Suffolk area. Every trade under one
+            roof, with a written quote before we start, and Kyle or Steven
+            running every job.
           </p>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink/70">
             We care about tidy sites, honest timescales, and finishes that hold
@@ -52,9 +52,7 @@ export default function AboutPage() {
               <p className="text-sm font-medium tracking-wide text-accent">
                 01
               </p>
-              <h3 className="mt-3 text-xl text-ink">
-                Fixed written quotes
-              </h3>
+              <h3 className="mt-3 text-xl text-ink">Fixed written quotes</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
                 We visit, measure up, and send a clear price before any work is
                 booked. No vague estimates once we are on site.
@@ -64,12 +62,10 @@ export default function AboutPage() {
               <p className="text-sm font-medium tracking-wide text-accent">
                 02
               </p>
-              <h3 className="mt-3 text-xl text-ink">
-                Same two people every job
-              </h3>
+              <h3 className="mt-3 text-xl text-ink">A founder on every job</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                You get the same pair from first visit to final tidy. No rotating
-                subcontractors and no guessing who is turning up.
+                Kyle or Steven runs your job from first visit to final tidy, so
+                you always know who is in charge and who to call.
               </p>
             </li>
             <li>
@@ -78,8 +74,9 @@ export default function AboutPage() {
               </p>
               <h3 className="mt-3 text-xl text-ink">Local to Suffolk</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">
-                Based in Ipswich and covering Felixstowe, Woodbridge, Colchester,
-                and nearby towns. Short travel means we can stay on the job.
+                Based in Ipswich and covering Felixstowe, Woodbridge,
+                Colchester, and nearby towns. Short travel means we can stay on
+                the job.
               </p>
             </li>
           </ul>
@@ -95,14 +92,9 @@ export default function AboutPage() {
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
             {teamMembers.map((member) => (
               <div key={member.name}>
-                <div className="relative aspect-square max-w-xs overflow-hidden bg-ink/10">
-                  <Image
-                    src={member.imageSrc}
-                    alt={`${member.name}, ${member.role}`}
-                    fill
-                    sizes="320px"
-                    className="object-cover"
-                  />
+                {/* Placeholder until real headshots are supplied. */}
+                <div className="flex aspect-square max-w-xs items-center justify-center bg-page">
+                  <BrandMark title="" className="h-14 w-auto text-brand/15" />
                 </div>
                 <h3 className="mt-5 font-serif text-2xl text-ink">
                   {member.name}

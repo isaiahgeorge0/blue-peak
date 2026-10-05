@@ -37,9 +37,9 @@ export function HomeHero() {
   return (
     <section
       ref={sectionRef}
-      className="relative isolate -mt-[var(--site-header-height,4.5rem)] h-[100dvh] overflow-hidden bg-navy"
+      className="home-hero relative isolate -mt-[var(--site-header-height,4.5rem)] h-[100dvh] overflow-hidden bg-navy"
     >
-      <div className="absolute inset-0">
+      <div className="home-hero-media absolute inset-0">
         <motion.div
           className="absolute inset-0 origin-center will-change-transform"
           style={imageMotionStyle}
@@ -48,7 +48,8 @@ export function HomeHero() {
             src="/home/hero.jpg"
             alt="Builder sketching a floor plan on a roll of drawings"
             fill
-            priority
+            preload
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover"
           />
@@ -64,24 +65,25 @@ export function HomeHero() {
           Frosted glass: solid near-opaque fallback first, then blur where supported
           so content never sits on a fully transparent plate.
         */}
-        <div className="home-frost-card w-full max-w-xl rounded-2xl border border-white/60 p-5 shadow-2xl shadow-navy/25 sm:p-7 lg:p-8">
+        <div className="home-frost-card home-hero-card w-full max-w-2xl rounded-2xl border border-white/60 p-6 shadow-2xl shadow-navy/25 sm:p-8 lg:p-10">
           <BrandMark className="h-10 w-auto text-brand sm:h-12" />
-          <h1 className="mt-4 max-w-lg text-2xl leading-tight tracking-tight text-ink sm:mt-4 sm:text-3xl lg:text-4xl xl:text-5xl">
-            Building work you don&apos;t have to worry about
-          </h1>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/80 sm:mt-4 sm:text-base lg:text-lg">
-            Kitchens, extensions, and refurbs across Ipswich and Suffolk, quoted
-            in writing before we start.
+          <p className="mt-5 text-xs font-medium tracking-[0.2em] text-accent uppercase">
+            Building and renovation · Ipswich and Suffolk
           </p>
-          <div className="mt-5 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
-            <Link href="/quote" className={primaryCtaClassName}>
-              Build an estimate
-            </Link>
-            <Link href="/contact" className={secondaryCtaClassName}>
+          <h1 className="mt-3 text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl xl:text-6xl">
+            Everything under one roof.
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/80 lg:text-lg">
+            Kitchens, extensions, roofing and full refurbs across Ipswich and
+            Suffolk. One team for every trade, and a written price before we
+            start.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
+            <Link href="/contact" className={primaryCtaClassName}>
               Get a quote
             </Link>
-            <Link href="/work" className={secondaryCtaClassName}>
-              See our work
+            <Link href="/quote" className={secondaryCtaClassName}>
+              Build an estimate
             </Link>
           </div>
         </div>

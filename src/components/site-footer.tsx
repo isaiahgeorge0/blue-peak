@@ -12,8 +12,8 @@ export function SiteFooter() {
             Everything under one roof.
           </p>
           <p className="mt-3 text-sm text-ink/75">
-            Two-person building and renovation team. Clear quotes, tidy sites,
-            work that holds up.
+            Building and renovation team covering Ipswich and Suffolk, with a
+            written quote before we start.
           </p>
         </div>
         <div>

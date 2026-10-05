@@ -3,6 +3,9 @@ export type Service = {
   name: string;
   shortDescription: string;
   longDescription: string;
+  /** Portrait photo in public/services/, named by slug. */
+  image?: string;
+  imageAlt?: string;
 };
 
 export type Project = {
@@ -28,6 +31,8 @@ export const services: Service[] = [
       "Full kitchen strip-outs and renovations, from layout changes to new units and flooring.",
     longDescription:
       "We take kitchens apart carefully, protect the rest of the house, and rebuild to a plan you have already priced. Typical work includes moving plumbing and electrics, fitting units, worktops, splashbacks, and finishing floors so the room is ready to use.",
+    image: "/services/kitchen-renovations.jpg",
+    imageAlt: "Sage green Shaker kitchen with wooden worktops and a window over the sink",
   },
   {
     slug: "bathroom-renovations",
@@ -36,6 +41,8 @@ export const services: Service[] = [
       "Complete bathroom strip-outs, tiling, and fitting for family homes.",
     longDescription:
       "We remove the old suite, check the substrate, and rebuild with new sanitaryware, tiling, and waterproofing. Jobs are quoted after measuring up, and we keep dust and disruption contained so the rest of the house stays usable.",
+    image: "/services/bathroom-renovations.jpg",
+    imageAlt: "Family bathroom with a glass walk-in shower and pale grey wall tiles",
   },
   {
     slug: "extensions",
@@ -44,6 +51,8 @@ export const services: Service[] = [
       "Single-storey rear and side extensions built to a fixed quote before we start.",
     longDescription:
       "From groundworks through to plaster and paint, we build domestic extensions with clear milestones. You get a written price after a site visit, a start date you can plan around, and one team on the job until the shell and interiors are finished.",
+    image: "/services/extensions.jpg",
+    imageAlt: "Single-storey brick rear extension with sliding glass doors onto the lawn",
   },
   {
     slug: "conservatories",
@@ -52,6 +61,8 @@ export const services: Service[] = [
       "New conservatories and lean-tos, plus repairs and upgrades to existing ones.",
     longDescription:
       "We build and renovate conservatories that stay usable year round. That covers bases, frames, glazing, roofs, and the join into the house, with a written quote after we have seen the property and measured up.",
+    image: "/services/conservatories.jpg",
+    imageAlt: "Lean-to conservatory with white frames and a grey tiled roof on a pale brick house",
   },
   {
     slug: "roofing",
@@ -60,6 +71,8 @@ export const services: Service[] = [
       "Roof repairs, re-roofs, and weatherproofing for houses and outbuildings.",
     longDescription:
       "From slipped tiles and leaking valleys to full re-roofs, we handle the work ourselves and leave the property watertight. Quotes cover materials, labour, and making good at flashings, gutters, and barge boards where needed.",
+    image: "/services/roofing.jpg",
+    imageAlt: "Newly tiled grey pitched roof above the brick gable end of a house",
   },
   {
     slug: "flooring",
@@ -68,6 +81,8 @@ export const services: Service[] = [
       "Timber, laminate, vinyl, and tile flooring fitted as part of a wider job or on its own.",
     longDescription:
       "We prepare the substrate, level where needed, and fit flooring that matches the room. Useful as a standalone job or as the finishing stage of a kitchen, bathroom, or full renovation.",
+    image: "/services/flooring.jpg",
+    imageAlt: "New oak plank floor in a living room with a grey sofa and a basket of blankets",
   },
   {
     slug: "loft-conversions",
@@ -76,6 +91,8 @@ export const services: Service[] = [
       "Loft conversions that turn unused roof space into bedrooms, offices, or storage.",
     longDescription:
       "We assess head height, access, and structure before quoting, then build out the loft with stairs, insulation, windows, and finishes. You get a fixed price after a site visit and a clear plan for how the space will work day to day.",
+    image: "/services/loft-conversions.jpg",
+    imageAlt: "Loft bedroom with sloping white ceilings and two roof windows above the bed",
   },
   {
     slug: "general-renovations",
@@ -84,6 +101,8 @@ export const services: Service[] = [
       "Room-by-room and whole-house renovations covering multiple trades in one team.",
     longDescription:
       "Carpentry, plastering, doors, flooring, and finishing work packaged as one job. Useful when you want several rooms brought up to standard without juggling separate trades. We agree scope in writing and stay on site until the list is done.",
+    image: "/services/general-renovations.jpg",
+    imageAlt: "Renovated Victorian hallway with a patterned tiled floor, painted panelling and a white staircase",
   },
 ];
 

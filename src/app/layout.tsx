@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { HomeIntroScript } from "@/components/home/home-intro";
 import { siteUrl } from "@/lib/content";
 import { SITE_NAME } from "@/lib/page-metadata";
 import "./globals.css";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Two-person building and renovation team covering Ipswich and the surrounding Suffolk area. Clear quotes before we start.",
+    "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
   robots: {
     index: true,
     follow: true,
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_NAME,
     description:
-      "Two-person building and renovation team covering Ipswich and the surrounding Suffolk area. Clear quotes before we start.",
+      "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
     siteName: SITE_NAME,
     locale: "en_GB",
     type: "website",
@@ -52,7 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <HomeIntroScript />
+      </head>
       <body className="flex min-h-full flex-col bg-page font-sans text-ink">
         {children}
       </body>

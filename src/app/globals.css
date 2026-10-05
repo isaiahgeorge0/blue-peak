@@ -151,6 +151,136 @@ body {
   }
 }
 
+/*
+  Homepage intro, first visit of a session only. The inline script in the root
+  layout sets html[data-intro="play"]; nothing below applies without it, so the
+  page is never left hidden if that script does not run. Timeline (ms):
+    0-300 logo fades in, 550-950 logo lifts out, 550-1250 photo opens from a
+    rounded rectangle to full bleed, 1250-1750 header and hero card rise in
+    (shortened below md, see the second block).
+  Only opacity, transform on non-scroll-linked elements, and clip-path animate.
+*/
+.home-intro {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-intro="play"] {
+    --intro-ease: cubic-bezier(0.76, 0, 0.24, 1);
+    scrollbar-gutter: stable;
+    animation: home-intro-lock 1750ms;
+  }
+
+  html[data-intro="play"] .home-intro {
+    display: grid;
+  }
+
+  html[data-intro="play"] .home-intro > svg {
+    opacity: 0;
+    animation: home-intro-logo 950ms var(--intro-ease) backwards;
+  }
+
+  html[data-intro="play"] .home-hero {
+    animation: home-intro-underlay 1250ms;
+  }
+
+  html[data-intro="play"] .home-hero-media {
+    animation:
+      home-intro-reveal 700ms var(--intro-ease) 550ms backwards,
+      home-intro-fade 200ms var(--intro-ease) 550ms backwards;
+  }
+
+  html[data-intro="play"] .site-header,
+  html[data-intro="play"] .home-hero-card {
+    animation: home-intro-rise 500ms var(--intro-ease) 1250ms backwards;
+  }
+}
+
+/*
+  Below md the same sequence finishes by 1.15s, leaving headroom for the 1.2s
+  limit measured from navigation: logo 0-620, photo 360-840, rise 840-1150.
+*/
+@media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
+  html[data-intro="play"] {
+    animation-duration: 1150ms;
+  }
+
+  html[data-intro="play"] .home-intro > svg {
+    animation-duration: 620ms;
+  }
+
+  html[data-intro="play"] .home-hero {
+    animation-duration: 840ms;
+  }
+
+  html[data-intro="play"] .home-hero-media {
+    animation-duration: 480ms, 140ms;
+    animation-delay: 360ms;
+  }
+
+  html[data-intro="play"] .site-header,
+  html[data-intro="play"] .home-hero-card {
+    animation-duration: 310ms;
+    animation-delay: 840ms;
+  }
+}
+
+@keyframes home-intro-lock {
+  from,
+  to {
+    overflow: hidden;
+  }
+}
+
+@keyframes home-intro-logo {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  32%,
+  58% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}
+
+@keyframes home-intro-underlay {
+  from,
+  to {
+    background-color: var(--page);
+  }
+}
+
+@keyframes home-intro-reveal {
+  from {
+    clip-path: inset(
+      calc(50% - max(11.25vw, 68px)) calc(50% - max(15vw, 90px)) round 16px
+    );
+  }
+  to {
+    clip-path: inset(0 round 0);
+  }
+}
+
+@keyframes home-intro-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Starts at 0.01, not 0: Chrome never counts text first painted at opacity 0
+   toward LCP, and the full-bleed hero photo is excluded as a background. */
+@keyframes home-intro-rise {
+  from {
+    opacity: 0.01;
+    transform: translateY(16px);
+  }
+}
+
 h1,
 h2,
 h3,

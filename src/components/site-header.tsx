@@ -135,7 +135,7 @@ export function SiteHeader() {
             <Link
               href="/contact"
               onClick={() => closeMenu()}
-              className={primaryCtaClassName}
+              className={`${primaryCtaClassName} hover:text-white`}
             >
               Get a quote
             </Link>

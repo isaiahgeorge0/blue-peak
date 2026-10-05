@@ -10,16 +10,14 @@ const BeforeAfterSlider = dynamic(
   {
     ssr: false,
     loading: () => (
-      <section className="bg-page">
-        <div className="mx-auto max-w-6xl px-6 py-16 text-sm text-ink/70">
-          Loading before and after...
-        </div>
-      </section>
+      <div className="flex aspect-[16/10] w-full items-center justify-center rounded-xl border border-ink/10 bg-page text-sm text-ink/70">
+        Loading before and after...
+      </div>
     ),
   },
 );
 
-/** Client boundary for below-fold homepage motion islands (`ssr: false`). */
+/** Client boundary for the below-fold before and after slider (`ssr: false`). */
 export function HomeMotionIslands() {
   return <BeforeAfterSlider />;
 }
