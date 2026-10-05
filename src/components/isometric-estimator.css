@@ -1,14 +1,15 @@
-/* Adapted from isometric-estimator.html — scoped under .ie-root */
+/* Quote calculator funnel, scoped under .ie-root */
 .ie-root {
-  --ie-bg: var(--page, #fefefe);
-  --ie-surface: #ffffff;
-  --ie-surface-2: var(--panel, #e9f7f7);
-  --ie-line: rgba(14, 34, 64, 0.14);
-  --ie-text: var(--ink, #0e2240);
-  --ie-text-dim: rgba(14, 34, 64, 0.74);
-  --ie-text-faint: rgba(14, 34, 64, 0.66);
-  --ie-accent: var(--accent, #1800ad);
-  --ie-accent-dim: rgba(24, 0, 173, 0.2);
+  --ie-surface: var(--page);
+  --ie-stage: var(--panel);
+  --ie-line: color-mix(in srgb, var(--ink) 13%, transparent);
+  --ie-line-strong: color-mix(in srgb, var(--ink) 34%, transparent);
+  --ie-text: var(--ink);
+  --ie-text-dim: color-mix(in srgb, var(--ink) 76%, transparent);
+  --ie-text-faint: color-mix(in srgb, var(--ink) 66%, transparent);
+  --ie-accent: var(--accent);
+  --ie-pick: var(--peak-fleet);
+  --ie-sticky-top: var(--site-header-height);
   color: var(--ie-text);
   font-family: var(--font-sans), Helvetica, Arial, sans-serif;
 }
@@ -22,14 +23,6 @@
 .ie-wrap {
   max-width: 1180px;
   margin: 0 auto;
-}
-
-.ie-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ie-accent);
-  margin: 0 0 10px;
 }
 
 .ie-title {
@@ -48,161 +41,42 @@
   color: var(--ie-text-dim);
   font-size: 14.5px;
   line-height: 1.6;
-  margin: 0 0 36px;
+  margin: 0 0 32px;
 }
 
-.ie-lede strong {
-  color: var(--ie-text);
-  font-weight: 600;
-}
+/* ---------- layout ---------- */
 
 .ie-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
   gap: 28px;
   align-items: start;
 }
 
-@media (max-width: 860px) {
-  .ie-layout {
-    grid-template-columns: 1fr;
-  }
-  .ie-layout .ie-controls {
-    order: 2;
-  }
-  .ie-layout .ie-stage-col {
-    order: 1;
-  }
-}
-
-.ie-panel {
-  background: var(--ie-surface);
-  border: 1px solid var(--ie-line);
-  border-radius: 10px;
-  padding: 22px;
-}
-
-.ie-panel + .ie-panel {
-  margin-top: 20px;
-}
-
-.ie-panel h2 {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  font-size: 17px;
-  margin: 0 0 4px;
-  color: var(--ie-text);
-}
-
-.ie-hint {
-  font-size: 12.5px;
-  color: var(--ie-text-faint);
-  margin: 0 0 16px;
-}
-
-.ie-chip-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.ie-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--ie-surface-2);
-  border: 1px solid var(--ie-line);
-  border-radius: 7px;
-  color: var(--ie-text-dim);
-  font-size: 13px;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.ie-chip:hover {
-  border-color: rgba(24, 0, 173, 0.4);
-}
-
-.ie-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ie-line);
-  flex: none;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ie-chip[aria-pressed="true"] {
-  background: rgba(24, 0, 173, 0.07);
-  border-color: var(--ie-accent);
-  color: var(--ie-text);
-}
-
-.ie-chip[aria-pressed="true"] .ie-dot {
-  background: var(--ie-accent);
-  box-shadow: 0 0 0 3px var(--ie-accent-dim);
-}
-
-.ie-price-tag {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--ie-text-faint);
-  font-variant-numeric: tabular-nums;
-}
-
-.ie-chip[aria-pressed="true"] .ie-price-tag {
-  color: var(--ie-accent);
-}
-
-.ie-seg {
-  display: flex;
-  gap: 6px;
-  background: var(--ie-surface-2);
-  border: 1px solid var(--ie-line);
-  border-radius: 8px;
-  padding: 4px;
-}
-
-.ie-seg button {
-  flex: 1;
-  padding: 8px 6px;
-  background: transparent;
-  border: 0;
-  border-radius: 5px;
-  color: var(--ie-text-dim);
-  font-family: inherit;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.ie-seg button[aria-pressed="true"] {
-  background: var(--ie-accent);
-  color: #ffffff;
-  font-weight: 600;
+.ie-visual {
+  position: sticky;
+  top: calc(var(--ie-sticky-top) + 16px);
+  min-width: 0;
 }
 
 .ie-stage-panel {
-  background: #dfe9ee;
-  border: 1px solid var(--ie-line);
-  border-radius: 10px;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
+  background: var(--ie-stage);
+  border: 1px solid var(--ie-line);
+  border-radius: 12px;
 }
 
 .ie-stage-host {
   display: block;
   width: 100%;
-  height: 440px;
+  height: clamp(320px, 52vh, 520px);
 }
 
 .ie-stage-canvas {
   display: block;
   width: 100%;
-  height: 440px;
+  height: 100%;
   cursor: grab;
   touch-action: none;
 }
@@ -213,8 +87,7 @@
 
 .ie-stage-loading {
   position: absolute;
-  inset: 0 0 auto;
-  height: 440px;
+  inset: 0;
   margin: 0;
   display: flex;
   align-items: center;
@@ -224,76 +97,28 @@
   pointer-events: none;
 }
 
-.ie-stage-foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px 14px;
-  font-size: 11.5px;
-  color: var(--ie-text-faint);
-  border-top: 1px solid var(--ie-line);
-}
-
 .ie-stage-hint {
   position: absolute;
   top: 14px;
   left: 14px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(14, 34, 64, 0.6);
-  padding: 5px 9px;
-  border-radius: 5px;
+  z-index: 1;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--peak-white);
+  border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+  padding: 5px 11px;
+  border-radius: 999px;
   pointer-events: none;
 }
 
-.ie-daynight {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 2px;
-  background: rgba(14, 34, 64, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 20px;
-  padding: 3px;
-  backdrop-filter: blur(4px);
-}
-
-.ie-daynight button {
-  border: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 6px 13px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.ie-daynight button[aria-pressed="true"] {
-  background: #ffffff;
-  color: var(--ie-accent);
-}
-
-.ie-price-panel {
-  margin-top: 16px;
-  background: var(--ie-surface);
-  border: 1px solid var(--ie-line);
-  border-radius: 10px;
-  padding: 20px 24px;
-  overflow: hidden;
-}
+/* ---------- running figure and cost bar ---------- */
 
 .ie-summary {
   display: flex;
-  gap: 36px;
+  gap: 12px 36px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  padding: 16px 4px 0;
 }
 
 .ie-fig-label {
@@ -307,6 +132,7 @@
 .ie-fig-value {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-size: 26px;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
   color: var(--ie-text);
   margin: 0;
@@ -317,13 +143,16 @@
   font-size: 18px;
 }
 
+.ie-breakdown {
+  padding: 14px 4px 0;
+}
+
 .ie-cost-bar {
   display: flex;
-  height: 7px;
+  height: 8px;
   border-radius: 4px;
   overflow: hidden;
-  background: var(--ie-surface-2);
-  margin-bottom: 16px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .ie-cost-bar span {
@@ -331,12 +160,20 @@
   transition: width 0.3s ease;
 }
 
+.ie-cost-bar span + span {
+  border-left: 2px solid var(--peak-white);
+}
+
 .ie-cost-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
-  margin-bottom: 18px;
+  gap: 8px 16px;
+  margin-top: 12px;
   min-width: 0;
+}
+
+.ie-cost-legend:empty {
+  display: none;
 }
 
 .ie-item {
@@ -350,17 +187,596 @@
 }
 
 .ie-swatch {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 2px;
   flex: none;
 }
 
-.ie-note {
-  margin-top: 20px;
-  font-size: 12px;
-  color: var(--ie-text-faint);
-  line-height: 1.6;
-  max-width: 780px;
+/* ---------- step card ---------- */
+
+.ie-card {
+  min-width: 0;
+  overflow-x: clip;
+  background: var(--ie-surface);
+  border: 1px solid var(--ie-line);
+  border-radius: 12px;
+  padding: 22px 24px 20px;
 }
 
+.ie-progress {
+  margin-bottom: 18px;
+}
+
+.ie-progress--pinned {
+  display: none;
+}
+
+.ie-progress-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ie-text-faint);
+  margin: 0 0 8px;
+}
+
+.ie-progress-track {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  overflow: hidden;
+}
+
+.ie-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ie-accent);
+  transition: width 0.25s ease-out;
+}
+
+.ie-step-title {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(22px, 2.4vw, 26px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+  color: var(--ie-text);
+  scroll-margin-top: calc(var(--ie-sticky-top) + 16px);
+}
+
+/* Focus is moved here on each step change so screen readers announce the step;
+   it is not an interactive control, so it shows no ring. */
+.ie-step-title:focus,
+.ie-step-title:focus-visible {
+  outline: none;
+}
+
+.ie-hint {
+  font-size: 13px;
+  color: var(--ie-text-faint);
+  margin: 0 0 16px;
+}
+
+.ie-step--forward {
+  animation: ie-step-in-forward 250ms ease-out both;
+}
+
+.ie-step--back {
+  animation: ie-step-in-back 250ms ease-out both;
+}
+
+@keyframes ie-step-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ie-step-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- choice cards ---------- */
+
+.ie-options {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.ie-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ie-option-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ie-option {
+  position: relative;
+  display: block;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.ie-option-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ie-option-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px;
+  height: 100%;
+  min-height: 82px;
+  padding: 14px 40px 13px 14px;
+  border: 1px solid var(--ie-line-strong);
+  border-radius: 10px;
+  background: var(--ie-surface);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+  pointer-events: none;
+}
+
+.ie-option-body--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 12px 14px;
+}
+
+.ie-option-body--compact {
+  min-height: 48px;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.ie-option:hover .ie-option-body {
+  border-color: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.ie-option-input:checked + .ie-option-body {
+  border-color: var(--ie-pick);
+  background: color-mix(in srgb, var(--ie-pick) 11%, var(--ie-surface));
+  box-shadow: inset 0 0 0 1px var(--ie-pick);
+}
+
+.ie-option-input:focus-visible + .ie-option-body {
+  outline: 2px solid var(--ie-accent);
+  outline-offset: 2px;
+}
+
+.ie-option-label {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ie-text);
+  overflow-wrap: anywhere;
+}
+
+.ie-option-body--compact .ie-option-label {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.ie-option-meta {
+  font-size: 12.5px;
+  color: var(--ie-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.ie-option-mark {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--ie-line-strong);
+  background: var(--ie-surface);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ie-option-body:not(.ie-option-body--row) .ie-option-mark {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+}
+
+.ie-option-mark--check {
+  position: relative;
+  border-radius: 4px;
+}
+
+.ie-option-mark--radio {
+  border-radius: 50%;
+}
+
+.ie-option-input:checked + .ie-option-body .ie-option-mark--check {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.ie-option-input:checked + .ie-option-body .ie-option-mark--check::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1.5px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--peak-white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.ie-option-input:checked + .ie-option-body .ie-option-mark--radio {
+  border: 5.5px solid var(--ink);
+}
+
+/* ---------- final step ---------- */
+
+.ie-recap {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--ie-stage);
+  display: grid;
+  gap: 8px;
+}
+
+.ie-recap > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.ie-recap dt {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ie-text-faint);
+  flex: none;
+}
+
+.ie-recap dd {
+  margin: 0;
+  font-size: 14px;
+  text-align: right;
+  color: var(--ie-text);
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+}
+
+.ie-question {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ie-text);
+  margin: 20px 0 10px;
+}
+
+.ie-optional {
+  font-weight: 400;
+  color: var(--ie-text-faint);
+}
+
+.ie-booking {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ie-line);
+}
+
+.ie-note {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--ie-text-faint);
+  line-height: 1.6;
+}
+
+/* ---------- navigation ---------- */
+
+.ie-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.ie-next-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ie-next-helper {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ie-text-faint);
+  text-align: right;
+}
+
+.ie-btn-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--ie-accent);
+  color: var(--on-accent);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.ie-btn-next:hover {
+  filter: brightness(1.1);
+}
+
+.ie-btn-next[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.ie-btn-back {
+  padding: 12px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--ie-text-dim);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+
+.ie-btn-back:hover {
+  color: var(--ie-text);
+  text-decoration: underline;
+}
+
+.ie-btn-next:focus-visible,
+.ie-btn-back:focus-visible {
+  outline: 2px solid var(--ie-accent);
+  outline-offset: 2px;
+}
+
+.ie-guide {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--ie-line);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ie-text-faint);
+}
+
+.ie-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- phones and small tablets: model pinned on top ---------- */
+
+@media (max-width: 959px) {
+  .ie-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .ie-visual {
+    display: contents;
+  }
+
+  .ie-root {
+    --ie-camera-fit: tight;
+    --ie-pinned-height: 45svh;
+    --ie-pinned-form-height: 96px;
+  }
+
+  /* The whole pinned block is capped at 45% of the viewport; the model panel
+     takes whatever the figure and progress leave. */
+  .ie-sticky {
+    position: sticky;
+    top: var(--ie-sticky-top);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    height: 45vh;
+    height: 45svh;
+    margin: 0 -24px;
+    padding: 8px 24px 10px;
+    background: var(--ie-stage);
+    border-bottom: 1px solid var(--ie-line);
+    container-type: scroll-state;
+  }
+
+  .ie-stage-panel {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* Step 4 on phones: figure and progress only, so the form gets the screen. */
+  .ie-root--form .ie-sticky {
+    height: auto;
+  }
+
+  .ie-root--form .ie-stage-panel {
+    display: none;
+  }
+
+  .ie-root--form .ie-summary {
+    padding-top: 2px;
+  }
+
+  /* On phones the header is floating buttons, so once the model is stuck the
+     strip above it is filled; browsers without scroll-state queries skip this. */
+  .ie-sticky::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: var(--ie-sticky-top);
+    background: var(--ie-stage);
+    visibility: hidden;
+  }
+
+  @container scroll-state(stuck: top) {
+    .ie-sticky::before {
+      visibility: visible;
+    }
+  }
+
+  .ie-stage-host {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+
+  .ie-stage-hint {
+    top: 8px;
+    left: 8px;
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+
+  .ie-summary {
+    padding-top: 10px;
+    gap: 6px 28px;
+  }
+
+  .ie-fig-value {
+    font-size: 21px;
+  }
+
+  .ie-fig-value.ie-muted {
+    font-size: 15px;
+  }
+
+  .ie-breakdown {
+    padding: 12px 0 16px;
+  }
+
+  .ie-progress--card {
+    display: none;
+  }
+
+  .ie-progress--pinned {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0 0;
+  }
+
+  .ie-progress--pinned .ie-progress-label {
+    flex: none;
+    margin: 0;
+  }
+
+  .ie-progress--pinned .ie-progress-track {
+    flex: 1;
+  }
+
+  /* Anything scrolled into view (focus, keyboard) must clear the pinned block. */
+  .ie-step-title,
+  .ie-card :is(input, button, a) {
+    scroll-margin-top: calc(var(--ie-sticky-top) + var(--ie-pinned-height) + 16px);
+    scroll-margin-bottom: 16px;
+  }
+
+  .ie-root--form .ie-step-title,
+  .ie-root--form .ie-card :is(input, button, a) {
+    scroll-margin-top: calc(var(--ie-sticky-top) + var(--ie-pinned-form-height) + 16px);
+  }
+}
+
+@media (max-width: 480px) {
+  .ie-card {
+    padding: 18px 16px 16px;
+  }
+
+  .ie-option-grid {
+    gap: 8px;
+  }
+
+  .ie-option-body {
+    padding: 12px 34px 12px 12px;
+    min-height: 78px;
+  }
+
+  .ie-option-body--row {
+    padding: 11px 12px;
+    min-height: 52px;
+  }
+
+  .ie-option-body--compact {
+    min-height: 46px;
+  }
+
+  .ie-option-label {
+    font-size: 14px;
+  }
+
+  .ie-option-body:not(.ie-option-body--row) .ie-option-mark {
+    top: 11px;
+    right: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ie-step--forward,
+  .ie-step--back {
+    animation: none;
+  }
+
+  .ie-progress-fill,
+  .ie-cost-bar span,
+  .ie-option-body,
+  .ie-option-mark,
+  .ie-btn-next {
+    transition: none;
+  }
+}

@@ -11,7 +11,7 @@ function EstimatorUnavailable() {
   return (
     <div className="flex min-h-[60vh] max-w-2xl flex-col justify-center py-8">
       <p className="text-sm font-medium tracking-wide text-accent uppercase">
-        Quote calculator
+        Build your estimate
       </p>
       <h1 className="mt-3 font-serif text-3xl tracking-tight text-ink sm:text-4xl">
         The 3D calculator can&apos;t run on this device

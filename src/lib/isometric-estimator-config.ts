@@ -8,8 +8,11 @@ export type EstimatorAddon = {
   label: string;
   price: number;
   weeks: number;
+  /** CSS colour for the cost bar and legend. Every add-on uses Peak Fleet. */
   color: string;
 };
+
+const ADDON_COLOR = "var(--peak-fleet)";
 
 export const ESTIMATOR_ADDONS: EstimatorAddon[] = [
   {
@@ -17,42 +20,42 @@ export const ESTIMATOR_ADDONS: EstimatorAddon[] = [
     label: "Loft conversion",
     price: 45000,
     weeks: 5,
-    color: "#43b7d4",
+    color: ADDON_COLOR,
   },
   {
     key: "extension",
     label: "Rear extension",
     price: 58000,
     weeks: 6,
-    color: "#e0a15c",
+    color: ADDON_COLOR,
   },
   {
     key: "side_return",
     label: "Side return",
     price: 28000,
     weeks: 3,
-    color: "#8fbf7a",
+    color: ADDON_COLOR,
   },
   {
     key: "garden_room",
     label: "Garden room",
     price: 24000,
     weeks: 3,
-    color: "#c98fd9",
+    color: ADDON_COLOR,
   },
   {
     key: "solar",
     label: "Solar panels",
     price: 9000,
     weeks: 1,
-    color: "#f0d05c",
+    color: ADDON_COLOR,
   },
   {
     key: "kitchen_bath",
     label: "Kitchen or bathroom",
     price: 32000,
     weeks: 4,
-    color: "#f08f8f",
+    color: ADDON_COLOR,
   },
 ];
 
@@ -81,6 +84,20 @@ export const ESTIMATOR_FINISH_LABELS: Record<EstimatorFinish, string> = {
   simple: "Simple",
   quality: "Quality",
   highend: "High-end",
+};
+
+export const ESTIMATOR_START_OPTIONS = [
+  "As soon as possible",
+  "Within 3 months",
+  "3 to 6 months",
+  "Just exploring",
+] as const;
+
+/** What the visitor has chosen; owned by the funnel and pushed into the scene. */
+export type EstimatorSelection = {
+  addons: string[];
+  size: EstimatorSize;
+  finish: EstimatorFinish;
 };
 
 /** Current calculator selection, reported by the scene after each change. */

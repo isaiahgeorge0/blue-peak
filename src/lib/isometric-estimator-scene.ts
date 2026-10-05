@@ -4,35 +4,83 @@ import * as THREE from "three";
 import type {
   EstimateSummary,
   EstimatorConfig,
+  EstimatorSelection,
 } from "@/lib/isometric-estimator-config";
+
+// Brand colours: Peak White, Navy and Peak Fleet. three.js materials cannot
+// read CSS tokens, so these mirror --peak-white, --navy and --peak-fleet in
+// globals.css. Every other colour in the scene is mixed from these three.
+const PEAK_WHITE = 0xfefefe;
+const NAVY = 0x0e2240;
+const PEAK_FLEET = 0x43b7d4;
+
+/** Mix two colours in sRGB, so the result matches what the eye expects. */
+function mixColor(a, b, t) {
+  var ca = new THREE.Color(a).getRGB({r:0,g:0,b:0}, THREE.SRGBColorSpace);
+  var cb = new THREE.Color(b).getRGB({r:0,g:0,b:0}, THREE.SRGBColorSpace);
+  return new THREE.Color().setRGB(
+    ca.r + (cb.r - ca.r) * t,
+    ca.g + (cb.g - ca.g) * t,
+    ca.b + (cb.b - ca.b) * t,
+    THREE.SRGBColorSpace
+  );
+}
+
+/** Seconds an add-on takes to rise into place (or sink away). */
+const ADDON_TWEEN_S = 0.4;
+/** Seconds the running price takes to count to a new figure. */
+const PRICE_TWEEN_S = 0.4;
+
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+// A size change grows or shrinks the model first, then the fitted camera eases to the new size.
+const SIZE_GROW_S = 0.4;
+const CAMERA_SETTLE_S = 0.6;
 
 type AddonMeshRecord = {
   solid: THREE.Group | THREE.Object3D;
   ghost: THREE.Object3D;
-  targetScale: number;
-  currentScale: number;
+  /** 1 when selected, 0 when not. */
+  target: number;
+  /** Linear 0..1 progress towards `target`; eased when applied. */
+  progress: number;
+  /** How far the add-on sinks below its resting place when hidden. */
+  rise: number;
+  materials: THREE.Material[];
   glow: THREE.Material[];
+  shadowsOn: boolean;
+};
+
+export type IsometricEstimatorHandle = {
+  /** Push a new selection into the scene; the model and figures update. */
+  update: (selection: EstimatorSelection) => void;
+  dispose: () => void;
 };
 
 /**
  * Mount the isometric estimator scene into a root element that contains the
- * expected markup (canvas + control ids). Returns a dispose function.
- * `onEstimateChange` receives the current selection after every change.
+ * expected markup (#stageHost plus the output ids). The selection is owned by
+ * the caller and pushed in with `update`. `onEstimateChange` receives the
+ * current estimate after every change.
  */
 export function mountIsometricEstimator(
   root: HTMLElement,
   config: EstimatorConfig,
+  initialSelection: EstimatorSelection,
   onEstimateChange?: (estimate: EstimateSummary) => void,
-): () => void {
+): IsometricEstimatorHandle {
   const ADDONS = config.addons;
   const SIZE_MULT = config.sizeMult;
   const FINISH_MULT = config.finishMult;
 
-    var state = {
+  var state = {
     addons: ADDONS.reduce(function(acc, a){ acc[a.key] = false; return acc; }, {}),
     size: 'standard',
     finish: 'quality'
   };
+
+  var reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reducedMotion = reducedMotionQuery.matches;
 
   // ---------- three.js scene ----------
   var stageHost = root.querySelector('#stageHost');
@@ -46,203 +94,85 @@ export function mountIsometricEstimator(
   canvas.className = 'ie-stage-canvas';
   canvas.setAttribute('aria-label', 'Interactive house estimate');
   stageHost.appendChild(canvas);
+  // Transparent background: the Frost White stage panel shows through.
   var scene = new THREE.Scene();
-
-  function makeSkyTexture(topColor, bottomColor){
-    var c = document.createElement('canvas'); c.width = 8; c.height = 256;
-    var ctx = c.getContext('2d');
-    var grad = ctx.createLinearGradient(0,0,0,256);
-    grad.addColorStop(0, topColor);
-    grad.addColorStop(1, bottomColor);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,8,256);
-    var tex = new THREE.CanvasTexture(c);
-    if ('SRGBColorSpace' in THREE) tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
-  }
-  var daySkyTex   = makeSkyTexture('#bcd9ea', '#eef1e9');
-  var nightSkyTex = makeSkyTexture('#131c34', '#2a3454');
-
-  scene.background = daySkyTex;
-  scene.fog = new THREE.Fog(0xe4e8df, 24, 46);
 
   var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
 
-  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:true});
+  renderer.setClearAlpha(0);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.VSMShadowMap;
 
+  // The stylesheet sets --ie-camera-fit: tight on layouts that want the model framed edge to edge.
+  var tightFit = false;
+  var stageVisible = true;
   function resize(){
     var w = canvas.clientWidth, h = canvas.clientHeight;
-    if (!w || !h) return;
+    stageVisible = w > 0 && h > 0;
+    if (!stageVisible) return;
     renderer.setSize(w, h, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    tightFit = getComputedStyle(canvas).getPropertyValue('--ie-camera-fit').trim() === 'tight';
+    if (orbit){
+      if (tightFit) computeFitDistance();
+      updateCamera();
+    }
   }
   window.addEventListener('resize', resize);
+  var resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(resize) : null;
+  if (resizeObserver) resizeObserver.observe(canvas);
 
-  // lighting
-  var hemi = new THREE.HemisphereLight(0xbfe2f5, 0x2c3020, 0.6);
+  // lighting: one soft neutral key light and a hemisphere fill
+  var hemi = new THREE.HemisphereLight(PEAK_WHITE, mixColor(PEAK_WHITE, NAVY, 0.25), 2.3);
   scene.add(hemi);
-  var sun = new THREE.DirectionalLight(0xfff3e0, 1.15);
-  sun.position.set(9, 14, 7);
+  // key light on the camera's starting side, so the front walls read white and the shadow falls behind
+  var sun = new THREE.DirectionalLight(PEAK_WHITE, 1.6);
+  sun.position.set(-9, 14, -8);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left = -14; sun.shadow.camera.right = 14;
   sun.shadow.camera.top = 14;   sun.shadow.camera.bottom = -14;
   sun.shadow.camera.near = 1;   sun.shadow.camera.far = 40;
-  sun.shadow.bias = -0.0015;
+  sun.shadow.radius = 9;
+  sun.shadow.blurSamples = 16;
+  sun.shadow.bias = -0.0005;
   scene.add(sun);
-  var fill = new THREE.DirectionalLight(0x89cff0, 0.18);
-  fill.position.set(-8,6,-6);
-  scene.add(fill);
-  var moon = new THREE.Mesh(new THREE.SphereGeometry(0.5,16,16), new THREE.MeshBasicMaterial({color:0xeaf0ff}));
-  moon.position.set(-9,13,-8);
-  moon.visible = false;
-  scene.add(moon);
-
-  // a scattering of stars, only shown at night
-  var starGeo = new THREE.BufferGeometry();
-  var starPos = new Float32Array(220*3);
-  for (var si=0; si<220; si++){
-    var sa = Math.random()*Math.PI*2, sr = 20+Math.random()*20;
-    starPos[si*3]   = Math.cos(sa)*sr;
-    starPos[si*3+1] = 8 + Math.random()*22;
-    starPos[si*3+2] = Math.sin(sa)*sr - 6;
-  }
-  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
-  var starMat = new THREE.PointsMaterial({color:0xffffff, size:0.12, transparent:true, opacity:0.85});
-  var stars = new THREE.Points(starGeo, starMat);
-  stars.visible = false;
-  scene.add(stars);
-
-  // ---------- ground: grass texture + a paved path to the door ----------
-  function makeGrassTexture(){
-    var c = document.createElement('canvas'); c.width = 256; c.height = 256;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#4c6b3f';
-    ctx.fillRect(0,0,256,256);
-    for (var i=0;i<2200;i++){
-      var gx = Math.random()*256, gy = Math.random()*256;
-      var g = 20 + Math.random()*60;
-      ctx.fillStyle = 'rgba('+(50+g*0.4)+','+(90+g)+','+(45+g*0.35)+','+(0.35+Math.random()*0.3)+')';
-      ctx.fillRect(gx, gy, 1.6, 1.6);
-    }
-    var tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(14,14);
-    return tex;
-  }
-  var grassTex = makeGrassTexture();
-  var groundMat = new THREE.MeshStandardMaterial({map: grassTex, roughness:1, metalness:0});
-  var ground = new THREE.Mesh(new THREE.CircleGeometry(18,48), groundMat);
-  ground.rotation.x = -Math.PI/2;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  function makePavingTexture(){
-    var c = document.createElement('canvas'); c.width = 128; c.height = 128;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#9d968a';
-    ctx.fillRect(0,0,128,128);
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 2;
-    for (var px=0; px<128; px+=32){ ctx.strokeRect(px,0,32,128); }
-    ctx.strokeRect(0,64,128,2);
-    var tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1,3);
-    return tex;
-  }
-  // positioned to meet the doorstep — modelRoot sits at world (-4.6, 0, -2.6) and the
-  // doorstep spans local x[2.3,3.6] z[-0.42,0], so its outer (world) edge is z=-3.02, x=[-2.3,-1.0]
-  var pathMat = new THREE.MeshStandardMaterial({map: makePavingTexture(), roughness:0.95});
-  var path = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 2.6), pathMat);
-  path.rotation.x = -Math.PI/2;
-  path.position.set(-1.65, 0.006, -4.32);
-  path.receiveShadow = true;
-  scene.add(path);
-
-  // a few low-poly trees and a hedge line for scale and context
-  function makeTree(x, z, scale){
-    var g = new THREE.Group();
-    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.16,1.1,7), new THREE.MeshStandardMaterial({color:0x4a3626, roughness:0.9}));
-    trunk.position.y = 0.55;
-    trunk.castShadow = true;
-    g.add(trunk);
-    var leafMat = new THREE.MeshStandardMaterial({color:0x4d7a3c, roughness:0.85});
-    [0,1,2].forEach(function(i){
-      var s = 1 - i*0.18;
-      var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.95*s,8,7), leafMat);
-      leaf.position.y = 1.3 + i*0.55;
-      leaf.castShadow = true;
-      g.add(leaf);
-    });
-    g.position.set(x,0,z);
-    g.scale.setScalar(scale);
-    return g;
-  }
-  var treeGroup = new THREE.Group();
-  treeGroup.add(makeTree(-9.5, -6.5, 1.15));
-  treeGroup.add(makeTree(-8.6, 3.5, 0.9));
-  treeGroup.add(makeTree(9.8, 1.5, 1.3));
-  scene.add(treeGroup);
-
-  var hedgeMat = new THREE.MeshStandardMaterial({color:0x3f5c34, roughness:0.9});
-  function makeHedgeRun(x0,z0,w,d){
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w,0.55,d), hedgeMat);
-    m.position.set(x0+w/2, 0.275, z0+d/2);
-    m.castShadow = true; m.receiveShadow = true;
-    return m;
-  }
-  scene.add(makeHedgeRun(-4.2, -6.8, 9.5, 0.5));
-  scene.add(makeHedgeRun(-4.2, -6.8, 0.5, 5.5));
-
-  // ---------- day / night ----------
-  var DAYNIGHT = {
-    day:   {sunColor:0xfff3e0, sunI:1.15, hemiSky:0xbfe2f5, hemiGround:0x2c3020, hemiI:0.6,  fog:0xe4e8df, ground:0xffffff, fillI:0.18},
-    night: {sunColor:0x7f9adf, sunI:0.42, hemiSky:0x3a4a7a, hemiGround:0x181d2c, hemiI:0.5,  fog:0x232c48, ground:0x8a94b5, fillI:0.5}
-  };
-  var nightGlow = {target:0, value:0};
-  function setDayNight(mode){
-    dayNightState = mode;
-    var c = DAYNIGHT[mode];
-    scene.background = mode === 'night' ? nightSkyTex : daySkyTex;
-    scene.fog.color.setHex(c.fog);
-    sun.color.setHex(c.sunColor);
-    sun.intensity = c.sunI;
-    hemi.color.setHex(c.hemiSky);
-    hemi.groundColor.setHex(c.hemiGround);
-    hemi.intensity = c.hemiI;
-    fill.intensity = c.fillI;
-    groundMat.color.setHex(c.ground);
-    moon.visible = mode === 'night';
-    stars.visible = mode === 'night';
-    nightGlow.target = mode === 'night' ? 1 : 0;
-  }
-  var dayNightState = 'day';
-  setDayNight('day');
 
   // model root (for size-tier scaling)
   var modelRoot = new THREE.Group();
   scene.add(modelRoot);
 
+  // ---------- ground: a flat pale disc under the house, plus a short path ----------
+  // The disc is unlit so it holds its colour exactly; a shadow-only disc on top
+  // of it carries the soft shadow from the house.
+  var GROUND_CENTER_X = 4.6, GROUND_CENTER_Z = 2.0, GROUND_RADIUS = 7.4;
+  var groundMat = new THREE.MeshBasicMaterial({color: mixColor(mixColor(PEAK_WHITE, PEAK_FLEET, 0.2), NAVY, 0.05)});
+  var ground = new THREE.Mesh(new THREE.CircleGeometry(GROUND_RADIUS, 96), groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.position.set(GROUND_CENTER_X, -0.002, GROUND_CENTER_Z);
+  modelRoot.add(ground);
+
+  var shadowCatcher = new THREE.Mesh(
+    new THREE.CircleGeometry(GROUND_RADIUS, 96),
+    new THREE.ShadowMaterial({color: NAVY, opacity: 0.16})
+  );
+  shadowCatcher.rotation.x = -Math.PI/2;
+  shadowCatcher.position.set(GROUND_CENTER_X, 0.004, GROUND_CENTER_Z);
+  shadowCatcher.receiveShadow = true;
+  modelRoot.add(shadowCatcher);
+
+  // the doorstep spans local x[2.3,3.6] z[-0.42,0]; the path runs out from its front edge
+  var pathMat = new THREE.MeshBasicMaterial({color: mixColor(PEAK_WHITE, PEAK_FLEET, 0.07)});
+  var path = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.9), pathMat);
+  path.rotation.x = -Math.PI/2;
+  path.position.set(2.95, 0.001, -1.37);
+  modelRoot.add(path);
+
   // helper: box from (x0, heightBase, depthBase) footprint using (width, heightSize, depthSize)
-  // colorOrMat may be a hex color (builds a new material) or a shared THREE.Material instance
-  function boxMesh(x0, hBase, dBase, w, h, d, colorOrMat, opts){
-    opts = opts || {};
-    var mat;
-    if (colorOrMat && colorOrMat.isMaterial){
-      mat = colorOrMat;
-    } else {
-      mat = new THREE.MeshStandardMaterial({
-        color: colorOrMat,
-        roughness: opts.roughness != null ? opts.roughness : 0.75,
-        metalness: opts.metalness != null ? opts.metalness : 0.05,
-        emissive: opts.emissive || 0x000000,
-        emissiveIntensity: opts.emissiveIntensity || 0
-      });
-    }
+  function boxMesh(x0, hBase, dBase, w, h, d, mat){
     var mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
     mesh.position.set(x0 + w/2, hBase + h/2, dBase + d/2);
     mesh.castShadow = true;
@@ -250,76 +180,23 @@ export function mountIsometricEstimator(
     return mesh;
   }
 
-  // ---------- procedural textures (canvas, no external assets) ----------
-  function makeBrickTexture(){
-    var c = document.createElement('canvas'); c.width = 256; c.height = 256;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#a3492f';
-    ctx.fillRect(0,0,256,256);
-    ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-    ctx.lineWidth = 2;
-    var bw = 34, bh = 15;
-    for (var row = 0, y = 0; y < 256 + bh; row++, y += bh){
-      var offset = (row % 2) * (bw/2);
-      for (var x = -bw + offset; x < 256 + bw; x += bw){
-        ctx.strokeRect(x, y, bw, bh);
-      }
-    }
-    var tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2.4, 1.4);
-    return tex;
+  // ---------- materials: matte, untextured ----------
+  function matte(color){
+    return new THREE.MeshStandardMaterial({color: color, roughness: 1, metalness: 0});
   }
-  function makeRoofTexture(){
-    var c = document.createElement('canvas'); c.width = 128; c.height = 128;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#2c2e33';
-    ctx.fillRect(0,0,128,128);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    for (var y = 0; y < 128; y += 12){ ctx.fillRect(0, y, 128, 2); }
-    var tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2.2, 2.6);
-    return tex;
-  }
-  function makeCladdingTexture(){
-    var c = document.createElement('canvas'); c.width = 128; c.height = 128;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#26282d';
-    ctx.fillRect(0,0,128,128);
-    // vertical board seams
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    for (var x = 0; x < 128; x += 16){ ctx.fillRect(x, 0, 1.5, 128); }
-    // subtle per-board tone variation
-    for (var bx = 0; bx < 128; bx += 16){
-      var tint = (Math.sin(bx*12.9898) * 43758.5453) % 1;
-      tint = (tint + 1) % 1;
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.02 + tint*0.035) + ')';
-      ctx.fillRect(bx, 0, 16, 128);
-    }
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    for (var y = 0; y < 128; y += 42){ ctx.fillRect(0, y, 128, 1); }
-    var tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    return tex;
-  }
-  var brickTex = makeBrickTexture();
-  var roofTex = makeRoofTexture();
-  var claddingTex = makeCladdingTexture();
-
-  var WALL_MAT  = new THREE.MeshStandardMaterial({map: brickTex, roughness:0.92, metalness:0.02});
-  var TRIM_MAT  = new THREE.MeshStandardMaterial({color:0xf1ece0, roughness:0.7, metalness:0.02});
-  var TRIM_DARK = new THREE.MeshStandardMaterial({color:0x121316, roughness:0.4, metalness:0.25});
-  var ROOF_MAT  = new THREE.MeshStandardMaterial({map: roofTex, roughness:0.85, metalness:0.05});
-  var DOOR_MAT  = new THREE.MeshStandardMaterial({color:0x2c2320, roughness:0.55, metalness:0.1});
-  var GLASS_MAT = new THREE.MeshStandardMaterial({color:0x1b2a33, roughness:0.15, metalness:0.35, emissive:0x0d1a20, emissiveIntensity:0.15});
+  var WALL_MAT  = matte(PEAK_WHITE);
+  var FRAME_MAT = matte(NAVY);
+  var ROOF_MAT  = matte(NAVY);
+  var DOOR_MAT  = FRAME_MAT;
+  var GLASS_MAT = matte(mixColor(PEAK_WHITE, NAVY, 0.2));
   function newGlassMat(){ return GLASS_MAT.clone(); } // own instance per pane so panes can be animated independently
-  function claddingMat(w, d){
-    // own material+texture instance per addon so UV repeat can match its own footprint
-    var tex = claddingTex.clone();
-    tex.needsUpdate = true;
-    tex.repeat.set(Math.max(1, Math.round((w+d))), 1);
-    return new THREE.MeshStandardMaterial({map: tex, roughness:0.55, metalness:0.1});
+  // add-ons get their own instances so each can fade on its own
+  function addonMat(){ return matte(PEAK_FLEET); }
+  function addonGlassMat(){
+    var m = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
+    m.emissive = new THREE.Color(PEAK_FLEET);
+    m.emissiveIntensity = 0;
+    return m;
   }
 
   // ---------- pitched gable roof (ridge runs along X) ----------
@@ -360,21 +237,25 @@ export function mountIsometricEstimator(
   // ---------- window unit: frame + glass + mullion ----------
   // axis 'z' = mounted on a front/back wall face (outward normal along Z, sign gives direction)
   // axis 'x' = mounted on a side wall face (outward normal along X, sign gives direction)
-  function addWindow(x, y, z, w, h, axis, sign){
+  function addWindow(x, y, z, w, h, axis, sign, frameMat){
+    frameMat = frameMat || FRAME_MAT;
     var group = new THREE.Group();
     var o = 0.03 * sign, o2 = 0.055 * sign; // o2 sits proud of the glass so the mullion never z-fights it
     var glass;
     if (axis === 'z'){
-      group.add(boxMesh(x-0.06, y-0.06, z-0.03*sign, w+0.12, h+0.12, 0.06, TRIM_MAT));
+      group.add(boxMesh(x-0.06, y-0.06, z-0.03*sign, w+0.12, h+0.12, 0.06, frameMat));
       glass = boxMesh(x, y, z+o, w, h, 0.03, newGlassMat());
       group.add(glass);
-      group.add(boxMesh(x+w/2-0.03, y, z+o2, 0.06, h, 0.02, TRIM_MAT));
+      group.add(boxMesh(x+w/2-0.03, y, z+o2, 0.06, h, 0.02, frameMat));
     } else {
-      group.add(boxMesh(x-0.03, y-0.06, z-0.06, 0.06, h+0.12, w+0.12, TRIM_MAT));
-      glass = boxMesh(x+o, y, z, 0.03, h, w, newGlassMat());
+      group.add(boxMesh(x-0.03, y-0.06, z-0.06, 0.06, h+0.12, w+0.12, frameMat));
+      // on the -x face the pane sits proud of the frame slab; flush faces z-fight
+      glass = boxMesh(sign > 0 ? x+o : x-0.04, y, z, 0.03, h, w, newGlassMat());
       group.add(glass);
-      group.add(boxMesh(x+o2, y, z+w/2-0.03, 0.02, h, 0.06, TRIM_MAT));
+      group.add(boxMesh(x+o2, y, z+w/2-0.03, 0.02, h, 0.06, frameMat));
     }
+    // thin frame and glass boxes self-shadow into stripes under the soft shadow map
+    group.children.forEach(function(child){ child.castShadow = false; });
     modelRoot.add(group);
     group.userData.glass = glass;
     return group;
@@ -386,68 +267,83 @@ export function mountIsometricEstimator(
   modelRoot.add(boxMesh(0, 0, 0, wallW, wallH, wallD, WALL_MAT));
   modelRoot.add(gableRoof(0, wallH, 0, wallW, wallD, roofRidgeH, roofOv, ROOF_MAT));
 
-  modelRoot.add(boxMesh(4.5, wallH+0.6, 1.6, 0.4, 1.6, 0.4, TRIM_MAT, {roughness:0.85}));
-  modelRoot.add(boxMesh(4.4, wallH+2.05, 1.5, 0.6, 0.12, 0.6, 0x18191c, {roughness:0.6}));
+  modelRoot.add(boxMesh(4.5, wallH+0.6, 1.6, 0.4, 1.6, 0.4, WALL_MAT));
+  modelRoot.add(boxMesh(4.4, wallH+2.05, 1.5, 0.6, 0.12, 0.6, FRAME_MAT));
 
-  modelRoot.add(boxMesh(2.42, 0, -0.02, 1.06, 2.02, 0.03, TRIM_MAT));
+  modelRoot.add(boxMesh(2.42, 0, -0.02, 1.06, 2.02, 0.03, FRAME_MAT));
   modelRoot.add(boxMesh(2.5, 0, -0.07, 0.9, 1.9, 0.05, DOOR_MAT));
-  modelRoot.add(boxMesh(2.3, 0, -0.42, 1.3, 0.07, 0.42, 0xcfc9bd, {roughness:0.9}));
+  modelRoot.add(boxMesh(2.3, 0, -0.42, 1.3, 0.07, 0.42, WALL_MAT));
 
-  var frontWindowA = addWindow(0.55, 1.65, 0, 0.85, 1.1, 'z', -1);
-  var frontWindowB = addWindow(4.6, 1.65, 0, 0.85, 1.1, 'z', -1);
-  var sideWindowA  = addWindow(0, 1.7, 1.55, 0.85, 1.05, 'x', -1);
-  var sideWindowB  = addWindow(0, 1.7, 3.25, 0.85, 1.05, 'x', -1);
+  // front window A stands in for the kitchen/bath add-on, so it owns its materials
+  var kitchenFrameMat = FRAME_MAT.clone();
+  var frontWindowA = addWindow(0.55, 1.65, 0, 0.85, 1.1, 'z', -1, kitchenFrameMat);
+  addWindow(4.6, 1.65, 0, 0.85, 1.1, 'z', -1);
+  addWindow(0, 1.7, 1.55, 0.85, 1.05, 'x', -1);
+  addWindow(0, 1.7, 3.25, 0.85, 1.05, 'x', -1);
   var kitchenGlass = frontWindowA.userData.glass; // the glass pane, toggled by kitchen/bath add-on
-  // the rest of the main-house windows glow warm at night (kitchenGlass is handled separately above)
-  var nightWindowMats = [frontWindowB, sideWindowA, sideWindowB].map(function(w){ return w.userData.glass.material; });
+  var kitchen = {
+    target: 0,
+    progress: 0,
+    glassFrom: GLASS_MAT.color.clone(),
+    glassTo: mixColor(PEAK_FLEET, PEAK_WHITE, 0.4),
+    frameFrom: FRAME_MAT.color.clone(),
+    frameTo: new THREE.Color(PEAK_FLEET)
+  };
 
-  // add-on groups (modern clad extensions with a glazed face, fascia cap and plinth, contrasting the brick house)
+  // add-on groups (flat-roofed volumes with a glazed face, fascia cap and plinth), all in Peak Fleet
   var addonMeshes = {};
+  var ADDON_RISE = 0.9;
+  var GHOST_OPACITY = 0.32; // assigned before makeAddon runs: ghostMat() reads it at construction
   function makeAddon(key, x0,hBase,dBase, w,h,d, glassAxis, glassSign){
     var group = new THREE.Group();
     var solidGroup = new THREE.Group();
-    solidGroup.add(boxMesh(x0,hBase,dBase, w,h,d, claddingMat(w,d), {}));
+    var bodyMat = addonMat();
+    var materials = [bodyMat];
+    solidGroup.add(boxMesh(x0,hBase,dBase, w,h,d, bodyMat));
 
-    // dark fascia cap along the flat roofline — reads as a roof edge without modelling one
-    solidGroup.add(boxMesh(x0-0.05, hBase+h, dBase-0.05, w+0.1, 0.08, d+0.1, TRIM_DARK));
+    // fascia cap along the flat roofline — reads as a roof edge without modelling one
+    solidGroup.add(boxMesh(x0-0.05, hBase+h, dBase-0.05, w+0.1, 0.08, d+0.1, bodyMat));
     // plinth at the base, grounds the volume (sits proud of grade so its top face never coplanar-fights the ground)
-    solidGroup.add(boxMesh(x0-0.03, hBase, dBase-0.03, w+0.06, 0.05, d+0.06, TRIM_DARK));
+    solidGroup.add(boxMesh(x0-0.03, hBase, dBase-0.03, w+0.06, 0.05, d+0.06, bodyMat));
 
-    var glowMats = []; // only glazing reacts to the finish-tier glow, not cladding/trim/solar
+    var glowMats = []; // only glazing reacts to the finish-tier glow
     var gw = Math.min(w,d) * 0.72;
     if (gw > 0.35){
       var glassH = h*0.6, glassY = hBase+0.2, glassMesh;
+      var glassMat = addonGlassMat();
+      materials.push(glassMat);
       if (glassAxis === 'x'){
         var gx = glassSign > 0 ? x0+w : x0;
         var gz0 = dBase+(d-gw)/2;
-        glassMesh = boxMesh(gx-0.015, glassY, gz0, 0.03, glassH, gw, newGlassMat());
+        glassMesh = boxMesh(gx-0.015, glassY, gz0, 0.03, glassH, gw, glassMat);
         solidGroup.add(glassMesh);
-        solidGroup.add(boxMesh(gx-0.03, glassY+glassH/2-0.03, gz0-0.02, 0.06, 0.06, gw+0.04, TRIM_DARK));
+        solidGroup.add(boxMesh(gx-0.03, glassY+glassH/2-0.03, gz0-0.02, 0.06, 0.06, gw+0.04, bodyMat));
       } else {
         var gz = glassSign > 0 ? dBase+d : dBase;
         var gx0 = x0+(w-gw)/2;
-        glassMesh = boxMesh(gx0, glassY, gz-0.015, gw, glassH, 0.03, newGlassMat());
+        glassMesh = boxMesh(gx0, glassY, gz-0.015, gw, glassH, 0.03, glassMat);
         solidGroup.add(glassMesh);
-        solidGroup.add(boxMesh(gx0-0.02, glassY+glassH/2-0.03, gz-0.03, gw+0.04, 0.06, 0.06, TRIM_DARK));
+        solidGroup.add(boxMesh(gx0-0.02, glassY+glassH/2-0.03, gz-0.03, gw+0.04, 0.06, 0.06, bodyMat));
       }
-      glowMats.push(glassMesh.material);
+      glowMats.push(glassMat);
     }
-    solidGroup.scale.set(0.001,0.001,0.001);
     var ghost = ghostBox(x0,hBase,dBase, w,h,d);
     group.add(ghost);
     group.add(solidGroup);
     modelRoot.add(group);
-    addonMeshes[key] = {solid:solidGroup, ghost:ghost, targetScale:0.001, currentScale:0.001, glow:glowMats};
+    addonMeshes[key] = {solid:solidGroup, ghost:ghost, target:0, progress:0, rise:ADDON_RISE, materials:materials, glow:glowMats, shadowsOn:true};
   }
   makeAddon('extension',   1,0,5,      4,2.2,2.5, 'z', 1);
   makeAddon('side_return', -1.8,0,1,   1.8,2.4,3, 'x', -1);
   makeAddon('loft',        1.6,3.5,1.2, 2.2,1.3,2.2, 'z', 1);
   makeAddon('garden_room', 8,0,1,      3,2.2,3, 'x', 1);
 
+  function ghostMat(){
+    return new THREE.LineDashedMaterial({color:NAVY, dashSize:0.14, gapSize:0.1, transparent:true, opacity:GHOST_OPACITY});
+  }
   function ghostBox(x0, hBase, dBase, w, h, d){
     var geo = new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));
-    var mat = new THREE.LineDashedMaterial({color:0xf4f1ea, dashSize:0.14, gapSize:0.1, transparent:true, opacity:0.4});
-    var lines = new THREE.LineSegments(geo, mat);
+    var lines = new THREE.LineSegments(geo, ghostMat());
     lines.position.set(x0 + w/2, hBase + h/2, dBase + d/2);
     lines.computeLineDistances();
     return lines;
@@ -457,8 +353,7 @@ export function mountIsometricEstimator(
   (function(){
     function centeredGhost(cx,cy,cz,w,h,d){
       var geo = new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));
-      var mat = new THREE.LineDashedMaterial({color:0xf4f1ea, dashSize:0.14, gapSize:0.1, transparent:true, opacity:0.4});
-      var lines = new THREE.LineSegments(geo, mat);
+      var lines = new THREE.LineSegments(geo, ghostMat());
       lines.position.set(cx,cy,cz);
       lines.computeLineDistances();
       return lines;
@@ -473,10 +368,10 @@ export function mountIsometricEstimator(
     var solidGroup = new THREE.Group();
     var ghostGroup = new THREE.Group();
     var panelW = 1.6, panelD = 1.35, slopeZ = 1.5, outward = 0.045;
-    var frameMat = new THREE.MeshStandardMaterial({color:0x1c1e21, roughness:0.5, metalness:0.3});
+    var panelMat = addonMat();
+    var frameMat = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
     [0.3,2.2,4.1].forEach(function(sx){
       var cx = sx + panelW/2;
-      var panelMat = new THREE.MeshStandardMaterial({color:0x141a22, roughness:0.22, metalness:0.55});
       var panel = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.04,panelD), panelMat);
       panel.position.set(cx, outward, slopeZ);
       panel.castShadow = true;
@@ -490,63 +385,144 @@ export function mountIsometricEstimator(
       solidGroup.add(muln);
       ghostGroup.add(centeredGhost(cx, outward, slopeZ, panelW, 0.08, panelD));
     });
-    solidGroup.scale.set(0.001,0.001,0.001);
     mount.add(ghostGroup);
     mount.add(solidGroup);
     modelRoot.add(mount);
-    addonMeshes['solar'] = {solid:solidGroup, ghost:ghostGroup, targetScale:0.001, currentScale:0.001, glow:[]};
+    addonMeshes['solar'] = {solid:solidGroup, ghost:ghostGroup, target:0, progress:0, rise:0.4, materials:[panelMat, frameMat], glow:[], shadowsOn:true};
   })();
 
   // center the model root so it orbits nicely
   modelRoot.position.set(-4.6, 0, -2.6);
 
+  var PHI_MIN = 0.5, PHI_MAX = 1.45; // tilt range the drag allows
+  var ORBIT_RADIUS = 16;             // starting orbit distance
+
+  // ---------- tight framing: bounds of the house and every add-on outline ----------
+  // Corners are kept in modelRoot space at scale 1, relative to the centre of their union.
+  var fitCenter = new THREE.Vector3();
+  var fitTarget = new THREE.Vector3();
+  var fitCorners = [];
+  var fitDistance = 16;
+  var FIT_MARGIN = 0.94;
+  (function(){
+    modelRoot.updateMatrixWorld(true);
+    var addonGroups = Object.keys(addonMeshes).map(function(key){ return addonMeshes[key].solid.parent; });
+    var parts = modelRoot.children.filter(function(child){
+      return child !== ground && child !== shadowCatcher && child !== path && addonGroups.indexOf(child) === -1;
+    });
+    // add-ons are measured by their outline, which matches the volume once it has risen into place
+    Object.keys(addonMeshes).forEach(function(key){ parts.push(addonMeshes[key].ghost); });
+    var union = new THREE.Box3();
+    var boxes = parts.map(function(obj){
+      var box = new THREE.Box3().setFromObject(obj);
+      box.min.sub(modelRoot.position);
+      box.max.sub(modelRoot.position);
+      union.union(box);
+      return box;
+    });
+    union.getCenter(fitCenter);
+    boxes.forEach(function(box){
+      for (var i = 0; i < 8; i++){
+        fitCorners.push(new THREE.Vector3(
+          i & 1 ? box.max.x : box.min.x,
+          i & 2 ? box.max.y : box.min.y,
+          i & 4 ? box.max.z : box.min.z
+        ).sub(fitCenter));
+      }
+    });
+  })();
+
+  // Smallest camera distance (at scale 1) that keeps every corner in frame at the
+  // current tilt, checked across the full turn so spinning never clips.
+  var fitPhi = null;
+  function computeFitDistance(){
+    var phi = orbit.phi;
+    var tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * FIT_MARGIN;
+    var tanH = tanV * camera.aspect;
+    var up = new THREE.Vector3(0, 1, 0);
+    var back = new THREE.Vector3(), side = new THREE.Vector3(), lift = new THREE.Vector3();
+    var need = 0;
+    for (var ti = 0; ti < 72; ti++){
+      var theta = ti / 72 * Math.PI * 2;
+      back.set(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+      side.crossVectors(up, back).normalize();
+      lift.crossVectors(back, side);
+      for (var i = 0; i < fitCorners.length; i++){
+        var q = fitCorners[i];
+        var depth = q.dot(back);
+        need = Math.max(
+          need,
+          depth + Math.abs(q.dot(side)) / tanH,
+          depth + Math.abs(q.dot(lift)) / tanV
+        );
+      }
+    }
+    fitDistance = need;
+    fitPhi = phi;
+  }
+
   // ---------- camera orbit (custom, no extra library) ----------
   var orbit = {
     theta: Math.PI*1.22,  // azimuth — starts facing the door/window side
     phi: 1.0,             // polar angle
-    radius: 16,
+    radius: ORBIT_RADIUS,
     target: new THREE.Vector3(0, 1.4, 0)
   };
   var dragging = false, lastX = 0, lastY = 0;
-  var idleTimer = null, autoRotate = true;
+  // Very slow idle spin until the visitor first drags; never with reduced motion.
+  var hasDragged = false;
+  var autoRotate = !reducedMotion;
+  var IDLE_SPIN = 0.05; // radians per second
 
+  // Canvases narrower than this aspect pull the camera back so the full plot stays in frame.
+  var FIT_ASPECT = 1.75;
   function updateCamera(){
     var p = orbit.phi;
+    var target = orbit.target, r;
+    if (tightFit){
+      // orbit the centre of the model and follow its size; wheel zoom scales the fitted distance
+      if (fitPhi !== p) computeFitDistance();
+      var s = cameraScale;
+      target = fitTarget.copy(fitCenter).multiplyScalar(s).add(modelRoot.position);
+      r = fitDistance * s * orbit.radius / ORBIT_RADIUS;
+    } else {
+      r = orbit.radius * Math.max(1, FIT_ASPECT / (camera.aspect || FIT_ASPECT));
+    }
     camera.position.set(
-      orbit.target.x + orbit.radius * Math.sin(p) * Math.cos(orbit.theta),
-      orbit.target.y + orbit.radius * Math.cos(p),
-      orbit.target.z + orbit.radius * Math.sin(p) * Math.sin(orbit.theta)
+      target.x + r * Math.sin(p) * Math.cos(orbit.theta),
+      target.y + r * Math.cos(p),
+      target.z + r * Math.sin(p) * Math.sin(orbit.theta)
     );
-    camera.lookAt(orbit.target);
+    camera.lookAt(target);
   }
 
   function onPointerDown(e){
-    dragging = true; autoRotate = false;
+    dragging = true; hasDragged = true; autoRotate = false;
     lastX = e.clientX; lastY = e.clientY;
     canvas.setPointerCapture(e.pointerId);
-    clearTimeout(idleTimer);
   }
   function onPointerMove(e){
     if (!dragging) return;
     var dx = e.clientX - lastX, dy = e.clientY - lastY;
     lastX = e.clientX; lastY = e.clientY;
     orbit.theta -= dx * 0.0065;
-    orbit.phi = Math.min(1.45, Math.max(0.5, orbit.phi - dy * 0.0065));
+    orbit.phi = Math.min(PHI_MAX, Math.max(PHI_MIN, orbit.phi - dy * 0.0065));
     updateCamera();
   }
   function onPointerUp(){
     dragging = false;
-    idleTimer = setTimeout(function(){ autoRotate = true; }, 2600);
   }
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
   window.addEventListener('pointerup', onPointerUp);
 
-  // ---------- controls UI ----------
-  var chipWrap = root.querySelector('#addonChips');
-  var sizeSeg = root.querySelector('#sizeSeg');
-  var finishSeg = root.querySelector('#finishSeg');
-  var daynightToggle = root.querySelector('#daynightToggle');
+  function onReducedMotionChange(e){
+    reducedMotion = e.matches;
+    autoRotate = !reducedMotion && !hasDragged;
+  }
+  reducedMotionQuery.addEventListener('change', onReducedMotionChange);
+
+  // ---------- outputs (the selection itself is owned by the caller) ----------
   var priceOut = root.querySelector('#priceOut');
   var weeksOut = root.querySelector('#weeksOut');
   var costBar = root.querySelector('#costBar');
@@ -556,64 +532,32 @@ export function mountIsometricEstimator(
   if (costBar) costBar.replaceChildren();
   if (costLegend) costLegend.replaceChildren();
 
-  // Chips are server-rendered by React (so the layout doesn't shift); bind to them.
-  var chipHandlers = [];
-  ADDONS.forEach(function(a){
-    var chip = chipWrap.querySelector('button[data-key="'+a.key+'"]');
-    if (!chip) return;
-    chip.setAttribute('aria-pressed','false');
-    function onChipClick(){
-      state.addons[a.key] = !state.addons[a.key];
-      render();
-    }
-    chip.addEventListener('click', onChipClick);
-    chipHandlers.push({ chip: chip, handler: onChipClick });
-  });
-
-  function onSizeClick(e){
-    var btn = e.target.closest('button[data-size]');
-    if(!btn) return;
-    state.size = btn.dataset.size;
-    render();
-  }
-  function onFinishClick(e){
-    var btn = e.target.closest('button[data-finish]');
-    if(!btn) return;
-    state.finish = btn.dataset.finish;
-    render();
-  }
-  function onDayNightClick(e){
-    var btn = e.target.closest('button[data-mode]');
-    if (!btn) return;
-    setDayNight(btn.dataset.mode);
-    Array.prototype.forEach.call(daynightToggle.children, function(b){
-      b.setAttribute('aria-pressed', b.dataset.mode === btn.dataset.mode ? 'true' : 'false');
-    });
-  }
-
-  sizeSeg.addEventListener('click', onSizeClick);
-  finishSeg.addEventListener('click', onFinishClick);
-  daynightToggle.addEventListener('click', onDayNightClick);
+  // Every add-on is Peak Fleet, so the cost bar tells them apart by tint.
+  var COST_TINTS = [100, 78, 60, 46, 35, 26];
 
   var sizeTargetScale = 1, sizeCurrentScale = 1;
+  var cameraScale = 1;   // size the fitted camera is framing; trails the model during a size change
+  var sizeTween = null;  // {from, to, cameraFrom, t} while a size change plays
   var FINISH_EMISSIVE = {simple:0, quality:0.18, highend:0.4};
   var finishTarget = FINISH_EMISSIVE.quality;
 
-  function render(){
-    Array.prototype.forEach.call(chipWrap.children, function(chip){
-      chip.setAttribute('aria-pressed', state.addons[chip.dataset.key] ? 'true' : 'false');
-    });
-    Array.prototype.forEach.call(sizeSeg.children, function(btn){
-      btn.setAttribute('aria-pressed', btn.dataset.size===state.size ? 'true' : 'false');
-    });
-    Array.prototype.forEach.call(finishSeg.children, function(btn){
-      btn.setAttribute('aria-pressed', btn.dataset.finish===state.finish ? 'true' : 'false');
-    });
+  var priceShown = null; // figure currently on screen, null while the placeholder shows
+  var priceAnim = null;  // {from, to, t} while counting
 
+  function showPrice(value){
+    if (priceOut) priceOut.textContent = '£' + value.toLocaleString('en-GB');
+  }
+
+  function render(){
     Object.keys(addonMeshes).forEach(function(key){
-      addonMeshes[key].targetScale = state.addons[key] ? 1 : 0.001;
+      addonMeshes[key].target = state.addons[key] ? 1 : 0;
     });
-    sizeTargetScale = SIZE_MULT[state.size];
+    kitchen.target = state.addons.kitchen_bath ? 1 : 0;
+    var nextScale = SIZE_MULT[state.size];
+    if (nextScale !== sizeTargetScale){
+      sizeTween = {from: sizeCurrentScale, to: nextScale, cameraFrom: cameraScale, t: 0};
+      sizeTargetScale = nextScale;
+    }
     finishTarget = FINISH_EMISSIVE[state.finish];
 
     var selected = ADDONS.filter(function(a){ return state.addons[a.key]; });
@@ -622,16 +566,32 @@ export function mountIsometricEstimator(
 
     var weeksLabel = null;
     if (selected.length === 0){
-      priceOut.textContent = "Select what you're building";
-      priceOut.classList.add('ie-muted');
-      weeksOut.textContent = '-';
+      priceAnim = null;
+      priceShown = null;
+      if (priceOut){
+        priceOut.textContent = "Select what you're building";
+        priceOut.classList.add('ie-muted');
+      }
+      if (weeksOut){
+        weeksOut.textContent = '-';
+        weeksOut.classList.add('ie-muted');
+      }
     } else {
-      priceOut.classList.remove('ie-muted');
-      priceOut.textContent = '£' + total.toLocaleString('en-GB');
+      if (priceOut) priceOut.classList.remove('ie-muted');
+      if (reducedMotion){
+        priceAnim = null;
+        priceShown = total;
+        showPrice(total);
+      } else if (priceShown !== total){
+        priceAnim = {from: priceShown === null ? 0 : priceShown, to: total, t: 0};
+      }
       var baseWeeks = 3 + selected.reduce(function(s,a){ return s + a.weeks; }, 0);
       var weeks = Math.round(baseWeeks * SIZE_MULT[state.size]);
       weeksLabel = weeks + ' to ' + (weeks + 2) + ' weeks';
-      weeksOut.textContent = weeksLabel;
+      if (weeksOut){
+        weeksOut.textContent = weeksLabel;
+        weeksOut.classList.remove('ie-muted');
+      }
     }
 
     if (onEstimateChange) {
@@ -645,78 +605,163 @@ export function mountIsometricEstimator(
     }
 
     // cost breakdown bar - proportional segment per selected add-on
-    costBar.innerHTML = '';
-    costLegend.innerHTML = '';
-    if (selected.length){
-      selected.forEach(function(a){
-        var pct = (a.price / basePrice) * 100;
-        var seg = document.createElement('span');
-        seg.style.width = pct + '%';
-        seg.style.background = a.color;
-        costBar.appendChild(seg);
+    if (!costBar || !costLegend) return;
+    costBar.replaceChildren();
+    costLegend.replaceChildren();
+    selected.forEach(function(a, i){
+      var tint = 'color-mix(in srgb, ' + a.color + ' ' + COST_TINTS[i % COST_TINTS.length] + '%, var(--peak-white))';
+      var seg = document.createElement('span');
+      seg.style.width = ((a.price / basePrice) * 100) + '%';
+      seg.style.background = tint;
+      costBar.appendChild(seg);
 
-        var item = document.createElement('span');
-        item.className = 'ie-item';
-        item.innerHTML = '<span class="ie-swatch" style="background:'+a.color+'"></span>'+a.label+' &middot; £'+a.price.toLocaleString('en-GB');
-        costLegend.appendChild(item);
-      });
+      var item = document.createElement('span');
+      item.className = 'ie-item';
+      var swatch = document.createElement('span');
+      swatch.className = 'ie-swatch';
+      swatch.style.background = tint;
+      item.appendChild(swatch);
+      item.appendChild(document.createTextNode(a.label + ' · £' + a.price.toLocaleString('en-GB')));
+      costLegend.appendChild(item);
+    });
+  }
+
+  function setShadows(obj, on){
+    obj.traverse(function(child){ if (child.isMesh) child.castShadow = on; });
+  }
+
+  function setGhostOpacity(ghost, opacity){
+    ghost.visible = opacity > 0.005;
+    ghost.traverse(function(child){
+      if (child.material) child.material.opacity = opacity;
+    });
+  }
+
+  // Selected add-ons rise into place and fade in; removed ones sink and fade out.
+  function applyAddon(rec){
+    var e = easeOutCubic(rec.progress);
+    rec.solid.visible = rec.progress > 0;
+    rec.solid.position.y = -(1 - e) * rec.rise;
+    rec.materials.forEach(function(m){
+      var transparent = e < 1;
+      if (m.transparent !== transparent){
+        m.transparent = transparent;
+        m.needsUpdate = true;
+      }
+      m.opacity = e;
+    });
+    var shadowsOn = e > 0.5;
+    if (shadowsOn !== rec.shadowsOn){
+      rec.shadowsOn = shadowsOn;
+      setShadows(rec.solid, shadowsOn);
+    }
+    setGhostOpacity(rec.ghost, GHOST_OPACITY * (1 - e));
+  }
+
+  function applyKitchen(){
+    var e = easeOutCubic(kitchen.progress);
+    kitchenGlass.material.color.lerpColors(kitchen.glassFrom, kitchen.glassTo, e);
+    kitchenFrameMat.color.lerpColors(kitchen.frameFrom, kitchen.frameTo, e);
+  }
+
+  function stepTowards(current, target, amount){
+    return target > current ? Math.min(target, current + amount) : Math.max(target, current - amount);
+  }
+
+  /** Jump every animated value to its target (first paint, reduced motion). */
+  function snapToTargets(){
+    Object.keys(addonMeshes).forEach(function(key){
+      var rec = addonMeshes[key];
+      rec.progress = rec.target;
+      applyAddon(rec);
+    });
+    kitchen.progress = kitchen.target;
+    applyKitchen();
+    sizeCurrentScale = cameraScale = sizeTargetScale;
+    sizeTween = null;
+    modelRoot.scale.setScalar(sizeCurrentScale);
+    Object.keys(addonMeshes).forEach(function(key){
+      (addonMeshes[key].glow || []).forEach(function(m){ m.emissiveIntensity = finishTarget; });
+    });
+    if (priceAnim){
+      priceShown = priceAnim.to;
+      showPrice(priceAnim.to);
+      priceAnim = null;
     }
   }
 
   // ---------- animation loop ----------
-  var clock = new THREE.Clock();
+  var timer = new THREE.Timer();
+  timer.connect(document);
   var raf = 0;
   var disposed = false;
-  function tick(){
+  function tick(timestamp){
     if (disposed) return;
     raf = requestAnimationFrame(tick);
-    var dt = Math.min(clock.getDelta(), 0.05);
+    timer.update(timestamp);
+    var dt = Math.min(timer.getDelta(), 0.05);
 
     if (autoRotate && !dragging){
-      orbit.theta += dt * 0.12;
+      orbit.theta += dt * IDLE_SPIN;
       updateCamera();
     }
 
-    Object.keys(addonMeshes).forEach(function(a){
-      var rec = addonMeshes[a];
-      rec.currentScale += (rec.targetScale - rec.currentScale) * Math.min(1, dt*6);
-      var s = Math.max(0.001, rec.currentScale);
-      rec.solid.scale.set(s,s,s);
-      rec.ghost.visible = rec.currentScale < 0.98;
-      if (rec.ghost.material) rec.ghost.material.opacity = 0.4 * (1 - Math.min(1, rec.currentScale));
-      if (rec.ghost.isGroup) {
-        rec.ghost.traverse(function(child){
-          if (child.material && child.material.opacity != null) {
-            child.material.opacity = 0.4 * (1 - Math.min(1, rec.currentScale));
-          }
-        });
-      }
+    var tweenStep = reducedMotion ? 1 : dt / ADDON_TWEEN_S;
+    Object.keys(addonMeshes).forEach(function(key){
+      var rec = addonMeshes[key];
+      if (rec.progress === rec.target) return;
+      rec.progress = stepTowards(rec.progress, rec.target, tweenStep);
+      applyAddon(rec);
     });
+    if (kitchen.progress !== kitchen.target){
+      kitchen.progress = stepTowards(kitchen.progress, kitchen.target, tweenStep);
+      applyKitchen();
+    }
 
-    sizeCurrentScale += (sizeTargetScale - sizeCurrentScale) * Math.min(1, dt*5);
-    modelRoot.scale.set(sizeCurrentScale, sizeCurrentScale, sizeCurrentScale);
+    var previousScale = sizeCurrentScale, previousCamera = cameraScale;
+    if (reducedMotion){
+      sizeCurrentScale = cameraScale = sizeTargetScale;
+      sizeTween = null;
+    } else if (sizeTween){
+      sizeTween.t += dt;
+      var grow = Math.min(1, sizeTween.t / SIZE_GROW_S);
+      var settle = Math.min(1, Math.max(0, (sizeTween.t - SIZE_GROW_S) / CAMERA_SETTLE_S));
+      sizeCurrentScale = sizeTween.from + (sizeTween.to - sizeTween.from) * easeOutCubic(grow);
+      cameraScale = sizeTween.cameraFrom + (sizeTween.to - sizeTween.cameraFrom) * easeInOutCubic(settle);
+      if (settle >= 1) sizeTween = null;
+    }
+    modelRoot.scale.setScalar(sizeCurrentScale);
+    if (tightFit && (sizeCurrentScale !== previousScale || cameraScale !== previousCamera)) updateCamera();
 
-    nightGlow.value += (nightGlow.target - nightGlow.value) * Math.min(1, dt*3);
-    var isNight = nightGlow.value > 0.5;
-    var kitchenTarget = isNight ? (0.55 + nightGlow.value*0.35) : (state.addons.kitchen_bath ? 0.9 : 0.15);
-    kitchenGlass.material.emissive.setHex(isNight ? 0xffcf8a : 0x89cff0);
-    kitchenGlass.material.emissiveIntensity += (kitchenTarget - kitchenGlass.material.emissiveIntensity) * Math.min(1, dt*6);
-
-    nightWindowMats.forEach(function(m){
-      m.emissive.setHex(0xffcf8a);
-      m.emissiveIntensity += (nightGlow.value*0.7 - m.emissiveIntensity) * Math.min(1, dt*4);
-    });
-
-    Object.keys(addonMeshes).forEach(function(a){
-      var rec = addonMeshes[a];
-      (rec.glow || []).forEach(function(m){
-        if (!m) return;
-        m.emissive.setHex(0x89cff0);
-        m.emissiveIntensity += (finishTarget - m.emissiveIntensity) * Math.min(1, dt*4);
+    Object.keys(addonMeshes).forEach(function(key){
+      (addonMeshes[key].glow || []).forEach(function(m){
+        if (reducedMotion) m.emissiveIntensity = finishTarget;
+        else m.emissiveIntensity += (finishTarget - m.emissiveIntensity) * Math.min(1, dt*4);
       });
     });
 
-    renderer.render(scene, camera);
+    if (priceAnim){
+      priceAnim.t = Math.min(1, priceAnim.t + dt / PRICE_TWEEN_S);
+      var value = priceAnim.from + (priceAnim.to - priceAnim.from) * easeOutCubic(priceAnim.t);
+      if (priceAnim.t >= 1){
+        priceShown = priceAnim.to;
+        showPrice(priceAnim.to);
+        priceAnim = null;
+      } else {
+        priceShown = Math.round(value / 100) * 100;
+        showPrice(priceShown);
+      }
+    }
+
+    if (stageVisible) renderer.render(scene, camera);
+  }
+
+  function applySelection(selection){
+    var picked = {};
+    (selection.addons || []).forEach(function(key){ picked[key] = true; });
+    ADDONS.forEach(function(a){ state.addons[a.key] = Boolean(picked[a.key]); });
+    if (SIZE_MULT[selection.size] != null) state.size = selection.size;
+    if (FINISH_MULT[selection.finish] != null) state.finish = selection.finish;
   }
 
   function onWheel(e){
@@ -742,35 +787,41 @@ export function mountIsometricEstimator(
 
   resize();
   updateCamera();
+  applySelection(initialSelection);
   render();
+  snapToTargets();
+  updateCamera();
   raf = requestAnimationFrame(tick);
   var resizeTimer = setTimeout(resize, 50);
 
-  return function dispose() {
+  function update(selection){
+    if (disposed) return;
+    applySelection(selection);
+    render();
+  }
+
+  function dispose() {
     if (disposed) return;
     disposed = true;
     cancelAnimationFrame(raf);
     clearTimeout(resizeTimer);
-    clearTimeout(idleTimer);
+    timer.dispose();
 
     window.removeEventListener('resize', resize);
+    if (resizeObserver) resizeObserver.disconnect();
+    reducedMotionQuery.removeEventListener('change', onReducedMotionChange);
     window.removeEventListener('pointerup', onPointerUp);
     canvas.removeEventListener('pointerdown', onPointerDown);
     canvas.removeEventListener('pointermove', onPointerMove);
     canvas.removeEventListener('wheel', onWheel);
 
-    sizeSeg.removeEventListener('click', onSizeClick);
-    finishSeg.removeEventListener('click', onFinishClick);
-    daynightToggle.removeEventListener('click', onDayNightClick);
-    chipHandlers.forEach(function(entry){
-      entry.chip.removeEventListener('click', entry.handler);
-      entry.chip.setAttribute('aria-pressed', 'false');
-    });
     if (costBar) costBar.replaceChildren();
     if (costLegend) costLegend.replaceChildren();
     if (stageHost) stageHost.replaceChildren();
 
     disposeObject3D(scene);
     renderer.dispose();
-  };
+  }
+
+  return { update: update, dispose: dispose };
 }

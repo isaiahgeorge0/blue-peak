@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
-    title: "Quote calculator",
+    title: "Build your estimate",
     description:
       "Interactive 3D estimate for loft conversions, extensions, and renovations with Blue Peak Solutions.",
     path: "/quote",

@@ -20,6 +20,11 @@ import {
 type EstimatorBookingProps = {
   /** Read at submit time so the lead carries the latest selection. */
   getEstimate: () => EstimateSummary | null;
+  /** Extra lines appended to the message, read at submit time. */
+  getExtraLines?: () => string[];
+  /** Inside the funnel: the form is shown straight away, with no Cancel. */
+  embedded?: boolean;
+  onSent?: () => void;
 };
 
 type Step = "closed" | "open" | "submitting" | "sent";
@@ -33,9 +38,12 @@ const fieldClassName =
 const buttonClassName =
   "inline-flex items-center justify-center rounded-[7px] bg-accent px-5 py-3 text-[13.5px] font-semibold text-on-accent transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
 
-function describeEstimate(estimate: EstimateSummary | null) {
+function describeEstimate(
+  estimate: EstimateSummary | null,
+  extraLines: string[] = [],
+) {
   const lines = ["Site visit request from the quote calculator."];
-  if (!estimate) return lines.join("\n");
+  if (!estimate) return [...lines, ...extraLines].join("\n");
 
   lines.push(
     `Work: ${estimate.work.length ? estimate.work.join(", ") : "Not selected"}`,
@@ -48,15 +56,20 @@ function describeEstimate(estimate: EstimateSummary | null) {
   if (estimate.weeks) {
     lines.push(`Time on site: ${estimate.weeks}`);
   }
-  return lines.join("\n");
+  return [...lines, ...extraLines].join("\n");
 }
 
 /**
  * Captures name + phone and posts to the same /api/leads pipeline as the
  * contact form. Success is only shown after the lead is stored.
  */
-export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
-  const [step, setStep] = useState<Step>("closed");
+export function EstimatorBooking({
+  getEstimate,
+  getExtraLines,
+  embedded = false,
+  onSent,
+}: EstimatorBookingProps) {
+  const [step, setStep] = useState<Step>(embedded ? "open" : "closed");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [honeypot, setHoneypot] = useState("");
@@ -75,8 +88,8 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
   } = useTurnstile(TURNSTILE_ACTIONS.estimator);
 
   useEffect(() => {
-    if (step === "open") nameRef.current?.focus();
-  }, [step]);
+    if (step === "open" && !embedded) nameRef.current?.focus();
+  }, [step, embedded]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -107,7 +120,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
           name: name.trim(),
           phone: phone.trim(),
           service_type: ESTIMATOR_SERVICE_TYPE,
-          message: describeEstimate(getEstimate()),
+          message: describeEstimate(getEstimate(), getExtraLines?.()),
           [LEAD_HONEYPOT_FIELD]: honeypot,
           [LEAD_TURNSTILE_FIELD]: turnstileToken ?? "",
         }),
@@ -124,6 +137,7 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
       }
 
       setStep("sent");
+      onSent?.();
     } catch {
       setSubmitError(SUBMIT_ERROR);
       setStep("open");
@@ -252,18 +266,20 @@ export function EstimatorBooking({ getEstimate }: EstimatorBookingProps) {
           >
             {isSubmitting ? "Sending..." : "Request a visit"}
           </button>
-          <button
-            type="button"
-            className="text-sm text-ink/70 underline-offset-2 hover:text-ink hover:underline"
-            onClick={() => {
-              setStep("closed");
-              setSubmitError(null);
-              setFieldErrors({});
-            }}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
+          {embedded ? null : (
+            <button
+              type="button"
+              className="text-sm text-ink/70 underline-offset-2 hover:text-ink hover:underline"
+              onClick={() => {
+                setStep("closed");
+                setSubmitError(null);
+                setFieldErrors({});
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </form>
     );
