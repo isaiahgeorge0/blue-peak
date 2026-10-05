@@ -30,19 +30,19 @@ export function WorkCard({
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="relative aspect-video overflow-hidden bg-ink/10">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-ink/10">
         <Image
           src={imageSrc}
           alt={photoNote}
           fill
-          sizes="(max-width: 640px) 100vw, 33vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px"
           className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
       </div>
-      <p className="mt-4 font-serif text-lg text-ink transition-colors duration-200 group-hover:text-accent">
+      <p className="mt-5 font-serif text-xl text-ink transition-colors duration-200 group-hover:text-accent">
         {title}
       </p>
-      <p className="mt-1 text-sm text-ink/65">{description}</p>
+      <p className="mt-1.5 text-sm text-ink/70">{description}</p>
     </MotionLink>
   );
 }

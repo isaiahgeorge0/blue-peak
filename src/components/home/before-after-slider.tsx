@@ -79,78 +79,67 @@ export function BeforeAfterSlider({
   const shownBefore = Math.round(position);
 
   return (
-    <section className="bg-page">
-      <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
-        <h2 className="text-3xl tracking-tight text-ink sm:text-4xl">
-          Before and after
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink/70">
-          Drag the handle, or use the arrow keys, to compare.
-        </p>
-
+    <div>
+      <div
+        ref={frameRef}
+        className="relative aspect-[16/10] w-full touch-none overflow-hidden rounded-xl border border-ink/10 bg-page select-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
+        <Image
+          src={afterSrc}
+          alt={afterAlt}
+          fill
+          sizes="(max-width: 1152px) 100vw, 1152px"
+          className="object-cover"
+          draggable={false}
+        />
         <div
-          ref={frameRef}
-          className="relative mt-10 aspect-[16/10] w-full touch-none overflow-hidden rounded-xl border border-ink/10 bg-panel select-none"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          className="absolute inset-0"
+          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
           <Image
-            src={afterSrc}
-            alt={afterAlt}
+            src={beforeSrc}
+            alt={beforeAlt}
             fill
             sizes="(max-width: 1152px) 100vw, 1152px"
             className="object-cover"
             draggable={false}
           />
-          <div
-            className="absolute inset-0"
-            style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
-          >
-            <Image
-              src={beforeSrc}
-              alt={beforeAlt}
-              fill
-              sizes="(max-width: 1152px) 100vw, 1152px"
-              className="object-cover"
-              draggable={false}
-            />
-          </div>
-
-          <div
-            className="absolute inset-y-0 z-10 w-px bg-accent"
-            style={{ left: `${position}%` }}
-          >
-            <div
-              role="slider"
-              tabIndex={0}
-              aria-label="Before and after comparison"
-              aria-orientation="horizontal"
-              aria-valuemin={MIN_POSITION}
-              aria-valuemax={MAX_POSITION}
-              aria-valuenow={shownBefore}
-              aria-valuetext={`${shownBefore}% before, ${100 - shownBefore}% after`}
-              onKeyDown={onHandleKeyDown}
-              className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-accent/60 bg-page text-accent shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-page"
-            >
-              <span aria-hidden className="text-sm tracking-tight">
-                {"< >"}
-              </span>
-            </div>
-          </div>
-
-          <span className="pointer-events-none absolute top-3 left-3 rounded bg-navy/80 px-2 py-1 text-[11px] font-medium tracking-wide text-white uppercase">
-            Before
-          </span>
-          <span className="pointer-events-none absolute top-3 right-3 rounded bg-navy/80 px-2 py-1 text-[11px] font-medium tracking-wide text-white uppercase">
-            After
-          </span>
         </div>
-        {caption ? (
-          <p className="mt-3 text-xs text-ink/60">{caption}</p>
-        ) : null}
+
+        <div
+          className="absolute inset-y-0 z-10 w-px bg-accent"
+          style={{ left: `${position}%` }}
+        >
+          <div
+            role="slider"
+            tabIndex={0}
+            aria-label="Before and after comparison"
+            aria-orientation="horizontal"
+            aria-valuemin={MIN_POSITION}
+            aria-valuemax={MAX_POSITION}
+            aria-valuenow={shownBefore}
+            aria-valuetext={`${shownBefore}% before, ${100 - shownBefore}% after`}
+            onKeyDown={onHandleKeyDown}
+            className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full border border-accent/60 bg-page text-accent shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-page"
+          >
+            <span aria-hidden className="text-sm tracking-tight">
+              {"< >"}
+            </span>
+          </div>
+        </div>
+
+        <span className="pointer-events-none absolute top-3 left-3 rounded bg-navy/80 px-2 py-1 text-[11px] font-medium tracking-wide text-white uppercase">
+          Before
+        </span>
+        <span className="pointer-events-none absolute top-3 right-3 rounded bg-navy/80 px-2 py-1 text-[11px] font-medium tracking-wide text-white uppercase">
+          After
+        </span>
       </div>
-    </section>
+      {caption ? <p className="mt-3 text-xs text-ink/70">{caption}</p> : null}
+    </div>
   );
 }

@@ -2,19 +2,49 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { SectionHeading } from "@/components/home/section-heading";
 import {
   SKETCH_RESOLVE_PATHS,
   SKETCH_RESOLVE_VIEWBOX,
 } from "@/lib/sketch-resolve-paths";
 
-const DRAW_START = 0;
-const DRAW_END = 0.4;
-const PHOTO_START = 0.47;
-const PHOTO_END = 0.9;
+/**
+ * Fractions of the pinned travel (wrapper height minus one viewport). Each
+ * stage starts at its bound; the drawing draws during stage 02 (with a short
+ * hold on the finished lines), resolves into the photo during stage 03, and
+ * stage 04 holds the finished photo until the section unpins.
+ */
+const STAGE_BOUNDS = [0.15, 0.45, 0.85];
+const DRAW_START = 0.15;
+const DRAW_END = 0.42;
+const PHOTO_START = 0.45;
+const PHOTO_END = 0.85;
+const RAIL_END = 0.95;
 /** Per-path draw window within drawP (overlap stagger from the updated prototype). */
 const PATH_OVERLAP = 0.22;
 const LINE_REST_OPACITY = 0.1;
 const PHOTO_SCALE_FROM = 1.03;
+
+const stages = [
+  {
+    title: "Enquire",
+    body: "Tell us what you want doing and send a few photos. We will say quickly whether it is a job we can take on.",
+  },
+  {
+    title: "Get a fixed quote",
+    body: "We visit the property, measure up, and send a written price before any work is booked.",
+    caption: "Every job starts on paper",
+  },
+  {
+    title: "Book the work",
+    body: "Agree a start date, we protect the house, and we stay on it until the job is finished.",
+    caption: "You get photos, not surprises",
+  },
+  {
+    title: "Handover",
+    body: "We walk the finished job with you before we call it done.",
+  },
+];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -37,25 +67,25 @@ function prefersReducedMotion() {
 }
 
 /**
- * Scroll-pinned sketch that draws itself, then dissolves into the project photo.
- * Timing mirrors the updated prototype (drawP 0–40%, photoP 47–90%, path overlap 0.22).
+ * How we work: one pinned section. The sketch draws itself and resolves into
+ * the photo while four stages of a job step through beside it.
  */
 export function SketchResolve() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const photoLayerRef = useRef<HTMLDivElement>(null);
   const lineLayerRef = useRef<SVGSVGElement>(null);
-  const pctRef = useRef<HTMLSpanElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const stageRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
     const panel = panelRef.current;
     const photoLayer = photoLayerRef.current;
     const lineLayer = lineLayerRef.current;
-    const pct = pctRef.current;
-    const bar = barRef.current;
-    if (!wrapper || !panel || !photoLayer || !lineLayer || !pct || !bar) {
+    const rail = railRef.current;
+    const stageItems = stageRefs.current;
+    if (!wrapper || !panel || !photoLayer || !lineLayer || !rail) {
       return;
     }
 
@@ -80,19 +110,17 @@ export function SketchResolve() {
       photoLayer.style.opacity = "1";
       lineLayer.style.opacity = String(LINE_REST_OPACITY);
       panel.style.transform = "scale(1)";
-      pct.textContent = "100%";
-      bar.style.transform = "scaleX(1)";
+      rail.style.transform = "scaleY(1)";
       return;
     }
 
     photoLayer.style.opacity = "0";
     lineLayer.style.opacity = "1";
     panel.style.transform = `scale(${PHOTO_SCALE_FROM})`;
-    pct.textContent = "0%";
-    bar.style.transform = "scaleX(0)";
 
     let raf = 0;
     let ticking = false;
+    let activeStage = -1;
 
     const applyProgress = (progress: number) => {
       const drawP = mapRange(progress, DRAW_START, DRAW_END);
@@ -113,8 +141,15 @@ export function SketchResolve() {
       photoLayer.style.opacity = String(photoP);
       lineLayer.style.opacity = String(1 - photoP * (1 - LINE_REST_OPACITY));
       panel.style.transform = `scale(${PHOTO_SCALE_FROM - photoP * (PHOTO_SCALE_FROM - 1)})`;
-      pct.textContent = `${Math.round(progress * 100)}%`;
-      bar.style.transform = `scaleX(${progress})`;
+      rail.style.transform = `scaleY(${mapRange(progress, 0, RAIL_END)})`;
+
+      const stage = STAGE_BOUNDS.filter((bound) => progress >= bound).length;
+      if (stage !== activeStage) {
+        activeStage = stage;
+        stageItems.forEach((item, index) => {
+          item?.setAttribute("data-active", String(index === stage));
+        });
+      }
     };
 
     const measure = () => {
@@ -144,28 +179,69 @@ export function SketchResolve() {
   }, []);
 
   return (
-    <div
+    <section
       ref={wrapperRef}
-      className="theme-brand relative h-[280vh] bg-page"
-      aria-label="Scroll to watch a project sketch resolve into a photo"
+      aria-labelledby="how-heading"
+      className="theme-brand relative bg-page motion-safe:h-[220vh] motion-safe:lg:h-[240vh]"
     >
-      <div className="sticky top-0 flex h-[100dvh] flex-col items-center justify-center gap-4 overflow-hidden px-5 py-6 sm:gap-5 lg:flex-row lg:gap-8 lg:px-8 xl:gap-10">
-        <aside className="w-full max-w-sm shrink-0 text-left lg:w-[min(22vw,240px)] lg:max-w-none">
-          <p className="text-[11px] font-medium tracking-wide text-accent uppercase sm:text-xs">
-            How we work
-          </p>
-          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-ink sm:mt-2 sm:text-2xl xl:text-3xl">
-            Every job starts on paper
-          </h2>
-          <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:mt-3 sm:text-sm">
-            We sketch the layout, cost it properly, and agree it with you in
-            writing before anything gets stripped out.
-          </p>
-        </aside>
+      <div className="mx-auto flex max-w-6xl flex-col px-6 py-20 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-12 lg:py-28 xl:gap-16 motion-safe:sticky motion-safe:top-0 motion-safe:h-[100dvh] motion-safe:overflow-hidden motion-safe:pt-20 motion-safe:pb-6 motion-safe:lg:content-center motion-safe:lg:pt-20 motion-safe:lg:pb-12">
+        <div className="max-lg:contents">
+          <SectionHeading
+            eyebrow="How we work"
+            id="how-heading"
+            className="order-1 shrink-0"
+          >
+            From first call to <em>final tidy-up</em>.
+          </SectionHeading>
+
+          <div className="relative order-3 mt-6 shrink-0 pl-6 lg:mt-10">
+            <div
+              className="absolute inset-y-0 left-0 w-0.5 overflow-hidden bg-ink/15"
+              aria-hidden
+            >
+              <div
+                ref={railRef}
+                className="h-full w-full origin-top bg-accent"
+                style={{ transform: "scaleY(0)" }}
+              />
+            </div>
+            <ol className="grid lg:gap-6">
+              {stages.map((stage, index) => (
+                <li
+                  key={stage.title}
+                  ref={(node) => {
+                    stageRefs.current[index] = node;
+                  }}
+                  data-active={index === 0 ? "true" : "false"}
+                  className="group transition-opacity duration-500 ease-out motion-safe:max-lg:[grid-area:1/1] motion-safe:max-lg:opacity-0 motion-safe:max-lg:data-[active=true]:opacity-100 motion-safe:lg:opacity-70 motion-safe:lg:data-[active=true]:opacity-100 max-lg:motion-reduce:mt-8 max-lg:motion-reduce:first:mt-0"
+                >
+                  <h3 className="flex items-baseline gap-3 text-2xl leading-tight text-ink">
+                    <span className="font-sans text-sm font-medium tracking-[0.2em] text-accent motion-safe:lg:text-ink motion-safe:lg:group-data-[active=true]:text-accent">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    {stage.title}
+                  </h3>
+                  <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out motion-safe:lg:grid-rows-[0fr] motion-safe:lg:group-data-[active=true]:grid-rows-[1fr]">
+                    <div className="overflow-hidden">
+                      <p className="max-w-md pt-3 text-base leading-relaxed text-ink/80">
+                        {stage.body}
+                      </p>
+                      {stage.caption ? (
+                        <p className="pt-3 font-serif text-lg text-accent italic">
+                          {stage.caption}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
 
         <div
           ref={panelRef}
-          className="sketch-resolve-panel relative aspect-[1100/1326] w-[min(68vw,260px)] max-h-[38vh] origin-center overflow-hidden border border-ink/25 will-change-transform sm:w-[min(60vw,340px)] sm:max-h-[46vh] lg:w-[min(28vw,420px)] lg:max-h-[62vh]"
+          className="sketch-resolve-panel relative order-2 mt-6 aspect-[1100/1326] w-full origin-center overflow-hidden border border-ink/25 will-change-transform lg:mt-0 lg:max-h-[calc(100dvh-10rem)] motion-safe:max-lg:aspect-auto motion-safe:max-lg:min-h-0 motion-safe:max-lg:flex-1"
         >
           <div
             className="pointer-events-none absolute inset-0"
@@ -186,7 +262,7 @@ export function SketchResolve() {
               src="/home/source.jpg"
               alt="Finished kitchen project"
               fill
-              sizes="(max-width: 640px) 92vw, 420px"
+              sizes="(max-width: 1023px) 92vw, 640px"
               className="object-cover"
             />
           </div>
@@ -194,6 +270,7 @@ export function SketchResolve() {
           <svg
             ref={lineLayerRef}
             viewBox={SKETCH_RESOLVE_VIEWBOX}
+            preserveAspectRatio="xMidYMid slice"
             className="absolute inset-0 h-full w-full"
             aria-hidden
             style={{ opacity: 1 }}
@@ -212,35 +289,7 @@ export function SketchResolve() {
             </g>
           </svg>
         </div>
-
-        <aside className="w-full max-w-sm shrink-0 text-left lg:w-[min(22vw,240px)] lg:max-w-none lg:text-right">
-          <p className="text-[11px] font-medium tracking-wide text-accent uppercase sm:text-xs">
-            Then it happens
-          </p>
-          <h2 className="mt-1.5 font-serif text-xl leading-tight tracking-tight text-ink sm:mt-2 sm:text-2xl xl:text-3xl">
-            You get photos, not surprises
-          </h2>
-          <p className="mt-2 text-xs leading-relaxed text-ink/70 sm:mt-3 sm:text-sm lg:ml-auto lg:max-w-[22ch]">
-            We send a photo update every Friday so you always know exactly where
-            the job&apos;s at.
-          </p>
-        </aside>
-
-        <div
-          ref={barRef}
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left bg-accent/80"
-          style={{ transform: "scaleX(0)" }}
-          aria-hidden
-        />
-
-        <span
-          ref={pctRef}
-          className="pointer-events-none absolute right-5 bottom-5 font-sans text-xs tracking-widest text-ink/70 tabular-nums sm:right-8 sm:bottom-8"
-          aria-hidden
-        >
-          0%
-        </span>
       </div>
-    </div>
+    </section>
   );
 }

@@ -9,7 +9,7 @@ const localBusinessJsonLd = {
   "@type": "LocalBusiness",
   name: "Blue Peak Solutions",
   description:
-    "Two-person building and renovation team covering Ipswich and the surrounding Suffolk area.",
+    "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
   url: siteUrl,
   telephone: sitePhoneTel,
   priceRange: "££",
