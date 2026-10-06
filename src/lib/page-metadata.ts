@@ -22,6 +22,8 @@ type PageMetadataInput = {
   description: string;
   /** Route path such as "/services". Resolved against `metadataBase` (siteUrl). */
   path: string;
+  /** Share image under /public, in place of the generated site card. */
+  image?: { url: string; alt: string };
 };
 
 /**
@@ -34,8 +36,10 @@ export function pageMetadata({
   absoluteTitle = false,
   description,
   path,
+  image,
 }: PageMetadataInput): Metadata {
   const fullTitle = absoluteTitle ? title : `${title} | ${SITE_NAME}`;
+  const images = [image ?? OG_IMAGE];
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
@@ -47,13 +51,13 @@ export function pageMetadata({
       siteName: SITE_NAME,
       locale: "en_GB",
       type: "website",
-      images: [OG_IMAGE],
+      images,
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [OG_IMAGE],
+      images,
     },
   };
 }

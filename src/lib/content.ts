@@ -13,16 +13,31 @@ export type Service = {
   includes: string[];
 };
 
+export type ProjectPhoto = {
+  src: string;
+  alt: string;
+};
+
 export type Project = {
   slug: string;
   title: string;
   location: string;
   shortDescription: string;
   longDescription: string;
-  /** Photo path under /public; projects without one show the brand mark. */
-  image?: string;
+  /** Main photo in public/work/<slug>/, landscape. */
+  image: string;
+  imageAlt: string;
+  /** Further photos of the same job, shown on the project page. */
+  gallery: ProjectPhoto[];
+  /**
+   * "What we did" list on the project page, 3 to 5 items. Every item must come
+   * from this project's shortDescription or longDescription.
+   */
+  scope: string[];
   /** Services this job is shown against on the service pages. */
   serviceSlugs?: string[];
+  /** Placeholder job: shows a Sample tag wherever it appears. */
+  sample: boolean;
 };
 
 export type ServiceArea = {
@@ -173,6 +188,10 @@ export const services: Service[] = [
   },
 ];
 
+/*
+ * Every entry with sample: true is a placeholder. Before launch, replace each
+ * one with a real Blue Peak job, with the customer's permission to show it.
+ */
 export const projects: Project[] = [
   {
     slug: "ipswich-kitchen-dining",
@@ -182,8 +201,31 @@ export const projects: Project[] = [
       "New layout, units, and flooring in a Victorian terrace.",
     longDescription:
       "The owners wanted a clearer run from kitchen to dining without losing the character of the house. We opened the layout slightly, fitted new units and flooring, and finished the room to match the existing joinery.",
-    image: "/home/work-kitchen.jpg",
+    image: "/work/ipswich-kitchen-dining/main.jpg",
+    imageAlt:
+      "White Shaker kitchen with an oak-topped island and a dining table by a sash window",
+    gallery: [
+      {
+        src: "/work/ipswich-kitchen-dining/2.jpg",
+        alt: "The kitchen seen from the dining end, with the island, range cooker and wall units",
+      },
+      {
+        src: "/work/ipswich-kitchen-dining/3.jpg",
+        alt: "Oak worktop edge above white Shaker drawers with steel bar handles",
+      },
+      {
+        src: "/work/ipswich-kitchen-dining/4.jpg",
+        alt: "Glazed wall cupboard with white plates beside the cooker hood",
+      },
+    ],
+    scope: [
+      "Opened up the layout between kitchen and dining",
+      "New units",
+      "New flooring",
+      "Finished to match the existing joinery",
+    ],
     serviceSlugs: ["kitchen-renovations"],
+    sample: true,
   },
   {
     slug: "felixstowe-rear-extension",
@@ -193,8 +235,30 @@ export const projects: Project[] = [
       "Single-storey addition opening onto the garden.",
     longDescription:
       "A rear extension to create a family dining space with doors onto the garden. We handled the build from foundations through to internal finishes, including the junction with the existing house so the new room felt continuous.",
-    image: "/home/work-extension.jpg",
+    image: "/work/felixstowe-rear-extension/main.jpg",
+    imageAlt: "Brick rear extension with open bifold doors onto a lawn",
+    gallery: [
+      {
+        src: "/work/felixstowe-rear-extension/2.jpg",
+        alt: "Inside the extension, looking out through open bifold doors to the garden",
+      },
+      {
+        src: "/work/felixstowe-rear-extension/3.jpg",
+        alt: "Eaves of the extension, with grey roof tiles, a gutter and mixed brickwork",
+      },
+      {
+        src: "/work/felixstowe-rear-extension/4.jpg",
+        alt: "Level threshold where the bifold door track meets the floor tiles",
+      },
+    ],
+    scope: [
+      "Single-storey rear extension",
+      "Foundations through to internal finishes",
+      "Doors onto the garden",
+      "The junction with the existing house",
+    ],
     serviceSlugs: ["extensions"],
+    sample: true,
   },
   {
     slug: "woodbridge-bathroom",
@@ -204,8 +268,30 @@ export const projects: Project[] = [
       "Full strip-out, tiling, and a walk-in shower.",
     longDescription:
       "A tired family bathroom stripped back and rebuilt with a walk-in shower, new tiling, and updated sanitaryware. The brief was a clean, durable finish that would stand up to daily use without looking clinical.",
-    image: "/home/work-bathroom.jpg",
+    image: "/work/woodbridge-bathroom/main.jpg",
+    imageAlt: "Bathroom with a glass walk-in shower and an oak vanity unit",
+    gallery: [
+      {
+        src: "/work/woodbridge-bathroom/2.jpg",
+        alt: "The bathroom from the doorway, with the shower, vanity unit and window",
+      },
+      {
+        src: "/work/woodbridge-bathroom/3.jpg",
+        alt: "Tiled niche in the shower wall holding two bottles",
+      },
+      {
+        src: "/work/woodbridge-bathroom/4.jpg",
+        alt: "Linear drain along the back of the shower floor",
+      },
+    ],
+    scope: [
+      "Full strip-out",
+      "Walk-in shower",
+      "New tiling",
+      "Updated sanitaryware",
+    ],
     serviceSlugs: ["bathroom-renovations"],
+    sample: true,
   },
   {
     slug: "colchester-internal-refurb",
@@ -215,8 +301,31 @@ export const projects: Project[] = [
       "Hall, stairs, and living rooms brought up to a consistent finish.",
     longDescription:
       "A mid-terrace house with mismatched finishes across the ground floor. We reworked the hall and stairs, repaired plaster, fitted new doors and skirtings, and left the living spaces ready for decoration with a consistent standard throughout.",
-    // Map to general-renovations again once this project has a photo.
-    serviceSlugs: [],
+    image: "/work/colchester-internal-refurb/main.jpg",
+    imageAlt:
+      "Refurbished hall with a white staircase, an oak handrail and grey stair carpet",
+    gallery: [
+      {
+        src: "/work/colchester-internal-refurb/2.jpg",
+        alt: "Straight flight of stairs with white spindles beside the hallway",
+      },
+      {
+        src: "/work/colchester-internal-refurb/3.jpg",
+        alt: "White panelled door left ajar, with a steel lever handle",
+      },
+      {
+        src: "/work/colchester-internal-refurb/4.jpg",
+        alt: "Oak handrail meeting a white newel post",
+      },
+    ],
+    scope: [
+      "Reworked the hall and stairs",
+      "Repaired plaster",
+      "New doors and skirtings",
+      "Living spaces left ready for decoration",
+    ],
+    serviceSlugs: ["general-renovations"],
+    sample: true,
   },
 ];
 

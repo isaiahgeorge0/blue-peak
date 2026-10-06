@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BrandMark } from "@/components/brand/brand-logo";
+import { CheckIcon } from "@/components/check-icon";
 import { ClosingBand } from "@/components/closing-band";
 import {
   primaryCtaClassName,
@@ -11,7 +12,11 @@ import {
 } from "@/components/cta-styles";
 import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/reveal";
-import { ArrowIcon, SectionHeading } from "@/components/section-heading";
+import {
+  ArrowIcon,
+  SectionHeading,
+  sectionTitleClassName,
+} from "@/components/section-heading";
 import { WorkCard } from "@/components/work-card";
 import {
   getProjectsForService,
@@ -21,10 +26,6 @@ import {
 } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
 import { howWeWorkSteps } from "@/lib/site";
-
-/** Matches the h2 in SectionHeading, for sections that have no eyebrow. */
-const sectionTitleClassName =
-  "text-4xl leading-tight tracking-tight text-ink lg:text-5xl";
 
 const focusRingClassName =
   "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent";
@@ -50,25 +51,6 @@ export async function generateMetadata({
     description: service.shortDescription,
     path: `/services/${service.slug}`,
   });
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      className="mt-1 h-4 w-4 shrink-0 text-accent"
-      aria-hidden
-    >
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3 8.5 6.5 12 13 4.5"
-      />
-    </svg>
-  );
 }
 
 export default async function ServiceDetailPage({
@@ -249,8 +231,9 @@ export default async function ServiceDetailPage({
                 href={`/work/${project.slug}`}
                 title={`${project.title}, ${project.location}`}
                 description={project.shortDescription}
-                photoNote={`${project.location} ${project.title.toLowerCase()}`}
                 imageSrc={project.image}
+                imageAlt={project.imageAlt}
+                sample={project.sample}
                 sizes="(max-width: 1023px) calc(100vw - 3rem), 736px"
               />
             </div>

@@ -13,6 +13,7 @@ import { SketchResolve } from "@/components/home/sketch-resolve";
 import { Reveal } from "@/components/reveal";
 import { TrustBadges } from "@/components/trust-badges";
 import { WorkCard } from "@/components/work-card";
+import { projects } from "@/lib/content";
 import { teamMembers } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
 
@@ -44,33 +45,21 @@ export default function HomePage() {
               Finished jobs across <em>Suffolk</em>.
             </SectionHeading>
             <ul className="-mx-6 mt-11 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto overscroll-x-contain px-6 py-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
-              <li className="w-[min(78vw,340px)] shrink-0 snap-start md:w-auto">
-                <WorkCard
-                  href="/work/ipswich-kitchen-dining"
-                  title="Kitchen and dining refit, Ipswich"
-                  description="New layout, units, and flooring in a Victorian terrace"
-                  photoNote="Ipswich kitchen and dining refit"
-                  imageSrc="/home/work-kitchen.jpg"
-                />
-              </li>
-              <li className="w-[min(78vw,340px)] shrink-0 snap-start md:w-auto">
-                <WorkCard
-                  href="/work/felixstowe-rear-extension"
-                  title="Rear extension, Felixstowe"
-                  description="Single-storey addition opening onto the garden"
-                  photoNote="Felixstowe rear extension"
-                  imageSrc="/home/work-extension.jpg"
-                />
-              </li>
-              <li className="w-[min(78vw,340px)] shrink-0 snap-start md:w-auto">
-                <WorkCard
-                  href="/work/woodbridge-bathroom"
-                  title="Bathroom renovation, Woodbridge"
-                  description="Full strip-out, tiling, and a walk-in shower"
-                  photoNote="Woodbridge bathroom renovation"
-                  imageSrc="/home/work-bathroom.jpg"
-                />
-              </li>
+              {projects.slice(0, 3).map((project) => (
+                <li
+                  key={project.slug}
+                  className="w-[min(78vw,340px)] shrink-0 snap-start md:w-auto"
+                >
+                  <WorkCard
+                    href={`/work/${project.slug}`}
+                    title={`${project.title}, ${project.location}`}
+                    description={project.shortDescription}
+                    imageSrc={project.image}
+                    imageAlt={project.imageAlt}
+                    sample={project.sample}
+                  />
+                </li>
+              ))}
             </ul>
 
             <div className="mt-14 grid gap-6 lg:mt-20 lg:grid-cols-3 lg:gap-x-12">
