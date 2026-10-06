@@ -6,6 +6,11 @@ export type Service = {
   /** Portrait photo in public/services/, named by slug. */
   image?: string;
   imageAlt?: string;
+  /**
+   * "Typically includes" checklist on the service page. Every item must come
+   * from this service's shortDescription or longDescription.
+   */
+  includes: string[];
 };
 
 export type Project = {
@@ -14,6 +19,10 @@ export type Project = {
   location: string;
   shortDescription: string;
   longDescription: string;
+  /** Photo path under /public; projects without one show the brand mark. */
+  image?: string;
+  /** Services this job is shown against on the service pages. */
+  serviceSlugs?: string[];
 };
 
 export type ServiceArea = {
@@ -33,6 +42,14 @@ export const services: Service[] = [
       "We take kitchens apart carefully, protect the rest of the house, and rebuild to a plan you have already priced. Typical work includes moving plumbing and electrics, fitting units, worktops, splashbacks, and finishing floors so the room is ready to use.",
     image: "/services/kitchen-renovations.jpg",
     imageAlt: "Sage green Shaker kitchen with wooden worktops and a window over the sink",
+    includes: [
+      "Full strip-out of the old kitchen",
+      "Layout changes",
+      "Moving plumbing and electrics",
+      "Fitting units and worktops",
+      "Splashbacks",
+      "Finished floors",
+    ],
   },
   {
     slug: "bathroom-renovations",
@@ -43,6 +60,14 @@ export const services: Service[] = [
       "We remove the old suite, check the substrate, and rebuild with new sanitaryware, tiling, and waterproofing. Jobs are quoted after measuring up, and we keep dust and disruption contained so the rest of the house stays usable.",
     image: "/services/bathroom-renovations.jpg",
     imageAlt: "Family bathroom with a glass walk-in shower and pale grey wall tiles",
+    includes: [
+      "Removing the old suite",
+      "Checking the substrate",
+      "New sanitaryware",
+      "Tiling",
+      "Waterproofing",
+      "Dust and disruption kept contained",
+    ],
   },
   {
     slug: "extensions",
@@ -53,6 +78,13 @@ export const services: Service[] = [
       "From groundworks through to plaster and paint, we build domestic extensions with clear milestones. You get a written price after a site visit, a start date you can plan around, and one team on the job until the shell and interiors are finished.",
     image: "/services/extensions.jpg",
     imageAlt: "Single-storey brick rear extension with sliding glass doors onto the lawn",
+    includes: [
+      "Single-storey rear and side extensions",
+      "Groundworks",
+      "The shell and interiors",
+      "Plaster and paint",
+      "Clear milestones and a start date you can plan around",
+    ],
   },
   {
     slug: "conservatories",
@@ -63,6 +95,13 @@ export const services: Service[] = [
       "We build and renovate conservatories that stay usable year round. That covers bases, frames, glazing, roofs, and the join into the house, with a written quote after we have seen the property and measured up.",
     image: "/services/conservatories.jpg",
     imageAlt: "Lean-to conservatory with white frames and a grey tiled roof on a pale brick house",
+    includes: [
+      "New conservatories and lean-tos",
+      "Repairs and upgrades to existing ones",
+      "Bases and frames",
+      "Glazing and roofs",
+      "The join into the house",
+    ],
   },
   {
     slug: "roofing",
@@ -73,6 +112,13 @@ export const services: Service[] = [
       "From slipped tiles and leaking valleys to full re-roofs, we handle the work ourselves and leave the property watertight. Quotes cover materials, labour, and making good at flashings, gutters, and barge boards where needed.",
     image: "/services/roofing.jpg",
     imageAlt: "Newly tiled grey pitched roof above the brick gable end of a house",
+    includes: [
+      "Slipped tiles and leaking valleys",
+      "Full re-roofs",
+      "Weatherproofing for houses and outbuildings",
+      "Making good at flashings, gutters and barge boards",
+      "Materials and labour in the quote",
+    ],
   },
   {
     slug: "flooring",
@@ -83,6 +129,12 @@ export const services: Service[] = [
       "We prepare the substrate, level where needed, and fit flooring that matches the room. Useful as a standalone job or as the finishing stage of a kitchen, bathroom, or full renovation.",
     image: "/services/flooring.jpg",
     imageAlt: "New oak plank floor in a living room with a grey sofa and a basket of blankets",
+    includes: [
+      "Timber, laminate, vinyl and tile flooring",
+      "Preparing the substrate",
+      "Levelling where needed",
+      "Fitted on its own or as part of a wider job",
+    ],
   },
   {
     slug: "loft-conversions",
@@ -93,6 +145,13 @@ export const services: Service[] = [
       "We assess head height, access, and structure before quoting, then build out the loft with stairs, insulation, windows, and finishes. You get a fixed price after a site visit and a clear plan for how the space will work day to day.",
     image: "/services/loft-conversions.jpg",
     imageAlt: "Loft bedroom with sloping white ceilings and two roof windows above the bed",
+    includes: [
+      "Head height, access and structure checked before we quote",
+      "Stairs",
+      "Insulation",
+      "Windows",
+      "Finishes",
+    ],
   },
   {
     slug: "general-renovations",
@@ -103,6 +162,14 @@ export const services: Service[] = [
       "Carpentry, plastering, doors, flooring, and finishing work packaged as one job. Useful when you want several rooms brought up to standard without juggling separate trades. We agree scope in writing and stay on site until the list is done.",
     image: "/services/general-renovations.jpg",
     imageAlt: "Renovated Victorian hallway with a patterned tiled floor, painted panelling and a white staircase",
+    includes: [
+      "Carpentry",
+      "Plastering",
+      "Doors",
+      "Flooring",
+      "Finishing work",
+      "Scope agreed in writing",
+    ],
   },
 ];
 
@@ -115,6 +182,8 @@ export const projects: Project[] = [
       "New layout, units, and flooring in a Victorian terrace.",
     longDescription:
       "The owners wanted a clearer run from kitchen to dining without losing the character of the house. We opened the layout slightly, fitted new units and flooring, and finished the room to match the existing joinery.",
+    image: "/home/work-kitchen.jpg",
+    serviceSlugs: ["kitchen-renovations"],
   },
   {
     slug: "felixstowe-rear-extension",
@@ -124,6 +193,8 @@ export const projects: Project[] = [
       "Single-storey addition opening onto the garden.",
     longDescription:
       "A rear extension to create a family dining space with doors onto the garden. We handled the build from foundations through to internal finishes, including the junction with the existing house so the new room felt continuous.",
+    image: "/home/work-extension.jpg",
+    serviceSlugs: ["extensions"],
   },
   {
     slug: "woodbridge-bathroom",
@@ -133,6 +204,8 @@ export const projects: Project[] = [
       "Full strip-out, tiling, and a walk-in shower.",
     longDescription:
       "A tired family bathroom stripped back and rebuilt with a walk-in shower, new tiling, and updated sanitaryware. The brief was a clean, durable finish that would stand up to daily use without looking clinical.",
+    image: "/home/work-bathroom.jpg",
+    serviceSlugs: ["bathroom-renovations"],
   },
   {
     slug: "colchester-internal-refurb",
@@ -142,6 +215,8 @@ export const projects: Project[] = [
       "Hall, stairs, and living rooms brought up to a consistent finish.",
     longDescription:
       "A mid-terrace house with mismatched finishes across the ground floor. We reworked the hall and stairs, repaired plaster, fitted new doors and skirtings, and left the living spaces ready for decoration with a consistent standard throughout.",
+    // Map to general-renovations again once this project has a photo.
+    serviceSlugs: [],
   },
 ];
 
@@ -188,6 +263,12 @@ export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug);
 }
 
+export function getProjectsForService(serviceSlug: string): Project[] {
+  return projects.filter((project) =>
+    project.serviceSlugs?.includes(serviceSlug),
+  );
+}
+
 export function getServiceAreaBySlug(slug: string): ServiceArea | undefined {
   return serviceAreas.find((area) => area.slug === slug);
 }
@@ -202,7 +283,13 @@ export function getServiceAreaBySlug(slug: string): ServiceArea | undefined {
  * - The Resend sending domain. Lead notifications send from
  *   notifications@skapa.uk in src/lib/send-new-lead-email.ts; verify the new
  *   domain in Resend before switching the from address.
+ * - NEXT_PUBLIC_SITE_LIVE=true in Vercel Production, once the placeholder
+ *   photos, sample reviews and contact details are replaced. Until then every
+ *   page is noindex and robots.txt disallows everything.
  */
 export const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://blue-peak-omega.vercel.app"
 ).replace(/\/$/, "");
+
+/** Search engines may index the site only when this is exactly "true". */
+export const siteLive = process.env.NEXT_PUBLIC_SITE_LIVE === "true";

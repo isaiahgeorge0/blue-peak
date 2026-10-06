@@ -8,7 +8,7 @@ type SectionHeadingProps = {
   id?: string;
 };
 
-/** Homepage section heading: uppercase eyebrow, then the serif h2. */
+/** Section heading: uppercase eyebrow, then the serif h2. */
 export function SectionHeading({
   eyebrow,
   children,

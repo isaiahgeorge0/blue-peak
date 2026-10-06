@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import { HomeIntroScript } from "@/components/home/home-intro";
-import { siteUrl } from "@/lib/content";
+import { siteLive, siteUrl } from "@/lib/content";
 import { SITE_NAME } from "@/lib/page-metadata";
 import "./globals.css";
 
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   description:
     "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
   robots: {
-    index: true,
-    follow: true,
+    index: siteLive,
+    follow: siteLive,
   },
   openGraph: {
     title: SITE_NAME,

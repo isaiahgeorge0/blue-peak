@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { SectionHeading } from "@/components/home/section-heading";
+import { SectionHeading } from "@/components/section-heading";
+import { howWeWorkSteps as stages } from "@/lib/site";
 import {
   SKETCH_RESOLVE_PATHS,
   SKETCH_RESOLVE_VIEWBOX,
@@ -26,27 +27,6 @@ const RAIL_END = 0.95;
 const PATH_OVERLAP = 0.22;
 const LINE_REST_OPACITY = 0.1;
 const PHOTO_SCALE_FROM = 1.03;
-
-const stages = [
-  {
-    title: "Enquire",
-    body: "Tell us what you want doing and send a few photos. We will say quickly whether it is a job we can take on.",
-  },
-  {
-    title: "Get a fixed quote",
-    body: "We visit the property, measure up, and send a written price before any work is booked.",
-    caption: "Every job starts on paper",
-  },
-  {
-    title: "Book the work",
-    body: "Agree a start date, we protect the house, and we stay on it until the job is finished.",
-    caption: "You get photos, not surprises",
-  },
-  {
-    title: "Handover",
-    body: "We walk the finished job with you before we call it done.",
-  },
-];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -183,6 +163,7 @@ export function SketchResolve() {
   return (
     <section
       ref={wrapperRef}
+      id="how-we-work"
       aria-labelledby="how-heading"
       className="theme-brand relative bg-page motion-safe:h-[220vh] motion-safe:lg:h-[240vh]"
     >

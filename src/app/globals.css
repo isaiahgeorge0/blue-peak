@@ -82,10 +82,22 @@ body {
 
 /*
   The pitch: the 31 degree roofline cut from the top of the logo mark.
-  Add to a block to cut its top edge along the pitch.
+  Add to a block to cut its top edge along the pitch, rising left to right.
+  The slope is worked out from the block's width, so the block must fill the
+  width of its parent and the parent must be an inline-size container
+  (Tailwind's @container class). By default the slope spans the full width;
+  set --pitch-run to a shorter length in cqw (e.g. 50cqw) to slope only that
+  far and leave the rest of the top edge flat. 0.60086 is tan(31deg).
 */
 .pitch-top {
-  clip-path: polygon(0 var(--pitch-drop, 12vw), 100% 0, 100% 100%, 0 100%);
+  --pitch-run-length: var(--pitch-run, 100cqw);
+  clip-path: polygon(
+    0 calc(var(--pitch-run-length) * 0.60086),
+    var(--pitch-run-length) 0,
+    100% 0,
+    100% 100%,
+    0 100%
+  );
 }
 
 /* Site header: solid bar at the top, transparent once compact so only the pills float */

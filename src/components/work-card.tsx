@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { BrandMark } from "@/components/brand/brand-logo";
 
 const MotionLink = motion.create(Link);
 
@@ -12,8 +13,10 @@ type WorkCardProps = {
   description: string;
   /** Comment-only marker for where real photography should go. */
   photoNote: string;
-  /** Stock or project photo path under /public. */
-  imageSrc: string;
+  /** Stock or project photo path under /public. Without one the card shows the brand mark. */
+  imageSrc?: string;
+  /** Image sizes hint; override when the card is wider than a third of the page. */
+  sizes?: string;
 };
 
 export function WorkCard({
@@ -22,6 +25,7 @@ export function WorkCard({
   description,
   photoNote,
   imageSrc,
+  sizes = "(max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px",
 }: WorkCardProps) {
   return (
     <MotionLink
@@ -31,13 +35,19 @@ export function WorkCard({
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-ink/10">
-        <Image
-          src={imageSrc}
-          alt={photoNote}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={photoNote}
+            fill
+            sizes={sizes}
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-panel">
+            <BrandMark title="" className="h-14 w-auto text-brand/15" />
+          </div>
+        )}
       </div>
       <p className="mt-5 font-serif text-xl text-ink transition-colors duration-200 group-hover:text-accent">
         {title}

@@ -8,8 +8,10 @@ import { BrandLogo } from "@/components/brand/brand-logo";
  * replay it. The 5s timeout is a fallback in case that event never fires; keep
  * it well past the 3s lock so a slow stylesheet cannot cut the intro short.
  * Every other case gets no attribute and therefore no intro and no scroll lock.
+ * A load with a hash (a deep link such as /#how-we-work) skips the intro and
+ * counts as having seen it, so the page can land on the section straight away.
  */
-const homeIntroScript = `(function(){try{var d=document.documentElement,k="bp-intro-seen";if(location.pathname!=="/"||matchMedia("(prefers-reduced-motion: reduce)").matches||sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");d.setAttribute("data-intro","play");var done=function(){d.setAttribute("data-intro","done")};document.addEventListener("animationend",function h(e){if(e.target===d&&e.animationName==="home-intro-lock"){document.removeEventListener("animationend",h);done()}});setTimeout(done,5000)}catch(e){}})();`;
+const homeIntroScript = `(function(){try{var d=document.documentElement,k="bp-intro-seen";if(location.pathname!=="/"||matchMedia("(prefers-reduced-motion: reduce)").matches||sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");if(location.hash)return;d.setAttribute("data-intro","play");var done=function(){d.setAttribute("data-intro","done")};document.addEventListener("animationend",function h(e){if(e.target===d&&e.animationName==="home-intro-lock"){document.removeEventListener("animationend",h);done()}});setTimeout(done,5000)}catch(e){}})();`;
 
 export function HomeIntroScript() {
   return (

@@ -19,7 +19,7 @@ import {
 } from "react";
 import { BrandMark } from "@/components/brand/brand-logo";
 import { textLinkClassName } from "@/components/cta-styles";
-import { ArrowIcon, SectionHeading } from "@/components/home/section-heading";
+import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { services } from "@/lib/content";
 
 /**

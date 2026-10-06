@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/brand-logo";
-import {
-  brandBandPrimaryCtaClassName,
-  textLinkClassName,
-} from "@/components/cta-styles";
+import { ClosingBand } from "@/components/closing-band";
+import { textLinkClassName } from "@/components/cta-styles";
 import { HomeHero } from "@/components/home/home-hero";
 import { HomeIntro } from "@/components/home/home-intro";
 import { HomeMotionIslands } from "@/components/home/home-motion-islands";
 import { ReviewsSection } from "@/components/home/reviews-section";
-import { ArrowIcon, SectionHeading } from "@/components/home/section-heading";
+import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { ServicesRail } from "@/components/home/services-rail";
 import { SketchResolve } from "@/components/home/sketch-resolve";
 import { Reveal } from "@/components/reveal";
 import { TrustBadges } from "@/components/trust-badges";
 import { WorkCard } from "@/components/work-card";
-import { sitePhoneDisplay, sitePhoneTel, teamMembers } from "@/lib/site";
+import { teamMembers } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -145,55 +142,7 @@ export default function HomePage() {
         </section>
       </Reveal>
 
-      <Reveal>
-        <section className="theme-brand border-b border-white/15 bg-page">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">
-            <div>
-              <SectionHeading eyebrow="Next step">
-                Ready to get a <em>price</em> on the job?
-              </SectionHeading>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
-                Tell us what you&apos;re planning. We usually reply the same
-                working day.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-                <Link href="/contact" className={brandBandPrimaryCtaClassName}>
-                  Get a quote
-                </Link>
-                <a
-                  href={`tel:${sitePhoneTel}`}
-                  className="text-sm font-semibold text-ink underline-offset-4 hover:underline"
-                >
-                  Call {sitePhoneDisplay}
-                </a>
-              </div>
-            </div>
-            <div>
-              <Link
-                href="/quote"
-                className="relative block aspect-[4/3] overflow-hidden rounded-xl border border-white/15"
-              >
-                <Image
-                  src="/home/quote-preview.jpg"
-                  alt="3D quote calculator preview"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 540px"
-                  className="object-cover"
-                />
-              </Link>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-                <p className="text-sm text-ink/80">
-                  Or build a rough estimate in 3D
-                </p>
-                <Link href="/quote" className={textLinkClassName}>
-                  Open the calculator
-                  <ArrowIcon />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      </Reveal>
+      <ClosingBand />
     </>
   );
 }

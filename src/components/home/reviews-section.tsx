@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { SectionHeading } from "@/components/home/section-heading";
+import { SectionHeading } from "@/components/section-heading";
 import { reviews } from "@/lib/reviews";
 
 /*
