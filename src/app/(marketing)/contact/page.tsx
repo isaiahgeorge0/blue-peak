@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  primaryCtaClassName,
-  secondaryCtaClassName,
-} from "@/components/cta-styles";
 import { ContactForm } from "@/components/contact-form";
+import { secondaryCtaClassName } from "@/components/cta-styles";
+import { PageHeader } from "@/components/page-header";
 import { Reveal } from "@/components/reveal";
-import { services } from "@/lib/content";
-import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
+import { serviceAreas, services } from "@/lib/content";
+import { howWeWorkSteps, sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "Contact",
     description:
-      "Request a written quote for kitchen, bathroom, extension, or renovation work from Blue Peak Solutions.",
+      "Request a written quote for kitchen, bathroom, extension, or renovation work from Blue Peak.",
     path: "/contact",
   });
 }
+
+const detailHeadingClassName =
+  "font-sans text-xs font-medium tracking-[0.2em] text-accent uppercase";
 
 export default function ContactPage() {
   const serviceOptions = services.map((service) => ({
@@ -26,59 +27,99 @@ export default function ContactPage() {
   }));
 
   return (
-    <div className="bg-page">
-      <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:py-20">
-        <Reveal>
-          <div>
-            <h1 className="text-4xl tracking-tight text-ink sm:text-5xl">
-              Get a quote
-            </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-ink/75">
-              Tell us what you are planning. We usually reply the same working
-              day with a clear next step.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#quote-form" className={primaryCtaClassName}>
-                Get a quote
-              </a>
-              <Link href="/work" className={secondaryCtaClassName}>
-                See our work
-              </Link>
-            </div>
-            <div className="mt-8 space-y-3 text-sm text-ink/70">
-              <p>
-                <span className="text-accent">Phone</span>
-                <br />
-                <a
-                  href={`tel:${sitePhoneTel}`}
-                  className="text-ink transition-colors hover:text-accent"
-                >
-                  {sitePhoneDisplay}
-                </a>
-              </p>
-              <p>
-                <span className="text-accent">Message</span>
-                <br />
-                <a
-                  href="#quote-form"
-                  className="text-ink transition-colors hover:text-accent"
-                >
-                  Use the contact form
-                </a>
-              </p>
-            </div>
-          </div>
-        </Reveal>
+    <>
+      <PageHeader
+        eyebrow="Contact"
+        title="Get a quote"
+        lede="Tell us what you are planning. We usually reply the same working day with a clear next step."
+      />
 
-        <Reveal delay={0.08}>
+      <section className="bg-page">
+        <div className="mx-auto grid max-w-6xl gap-16 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16 lg:py-28">
+          {/* First in the source so it leads on phones; placed right on desktop. */}
           <div
             id="quote-form"
-            className="scroll-mt-28 rounded-lg border border-ink/10 bg-panel px-6 py-8 sm:px-8"
+            className="scroll-mt-28 rounded-lg border border-ink/10 bg-panel px-6 py-8 sm:px-8 lg:col-start-2 lg:row-start-1 lg:self-start"
           >
             <ContactForm services={serviceOptions} />
           </div>
+
+          <Reveal className="space-y-12 lg:col-start-1 lg:row-start-1">
+            <div>
+              <h2>
+                <span className={detailHeadingClassName}>Phone</span>
+              </h2>
+              <a
+                href={`tel:${sitePhoneTel}`}
+                className="mt-3 inline-block font-serif text-4xl tracking-tight text-ink transition-colors duration-200 hover:text-accent lg:text-5xl"
+              >
+                {sitePhoneDisplay}
+              </a>
+            </div>
+
+            <div>
+              <h2>
+                <span className={detailHeadingClassName}>What happens next</span>
+              </h2>
+              <ol className="mt-5 space-y-5">
+                {howWeWorkSteps.slice(0, 3).map((step, index) => (
+                  <li key={step.title} className="flex gap-4">
+                    <span className="pt-1 text-sm font-medium tracking-[0.2em] text-accent">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <h3 className="text-xl leading-tight text-ink">
+                        {step.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-relaxed text-ink/70">
+                        {step.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div>
+              <h2>
+                <span className={detailHeadingClassName}>Areas we cover</span>
+              </h2>
+              <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+                {serviceAreas.map((area) => (
+                  <li key={area.slug}>
+                    <Link
+                      href={`/areas/${area.slug}`}
+                      className="text-base text-ink underline decoration-ink/30 underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-accent"
+                    >
+                      {area.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="bg-panel">
+        <Reveal className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 md:flex-row md:items-center md:justify-between md:gap-12 lg:py-14">
+          <div>
+            <h2 className="text-2xl leading-tight tracking-tight text-ink lg:text-3xl">
+              Not ready to talk yet?
+            </h2>
+            <p className="mt-2 max-w-xl text-base leading-relaxed text-ink/70">
+              Build a rough estimate in 3D and see a guide price in a couple of
+              minutes.
+            </p>
+          </div>
+          <Link
+            href="/quote"
+            className={`${secondaryCtaClassName} shrink-0 self-start md:self-auto`}
+          >
+            Build an estimate
+          </Link>
         </Reveal>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

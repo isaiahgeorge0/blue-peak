@@ -1,7 +1,13 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type PageHeaderProps = {
   eyebrow: string;
+  /**
+   * Shows the eyebrow as a breadcrumb instead: the eyebrow links to `href`,
+   * followed by the current page's name.
+   */
+  breadcrumb?: { href: string; current: string };
   /** The page's h1. */
   title: ReactNode;
   lede?: ReactNode;
@@ -14,13 +20,42 @@ type PageHeaderProps = {
  * Not wrapped in Reveal: it is above the fold and must paint without waiting
  * for hydration.
  */
-export function PageHeader({ eyebrow, title, lede, children }: PageHeaderProps) {
+export function PageHeader({
+  eyebrow,
+  breadcrumb,
+  title,
+  lede,
+  children,
+}: PageHeaderProps) {
   return (
     <section className="bg-panel">
       <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
-        <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
-          {eyebrow}
-        </p>
+        {breadcrumb ? (
+          <nav aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-medium tracking-[0.2em] uppercase">
+              <li>
+                <Link
+                  href={breadcrumb.href}
+                  className="text-accent underline-offset-4 hover:underline"
+                >
+                  {eyebrow}
+                </Link>
+              </li>
+              <li aria-hidden className="text-ink/40">
+                /
+              </li>
+              <li>
+                <span aria-current="page" className="text-ink/70">
+                  {breadcrumb.current}
+                </span>
+              </li>
+            </ol>
+          </nav>
+        ) : (
+          <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
+            {eyebrow}
+          </p>
+        )}
         <h1 className="mt-4 max-w-4xl text-4xl leading-tight tracking-tight text-ink lg:text-6xl">
           {title}
         </h1>

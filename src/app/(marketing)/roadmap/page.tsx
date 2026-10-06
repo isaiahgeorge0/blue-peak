@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "Roadmap",
     description:
-      "What Blue Peak Solutions is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
+      "What Blue Peak is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
     path: "/roadmap",
   });
 }

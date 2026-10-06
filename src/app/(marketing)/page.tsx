@@ -19,7 +19,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
-    title: "Blue Peak Solutions | Building and renovation in Ipswich",
+    title: "Blue Peak | Building and renovation in Ipswich",
     absoluteTitle: true,
     description:
       "Kitchens, extensions, bathrooms, and refurbs across Ipswich and Suffolk. Written quotes before we start.",

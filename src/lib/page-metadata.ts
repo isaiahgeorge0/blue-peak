@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-export const SITE_NAME = "Blue Peak Solutions";
+export const SITE_NAME = "Blue Peak";
 
 export const OG_IMAGE_ALT =
-  "Blue Peak Solutions - building and renovation across Ipswich and Suffolk";
+  "Blue Peak - building and renovation across Ipswich and Suffolk";
 
 /** Served by app/opengraph-image.tsx; resolved against `metadataBase`. */
 const OG_IMAGE = {
@@ -15,7 +15,7 @@ const OG_IMAGE = {
 };
 
 type PageMetadataInput = {
-  /** Page title; the root layout template appends " | Blue Peak Solutions". */
+  /** Page title; the root layout template appends " | Blue Peak". */
   title: string;
   /** Use the title as-is instead of applying the template. */
   absoluteTitle?: boolean;

@@ -12,7 +12,7 @@ export type HowWeWorkStep = {
 export const howWeWorkSteps: HowWeWorkStep[] = [
   {
     title: "Enquire",
-    body: "Tell us what you want doing and send a few photos. We will say quickly whether it is a job we can take on.",
+    body: "Tell us what you want doing. We will say quickly whether it is a job we can take on.",
   },
   {
     title: "Get a fixed quote",

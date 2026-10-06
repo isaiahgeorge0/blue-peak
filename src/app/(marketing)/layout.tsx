@@ -4,10 +4,15 @@ import { SiteHeader } from "@/components/site-header";
 import { siteUrl } from "@/lib/content";
 import { sitePhoneTel } from "@/lib/site";
 
+/*
+ * No company is registered yet, so there is no legal name or confirmed street
+ * address. At launch, add: legalName (the registered company name), the
+ * company number (e.g. as an identifier), and streetAddress and postalCode.
+ */
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Blue Peak Solutions",
+  name: "Blue Peak",
   description:
     "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
   url: siteUrl,
@@ -15,10 +20,8 @@ const localBusinessJsonLd = {
   priceRange: "££",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "14 St Helens Street",
     addressLocality: "Ipswich",
     addressRegion: "Suffolk",
-    postalCode: "IP4 1HH",
     addressCountry: "GB",
   },
   areaServed: ["Ipswich", "Felixstowe", "Woodbridge", "Colchester"],

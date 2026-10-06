@@ -352,7 +352,7 @@ export const serviceAreas: ServiceArea[] = [
     shortDescription:
       "Kitchens, bathrooms, and refurbs for Woodbridge homes.",
     longDescription:
-      "Woodbridge is part of our regular Suffolk patch. If you are planning a kitchen, bathroom, or internal refurb, send photos and a short brief and we will confirm whether it is a job we can take on.",
+      "Woodbridge is part of our regular Suffolk patch. If you are planning a kitchen, bathroom, or internal refurb, send a short brief and we will confirm whether it is a job we can take on.",
   },
   {
     slug: "colchester",

@@ -6,7 +6,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "Build your estimate",
     description:
-      "Interactive 3D estimate for loft conversions, extensions, and renovations with Blue Peak Solutions.",
+      "Interactive 3D estimate for loft conversions, extensions, and renovations with Blue Peak.",
     path: "/quote",
   });
 }

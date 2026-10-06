@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceAreaBySlug, serviceAreas } from "@/lib/content";
+import { CheckIcon } from "@/components/check-icon";
+import { ClosingBand } from "@/components/closing-band";
+import { textLinkClassName } from "@/components/cta-styles";
+import { PageHeader } from "@/components/page-header";
+import { Reveal } from "@/components/reveal";
+import {
+  ArrowIcon,
+  SectionHeading,
+  sectionTitleClassName,
+} from "@/components/section-heading";
+import { WorkCard } from "@/components/work-card";
+import {
+  getServiceAreaBySlug,
+  projects,
+  serviceAreas,
+  services,
+} from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
-
-const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent transition-opacity hover:opacity-90";
 
 export function generateStaticParams() {
   return serviceAreas.map((area) => ({ slug: area.slug }));
@@ -40,25 +53,77 @@ export default async function AreaDetailPage({
     notFound();
   }
 
+  const project = projects.find((item) => item.location === area.name);
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-16">
-      <p className="text-sm tracking-wide text-accent uppercase">
-        Service area
-      </p>
-      <h1 className="mt-3 text-4xl tracking-tight text-ink sm:text-5xl">
-        Building work in {area.name}
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink/75">
-        {area.shortDescription}
-      </p>
-      <p className="mt-6 max-w-2xl text-base leading-relaxed text-ink/70">
-        {area.longDescription}
-      </p>
-      <div className="mt-10">
-        <Link href="/contact" className={quoteButtonClassName}>
-          Get a quote
-        </Link>
-      </div>
-    </div>
+    <>
+      <PageHeader
+        eyebrow="Areas"
+        breadcrumb={{ href: "/about#areas", current: area.name }}
+        title={`Builders in ${area.name}`}
+        lede={area.shortDescription}
+      />
+
+      <section className="bg-page">
+        <Reveal className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16 lg:py-28">
+          <div>
+            <h2 className={sectionTitleClassName}>Working in {area.name}</h2>
+            <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-ink/80 lg:text-xl lg:leading-relaxed">
+              {area.longDescription}
+            </p>
+          </div>
+          <div className="rounded-xl border border-ink/10 p-6 lg:self-start lg:p-8">
+            <h3 className="text-2xl leading-tight text-ink">What we do here</h3>
+            <ul className="mt-6 space-y-4">
+              {services.map((service) => (
+                <li
+                  key={service.slug}
+                  className="flex gap-3 text-base leading-relaxed text-ink/80"
+                >
+                  <CheckIcon />
+                  <Link
+                    href={`/services/${service.slug}`}
+                    className="underline-offset-4 transition-colors duration-200 hover:text-accent hover:underline"
+                  >
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </section>
+
+      {project ? (
+        <section className="bg-panel">
+          <Reveal className="mx-auto grid max-w-6xl gap-10 px-6 py-20 lg:grid-cols-3 lg:gap-x-12 lg:py-28">
+            <div className="flex flex-col">
+              <SectionHeading eyebrow="Recent work nearby">
+                A recent job in <em>{area.name}</em>.
+              </SectionHeading>
+              <div className="mt-8 lg:mt-auto">
+                <Link href="/work" className={textLinkClassName}>
+                  See all our work
+                  <ArrowIcon />
+                </Link>
+              </div>
+            </div>
+            <div className="lg:col-span-2">
+              <WorkCard
+                href={`/work/${project.slug}`}
+                title={`${project.title}, ${project.location}`}
+                description={project.shortDescription}
+                imageSrc={project.image}
+                imageAlt={project.imageAlt}
+                sample={project.sample}
+                sizes="(max-width: 1023px) calc(100vw - 3rem), 736px"
+              />
+            </div>
+          </Reveal>
+        </section>
+      ) : null}
+
+      <ClosingBand />
+    </>
   );
 }
