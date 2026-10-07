@@ -73,7 +73,7 @@ export default function ServicesPage() {
                     <p className="mt-3 text-base leading-relaxed text-ink/70">
                       {service.shortDescription}
                     </p>
-                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold text-accent underline-offset-4 group-hover:underline">
+                    <span className="link-arrow mt-auto inline-flex items-center gap-2 self-start pt-6 text-sm font-bold text-accent">
                       Learn more
                       <ArrowIcon />
                     </span>

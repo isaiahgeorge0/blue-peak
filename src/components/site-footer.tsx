@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { ScrollDistance } from "@/components/scroll-distance";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 export function SiteFooter() {
@@ -24,13 +25,18 @@ export function SiteFooter() {
             <li>
               <Link
                 href="/contact#quote-form"
-                className="transition-colors hover:text-accent"
+                className="link-draw transition-colors hover:text-accent"
               >
                 Send us a message
               </Link>
             </li>
             <li>
-              <a href={`tel:${sitePhoneTel}`}>{sitePhoneDisplay}</a>
+              <a
+                href={`tel:${sitePhoneTel}`}
+                className="link-draw transition-colors hover:text-accent"
+              >
+                {sitePhoneDisplay}
+              </a>
             </li>
           </ul>
         </div>
@@ -46,6 +52,9 @@ export function SiteFooter() {
             © 2026 Blue Peak. All rights reserved.
           </p>
         </div>
+      </div>
+      <div className="mx-auto -mt-4 max-w-6xl px-6 pb-10 empty:hidden">
+        <ScrollDistance />
       </div>
     </footer>
   );

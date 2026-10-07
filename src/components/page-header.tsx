@@ -16,7 +16,8 @@ type PageHeaderProps = {
 };
 
 /**
- * Frost White band that opens an inner page, directly under the site header.
+ * Frost White band that opens an inner page. It runs up behind the floating
+ * header, so its top padding includes the header's clearance.
  * Not wrapped in Reveal: it is above the fold and must paint without waiting
  * for hydration.
  */
@@ -29,14 +30,14 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <section className="bg-panel">
-      <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+      <div className="mx-auto max-w-6xl px-6 pt-38 pb-20 lg:pt-46 lg:pb-28">
         {breadcrumb ? (
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
               <li>
                 <Link
                   href={breadcrumb.href}
-                  className="text-accent underline-offset-4 hover:underline"
+                  className="link-draw text-accent"
                 >
                   {eyebrow}
                 </Link>

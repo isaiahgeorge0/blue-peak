@@ -19,7 +19,7 @@ export default function NotFound() {
         lede="Sorry, we couldn't find the page you were looking for."
       >
         <Link href="/" className={primaryCtaClassName}>
-          Back to the homepage
+          <span className="cta-label">Back to the homepage</span>
         </Link>
       </PageHeader>
     </SiteChrome>

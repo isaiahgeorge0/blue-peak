@@ -93,14 +93,14 @@ export default async function ServiceDetailPage({
       <JsonLd data={breadcrumbJsonLd} />
 
       <section className="bg-panel">
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-16 lg:py-28">
+        <div className="mx-auto grid max-w-6xl gap-12 px-6 pt-38 pb-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-16 lg:pt-46 lg:pb-28">
           <div>
             <nav aria-label="Breadcrumb">
               <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
                 <li>
                   <Link
                     href="/services"
-                    className="text-accent underline-offset-4 hover:underline"
+                    className="link-draw text-accent"
                   >
                     Services
                   </Link>
@@ -123,7 +123,7 @@ export default async function ServiceDetailPage({
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href="/contact" className={primaryCtaClassName}>
-                Get a quote
+                <span className="cta-label">Get a quote</span>
               </Link>
               <Link href="/quote" className={secondaryCtaClassName}>
                 Build an estimate

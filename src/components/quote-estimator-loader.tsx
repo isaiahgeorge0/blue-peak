@@ -22,7 +22,7 @@ function EstimatorUnavailable() {
       </p>
       <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
         <Link href="/contact" className={primaryCtaClassName}>
-          Send an enquiry
+          <span className="cta-label">Send an enquiry</span>
         </Link>
         <a
           href={`tel:${sitePhoneTel}`}

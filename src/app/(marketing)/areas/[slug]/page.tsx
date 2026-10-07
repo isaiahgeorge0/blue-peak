@@ -83,7 +83,7 @@ export default async function AreaDetailPage({
                   <CheckIcon />
                   <Link
                     href={`/services/${service.slug}`}
-                    className="underline-offset-4 transition-colors duration-200 hover:text-accent hover:underline"
+                    className="link-draw transition-colors duration-200 hover:text-accent"
                   >
                     {service.name}
                   </Link>

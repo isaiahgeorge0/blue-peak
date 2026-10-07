@@ -24,11 +24,11 @@ export function ClosingBand() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
               <Link href="/contact" className={brandBandPrimaryCtaClassName}>
-                Get a quote
+                <span className="cta-label">Get a quote</span>
               </Link>
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="text-sm font-bold text-ink underline-offset-4 hover:underline"
+                className="link-draw text-sm font-bold text-ink"
               >
                 Call {sitePhoneDisplay}
               </a>

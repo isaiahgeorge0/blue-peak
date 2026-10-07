@@ -92,13 +92,13 @@ export default async function ProjectDetailPage({
       <JsonLd data={breadcrumbJsonLd} />
 
       <section className="bg-panel">
-        <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+        <div className="mx-auto max-w-6xl px-6 pt-38 pb-20 lg:pt-46 lg:pb-28">
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
               <li>
                 <Link
                   href="/work"
-                  className="text-accent underline-offset-4 hover:underline"
+                  className="link-draw text-accent"
                 >
                   Work
                 </Link>

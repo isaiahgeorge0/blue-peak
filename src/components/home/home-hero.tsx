@@ -8,7 +8,7 @@ import {
   useTransform,
   type MotionStyle,
 } from "motion/react";
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { BrandMark } from "@/components/brand/brand-logo";
 import {
   primaryCtaClassName,
@@ -28,8 +28,41 @@ function useHasMounted() {
 }
 
 /**
- * Full-bleed hero locked to one dynamic viewport height.
- * Pulls under the sticky header so the first screen is exactly the hero.
+ * Bottom-right "Scroll" pill. Fades out once the page has scrolled 80px and
+ * stays gone. The wheel dot only loops when motion is allowed.
+ */
+function ScrollCue() {
+  const [gone, setGone] = useState(false);
+
+  useEffect(() => {
+    if (gone) return;
+    const onScroll = () => {
+      if (window.scrollY > 80) setGone(true);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [gone]);
+
+  return (
+    <div
+      aria-hidden
+      className={`home-scroll-cue absolute right-4 bottom-4 z-10 flex h-9 items-center gap-2 rounded-full bg-peak-white pr-4 pl-3 text-xs font-bold tracking-[0.2em] text-ink uppercase shadow-lg shadow-navy/20 transition-opacity duration-300 ease-out sm:right-6 sm:bottom-6 lg:right-8 lg:bottom-10 ${
+        gone ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <svg viewBox="0 0 16 24" className="h-5 w-auto">
+        <rect x="1" y="1" width="14" height="22" rx="7" fill="none" stroke="currentColor" strokeWidth={1.5} />
+        <circle className="scroll-cue-dot" cx="8" cy="7" r="1.75" fill="currentColor" />
+      </svg>
+      Scroll
+    </div>
+  );
+}
+
+/**
+ * Full-bleed hero locked to one dynamic viewport height. The header floats
+ * over it, so the first screen is exactly the hero.
  */
 export function HomeHero() {
   const reduceMotion = useHomeMotionPreference();
@@ -50,7 +83,7 @@ export function HomeHero() {
   return (
     <section
       ref={sectionRef}
-      className="home-hero relative isolate -mt-[var(--site-header-height,4.5rem)] h-[100dvh] overflow-hidden bg-navy"
+      className="home-hero relative isolate h-[100dvh] overflow-hidden bg-navy"
     >
       <div className="home-hero-media absolute inset-0">
         <motion.div
@@ -73,7 +106,7 @@ export function HomeHero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height,4.5rem)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
         {/*
           Frosted glass: solid near-opaque fallback first, then blur where supported
           so content never sits on a fully transparent plate.
@@ -93,7 +126,7 @@ export function HomeHero() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
             <Link href="/contact" className={primaryCtaClassName}>
-              Get a quote
+              <span className="cta-label">Get a quote</span>
             </Link>
             <Link href="/quote" className={secondaryCtaClassName}>
               Build an estimate
@@ -101,6 +134,8 @@ export function HomeHero() {
           </div>
         </div>
       </div>
+
+      <ScrollCue />
     </section>
   );
 }

@@ -21,7 +21,7 @@ export default function RoadmapPage() {
   return (
     <>
       <section className="bg-panel">
-        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+        <div className="mx-auto max-w-6xl px-6 pt-34 pb-16 lg:pt-42 lg:pb-24">
           <p className="text-sm font-bold tracking-wide text-accent uppercase">
             Roadmap
           </p>
