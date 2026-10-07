@@ -35,7 +35,7 @@ const fieldClassName =
 const labelClassName = "block text-sm font-medium text-ink/85";
 
 const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
+  "inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold text-on-accent transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
 
 export function ContactForm({ services }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
@@ -133,10 +133,10 @@ export function ContactForm({ services }: ContactFormProps) {
   if (isSuccess) {
     return (
       <div className="rounded-lg border border-accent/30 bg-panel px-6 py-10">
-        <h2 className="font-serif text-3xl tracking-tight text-ink">
+        <h2 className="text-3xl tracking-heading text-ink">
           Thanks, we have your enquiry
         </h2>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/75">
+        <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink/75">
           We usually reply the same working day with next steps or a time to
           visit. If it is urgent, call us and mention you sent this form.
         </p>

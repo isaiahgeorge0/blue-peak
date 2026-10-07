@@ -70,8 +70,14 @@
   --color-peak-white: var(--peak-white);
   --color-navy: var(--navy);
 
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-fraunces);
+  --font-sans: var(--font-nunito-sans);
+  --font-serif: "Times New Roman", Times, var(--font-tinos), serif;
+
+  /* Serif display headings: text-display-sm below lg; tracking -0.03em from text-5xl up, -0.02em below. */
+  --text-display-sm: 2.5rem;
+  --tracking-display: -0.03em;
+  --tracking-heading: -0.02em;
+  --leading-display: 1.05;
 }
 
 body {
@@ -440,11 +446,22 @@ body {
   }
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
+@layer base {
+  /* The serif ships at 400 only; anything heavier would be faux bold. */
+  h1,
+  h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-synthesis-weight: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
 }

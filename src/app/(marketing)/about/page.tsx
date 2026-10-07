@@ -51,7 +51,7 @@ export default function AboutPage() {
         <Reveal className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-16 lg:py-28">
           <div>
             <h2 className={sectionTitleClassName}>Who we are</h2>
-            <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-ink/80 lg:text-xl lg:leading-relaxed">
+            <p className="mt-6 max-w-[60ch] text-xl leading-relaxed text-ink/80">
               We care about tidy sites, honest timescales, and finishes that
               hold up. Most of our work is for homeowners across Suffolk who
               want a clear written price before anything starts, and a team
@@ -74,10 +74,10 @@ export default function AboutPage() {
 
       <section className="theme-brand bg-page">
         <Reveal className="mx-auto max-w-6xl px-6 py-24 text-center lg:py-36">
-          <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
+          <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
             What we stand for
           </p>
-          <h2 className="mt-6 text-5xl leading-tight tracking-tight text-ink md:text-6xl lg:text-7xl">
+          <h2 className="mt-6 text-6xl leading-display tracking-display text-ink lg:text-7xl xl:text-8xl">
             <span className="block sm:inline">Simple.</span>{" "}
             <em className="block sm:inline">Trusted.</em>{" "}
             <span className="block sm:inline">Different.</span>
@@ -91,13 +91,13 @@ export default function AboutPage() {
           <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8 lg:mt-16 lg:gap-12">
             {differences.map((point, index) => (
               <li key={point.title} className="border-t border-ink/15 pt-6">
-                <p className="text-sm font-medium tracking-[0.2em] text-accent">
+                <p className="text-sm font-bold tracking-[0.2em] text-accent">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-3 text-2xl leading-tight text-ink">
+                <h3 className="mt-3 text-2xl leading-tight font-semibold text-ink">
                   {point.title}
                 </h3>
-                <p className="mt-3 max-w-sm text-base leading-relaxed text-ink/70">
+                <p className="mt-3 max-w-sm text-lg leading-relaxed text-ink/70">
                   {point.body}
                 </p>
               </li>
@@ -118,11 +118,11 @@ export default function AboutPage() {
                 <div className="flex aspect-[4/5] w-full items-center justify-center rounded-lg bg-page">
                   <BrandMark title="" className="h-14 w-auto text-brand/15" />
                 </div>
-                <h3 className="mt-5 text-2xl text-ink">{member.name}</h3>
+                <h3 className="mt-5 text-2xl font-semibold text-ink">{member.name}</h3>
                 <p className="mt-1 text-sm tracking-wide text-accent">
                   {member.role}
                 </p>
-                <p className="mt-3 max-w-sm text-base leading-relaxed text-ink/70">
+                <p className="mt-3 max-w-sm text-lg leading-relaxed text-ink/70">
                   {member.blurb}
                 </p>
               </li>
@@ -143,10 +143,10 @@ export default function AboutPage() {
                   href={`/areas/${area.slug}`}
                   className="group flex h-full flex-col rounded-xl border border-ink/10 p-5 transition-colors duration-200 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:p-6"
                 >
-                  <h3 className="text-2xl leading-tight text-ink transition-colors duration-200 group-hover:text-accent">
+                  <h3 className="text-2xl leading-tight font-semibold text-ink transition-colors duration-200 group-hover:text-accent">
                     {area.name}
                   </h3>
-                  <p className="mt-3 text-base leading-relaxed text-ink/70">
+                  <p className="mt-3 text-lg leading-relaxed text-ink/70">
                     {area.shortDescription}
                   </p>
                   <span className="mt-auto pt-6 text-accent">

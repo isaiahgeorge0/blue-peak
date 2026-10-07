@@ -10,7 +10,7 @@ type SectionHeadingProps = {
 
 /** The serif h2 style, for sections that have no eyebrow. */
 export const sectionTitleClassName =
-  "text-4xl leading-tight tracking-tight text-ink lg:text-5xl";
+  "text-display-sm leading-display tracking-heading text-ink lg:text-6xl lg:tracking-display";
 
 /** Section heading: uppercase eyebrow, then the serif h2. */
 export function SectionHeading({
@@ -21,7 +21,7 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <div className={className}>
-      <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
+      <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
         {eyebrow}
       </p>
       <h2 id={id} className={`mt-4 ${sectionTitleClassName}`}>

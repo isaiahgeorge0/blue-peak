@@ -118,7 +118,7 @@ export function SiteHeader() {
                   href={link.href}
                   onClick={() => closeMenu()}
                   aria-current={isActive(pathname, link.href) ? "page" : undefined}
-                  className={`inline-block font-serif text-4xl tracking-tight transition-[opacity,translate,color] duration-500 ease-out hover:text-accent motion-reduce:transition-none sm:text-5xl ${
+                  className={`inline-block font-serif text-4xl tracking-heading transition-[opacity,translate,color] duration-500 ease-out hover:text-accent motion-reduce:transition-none sm:text-5xl sm:tracking-display ${
                     isActive(pathname, link.href)
                       ? "text-ridge-cyan"
                       : "text-ink"

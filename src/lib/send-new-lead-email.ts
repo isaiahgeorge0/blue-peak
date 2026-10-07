@@ -55,10 +55,10 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload) {
     .map(
       ([label, value], index) => `
         <tr>
-          <td style="padding: 12px 0; border-top: ${index === 0 ? "none" : "1px solid #3a3a3a"}; width: 120px; vertical-align: top; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #89cff0;">
+          <td style="padding: 12px 0; border-top: ${index === 0 ? "none" : "1px solid #3a3a3a"}; width: 120px; vertical-align: top; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #89cff0;">
             ${escapeHtml(label)}
           </td>
-          <td style="padding: 12px 0; border-top: ${index === 0 ? "none" : "1px solid #3a3a3a"}; vertical-align: top; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #f4f1ea;">
+          <td style="padding: 12px 0; border-top: ${index === 0 ? "none" : "1px solid #3a3a3a"}; vertical-align: top; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #f4f1ea;">
             ${escapeHtml(value)}
           </td>
         </tr>`,
@@ -80,10 +80,10 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload) {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 560px; background-color: #2a2a2a; border: 1px solid #3a3a3a;">
           <tr>
             <td style="padding: 28px 32px 20px; border-bottom: 2px solid #89cff0;">
-              <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 26px; line-height: 1.2; color: #f4f1ea;">
+              <p style="margin: 0; font-family: 'Times New Roman', Times, serif; font-size: 26px; line-height: 1.2; color: #f4f1ea;">
                 Blue Peak Solutions
               </p>
-              <p style="margin: 10px 0 0; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #89cff0;">
+              <p style="margin: 10px 0 0; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #89cff0;">
                 New website lead
               </p>
             </td>
@@ -100,13 +100,13 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload) {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="background-color: #89cff0; border-radius: 4px;">
-                    <a href="${escapeHtml(adminLeadsUrl)}" style="display: inline-block; padding: 14px 22px; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #0a0a0a; text-decoration: none;">
+                    <a href="${escapeHtml(adminLeadsUrl)}" style="display: inline-block; padding: 14px 22px; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #0a0a0a; text-decoration: none;">
                       Open in admin
                     </a>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 16px 0 0; font-family: Inter, Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #9a9a9a;">
+              <p style="margin: 16px 0 0; font-family: 'Nunito Sans', Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #9a9a9a;">
                 Or paste this link:<br />
                 <a href="${escapeHtml(adminLeadsUrl)}" style="color: #89cff0; word-break: break-all;">${escapeHtml(adminLeadsUrl)}</a>
               </p>

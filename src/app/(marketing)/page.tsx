@@ -42,7 +42,7 @@ export default function HomePage() {
         <section className="bg-panel">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
             <SectionHeading eyebrow="Recent work">
-              Finished jobs across <em>Suffolk</em>.
+              Finished jobs across <em>Suffolk.</em>
             </SectionHeading>
             <ul className="-mx-6 mt-11 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto overscroll-x-contain px-6 py-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden">
               {projects.slice(0, 3).map((project) => (
@@ -64,10 +64,10 @@ export default function HomePage() {
 
             <div className="mt-14 grid gap-6 lg:mt-20 lg:grid-cols-3 lg:gap-x-12">
               <div className="lg:col-start-1 lg:row-start-1">
-                <h3 className="text-2xl text-ink lg:text-3xl">
+                <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
                   See the difference
                 </h3>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/70">
+                <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
                   Drag the handle, or use the arrow keys, to compare.
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default function HomePage() {
               <SectionHeading eyebrow="Who you'll deal with">
                 Led by Kyle and Steven.
               </SectionHeading>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/70">
+              <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
                 Blue Peak brings every trade under one roof, and the two
                 founders run every job. You deal with Kyle or Steven from the
                 first visit to the final tidy-up.
@@ -117,11 +117,11 @@ export default function HomePage() {
                   <div className="flex aspect-[4/5] items-center justify-center rounded-lg bg-panel">
                     <BrandMark title="" className="h-14 w-auto text-brand/15" />
                   </div>
-                  <h3 className="mt-5 text-2xl text-ink">{member.name}</h3>
+                  <h3 className="mt-5 text-2xl font-semibold text-ink">{member.name}</h3>
                   <p className="mt-1 text-sm tracking-wide text-accent">
                     {member.role}
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                  <p className="mt-3 text-base leading-relaxed text-ink/70">
                     {member.blurb}
                   </p>
                 </li>

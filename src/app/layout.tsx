@@ -1,19 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Nunito_Sans, Tinos } from "next/font/google";
 import { HomeIntroScript } from "@/components/home/home-intro";
 import { siteLive, siteUrl } from "@/lib/content";
 import { SITE_NAME } from "@/lib/page-metadata";
 import "./globals.css";
 
-const inter = Inter({
+const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-nunito-sans",
   display: "swap",
 });
 
-const fraunces = Fraunces({
+/**
+ * Metric-compatible stand-in for Times New Roman, used only on devices that
+ * lack it. --font-serif lists Times New Roman first, so browsers that have it
+ * never request these files; hence no preload.
+ */
+const tinos = Tinos({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-tinos",
+  preload: false,
   display: "swap",
 });
 
@@ -52,7 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${nunitoSans.variable} ${tinos.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

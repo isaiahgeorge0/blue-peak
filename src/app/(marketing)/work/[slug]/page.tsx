@@ -19,7 +19,7 @@ import {
 } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
 
-const panelHeadingClassName = "text-xl leading-tight text-ink";
+const panelHeadingClassName = "text-xl leading-tight font-semibold text-ink";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -94,7 +94,7 @@ export default async function ProjectDetailPage({
       <section className="bg-panel">
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
           <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-medium tracking-[0.2em] uppercase">
+            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
               <li>
                 <Link
                   href="/work"
@@ -114,10 +114,10 @@ export default async function ProjectDetailPage({
             </ol>
           </nav>
           {project.sample ? <SampleTag onFrost className="mt-6" /> : null}
-          <h1 className="mt-4 max-w-4xl text-4xl leading-tight tracking-tight text-ink lg:text-6xl">
+          <h1 className="mt-4 max-w-4xl text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
             {project.title}, {project.location}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink/70">
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-ink/70">
             {project.shortDescription}
           </p>
           <div className="relative mt-12 aspect-[4/3] overflow-hidden rounded-xl bg-ink/10 md:aspect-video lg:mt-16">
@@ -138,7 +138,7 @@ export default async function ProjectDetailPage({
         <Reveal className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16 lg:py-28">
           <div>
             <h2 className={sectionTitleClassName}>The job</h2>
-            <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-ink/80 lg:text-xl lg:leading-relaxed">
+            <p className="mt-6 max-w-[60ch] text-xl leading-relaxed text-ink/80">
               {project.longDescription}
             </p>
           </div>

@@ -170,9 +170,9 @@ export function ServicesRail() {
         <div className="w-full py-20 lg:py-28 motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:py-0">
           <div className="mx-auto max-w-6xl px-6 motion-safe:lg:mx-0 motion-safe:lg:w-[calc(var(--rail-gutter)+22rem)] motion-safe:lg:max-w-none motion-safe:lg:shrink-0 motion-safe:lg:pr-12 motion-safe:lg:pl-[var(--rail-gutter)]">
             <SectionHeading eyebrow="What we do" id="services-heading">
-              Every trade your home needs, from <em>one team</em>.
+              Every trade your home needs, from <em>one team.</em>
             </SectionHeading>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/70">
+            <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
               No juggling separate firms. We plan it, build it and finish it.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 motion-safe:lg:mt-12 motion-safe:lg:flex-col motion-safe:lg:items-start">
@@ -230,12 +230,12 @@ export function ServicesRail() {
                         )}
                       </div>
                       <div className="mt-5 flex items-start justify-between gap-4 max-sm:motion-reduce:mt-3 max-sm:motion-reduce:gap-2">
-                        <h3 className="text-2xl leading-tight text-ink max-sm:motion-reduce:text-lg">
+                        <h3 className="text-2xl leading-tight font-semibold text-ink max-sm:motion-reduce:text-lg">
                           {service.name}
                         </h3>
                         <ArrowIcon className="mt-2 shrink-0 text-accent max-sm:motion-reduce:mt-1" />
                       </div>
-                      <p className="mt-2 text-sm leading-relaxed text-ink/70">
+                      <p className="mt-2 text-base leading-relaxed text-ink/70">
                         {service.shortDescription}
                       </p>
                     </Link>

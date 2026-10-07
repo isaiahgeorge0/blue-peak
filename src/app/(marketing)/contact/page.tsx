@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const detailHeadingClassName =
-  "font-sans text-xs font-medium tracking-[0.2em] text-accent uppercase";
+  "font-sans text-xs font-bold tracking-[0.2em] text-accent uppercase";
 
 export default function ContactPage() {
   const serviceOptions = services.map((service) => ({
@@ -46,32 +46,28 @@ export default function ContactPage() {
 
           <Reveal className="space-y-12 lg:col-start-1 lg:row-start-1">
             <div>
-              <h2>
-                <span className={detailHeadingClassName}>Phone</span>
-              </h2>
+              <h2 className={detailHeadingClassName}>Phone</h2>
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="mt-3 inline-block font-serif text-4xl tracking-tight text-ink transition-colors duration-200 hover:text-accent lg:text-5xl"
+                className="mt-3 inline-block font-serif text-5xl tracking-display text-ink transition-colors duration-200 hover:text-accent lg:text-6xl"
               >
                 {sitePhoneDisplay}
               </a>
             </div>
 
             <div>
-              <h2>
-                <span className={detailHeadingClassName}>What happens next</span>
-              </h2>
+              <h2 className={detailHeadingClassName}>What happens next</h2>
               <ol className="mt-5 space-y-5">
                 {howWeWorkSteps.slice(0, 3).map((step, index) => (
                   <li key={step.title} className="flex gap-4">
-                    <span className="pt-1 text-sm font-medium tracking-[0.2em] text-accent">
+                    <span className="pt-1 text-sm font-bold tracking-[0.2em] text-accent">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <h3 className="text-xl leading-tight text-ink">
+                      <h3 className="text-xl leading-tight font-semibold text-ink">
                         {step.title}
                       </h3>
-                      <p className="mt-1 text-sm leading-relaxed text-ink/70">
+                      <p className="mt-1 text-base leading-relaxed text-ink/70">
                         {step.body}
                       </p>
                     </div>
@@ -81,9 +77,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <h2>
-                <span className={detailHeadingClassName}>Areas we cover</span>
-              </h2>
+              <h2 className={detailHeadingClassName}>Areas we cover</h2>
               <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
                 {serviceAreas.map((area) => (
                   <li key={area.slug}>
@@ -104,10 +98,10 @@ export default function ContactPage() {
       <section className="bg-panel">
         <Reveal className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 md:flex-row md:items-center md:justify-between md:gap-12 lg:py-14">
           <div>
-            <h2 className="text-2xl leading-tight tracking-tight text-ink lg:text-3xl">
+            <h2 className="text-2xl leading-tight tracking-heading text-ink lg:text-3xl">
               Not ready to talk yet?
             </h2>
-            <p className="mt-2 max-w-xl text-base leading-relaxed text-ink/70">
+            <p className="mt-2 max-w-xl text-lg leading-relaxed text-ink/70">
               Build a rough estimate in 3D and see a guide price in a couple of
               minutes.
             </p>

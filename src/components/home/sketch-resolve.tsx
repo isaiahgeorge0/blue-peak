@@ -174,7 +174,7 @@ export function SketchResolve() {
             id="how-heading"
             className="order-1 shrink-0"
           >
-            From first call to <em>final tidy-up</em>.
+            From first call to <em>final tidy-up.</em>
           </SectionHeading>
 
           <div className="relative order-3 mt-6 shrink-0 pl-6 lg:mt-10">
@@ -198,19 +198,19 @@ export function SketchResolve() {
                   data-active={index === 0 ? "true" : "false"}
                   className="group transition-opacity duration-500 ease-out motion-safe:max-lg:[grid-area:1/1] motion-safe:max-lg:opacity-0 motion-safe:max-lg:data-[active=true]:opacity-100 motion-safe:lg:opacity-70 motion-safe:lg:data-[active=true]:opacity-100 max-lg:motion-reduce:mt-8 max-lg:motion-reduce:first:mt-0"
                 >
-                  <h3 className="flex items-baseline gap-3 text-2xl leading-tight text-ink">
-                    <span className="font-sans text-sm font-medium tracking-[0.2em] text-accent motion-safe:lg:text-ink motion-safe:lg:group-data-[active=true]:text-accent">
+                  <h3 className="flex items-baseline gap-3 text-2xl leading-tight font-semibold text-ink">
+                    <span className="text-sm font-bold tracking-[0.2em] text-accent motion-safe:lg:text-ink motion-safe:lg:group-data-[active=true]:text-accent">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     {stage.title}
                   </h3>
                   <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out motion-safe:lg:grid-rows-[0fr] motion-safe:lg:group-data-[active=true]:grid-rows-[1fr]">
                     <div className="overflow-hidden">
-                      <p className="max-w-md pt-3 text-base leading-relaxed text-ink/80">
+                      <p className="max-w-md pt-3 text-lg leading-relaxed text-ink/80">
                         {stage.body}
                       </p>
                       {stage.caption ? (
-                        <p className="pt-3 font-serif text-lg text-accent italic">
+                        <p className="pt-3 font-serif text-xl text-accent italic">
                           {stage.caption}
                         </p>
                       ) : null}

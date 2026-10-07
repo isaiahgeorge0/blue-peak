@@ -10,13 +10,13 @@ import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 function EstimatorUnavailable() {
   return (
     <div className="flex min-h-[60vh] max-w-2xl flex-col justify-center py-8">
-      <p className="text-sm font-medium tracking-wide text-accent uppercase">
+      <p className="text-sm font-bold tracking-wide text-accent uppercase">
         Build your estimate
       </p>
-      <h1 className="mt-3 font-serif text-3xl tracking-tight text-ink sm:text-4xl">
+      <h1 className="mt-3 text-3xl tracking-heading text-ink sm:text-4xl">
         The 3D calculator can&apos;t run on this device
       </h1>
-      <p className="mt-4 text-base leading-relaxed text-ink/75">
+      <p className="mt-4 text-lg leading-relaxed text-ink/75">
         Tell us what you have in mind and we&apos;ll give you a proper written
         price, usually after a free site visit.
       </p>

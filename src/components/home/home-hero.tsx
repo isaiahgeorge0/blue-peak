@@ -80,13 +80,13 @@ export function HomeHero() {
         */}
         <div className="home-frost-card home-hero-card w-full max-w-2xl rounded-2xl border border-white/60 p-6 shadow-2xl shadow-navy/25 sm:p-8 lg:p-10">
           <BrandMark className="h-10 w-auto text-brand sm:h-12" />
-          <p className="mt-5 text-xs font-medium tracking-[0.2em] text-accent uppercase">
+          <p className="mt-5 text-xs font-bold tracking-[0.2em] text-accent uppercase">
             Building and renovation · Ipswich and Suffolk
           </p>
-          <h1 className="mt-3 text-4xl leading-[1.05] tracking-tight text-ink sm:text-5xl xl:text-6xl">
+          <h1 className="mt-3 text-display-sm leading-display tracking-heading text-ink sm:text-5xl sm:tracking-display lg:text-6xl xl:text-7xl">
             Everything under one roof.
           </h1>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/80 lg:text-lg">
+          <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink/80 lg:text-xl">
             Kitchens, extensions, roofing and full refurbs across Ipswich and
             Suffolk. One team for every trade, and a written price before we
             start.

@@ -36,7 +36,7 @@ const fieldClassName =
   "mt-1.5 w-full rounded-md border border-ink/20 bg-page px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/40";
 
 const buttonClassName =
-  "inline-flex items-center justify-center rounded-[7px] bg-accent px-5 py-3 text-[13.5px] font-semibold text-on-accent transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-[7px] bg-accent px-5 py-3 text-[13.5px] font-bold text-on-accent transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
 
 function describeEstimate(
   estimate: EstimateSummary | null,

@@ -67,13 +67,13 @@ export default function ServicesPage() {
                     )}
                   </div>
                   <div className="flex flex-1 flex-col p-6 lg:p-8">
-                    <h2 className="text-2xl leading-tight text-ink">
+                    <h2 className="font-sans text-2xl leading-tight font-semibold text-ink">
                       {service.name}
                     </h2>
-                    <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                    <p className="mt-3 text-base leading-relaxed text-ink/70">
                       {service.shortDescription}
                     </p>
-                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-accent underline-offset-4 group-hover:underline">
+                    <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold text-accent underline-offset-4 group-hover:underline">
                       Learn more
                       <ArrowIcon />
                     </span>
@@ -93,13 +93,13 @@ export default function ServicesPage() {
           <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8 lg:mt-16 lg:gap-12">
             {pricingSteps.map((step, index) => (
               <li key={step.title} className="border-t border-ink/15 pt-6">
-                <p className="text-sm font-medium tracking-[0.2em] text-accent">
+                <p className="text-sm font-bold tracking-[0.2em] text-accent">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-3 text-2xl leading-tight text-ink">
+                <h3 className="mt-3 text-2xl leading-tight font-semibold text-ink">
                   {step.title}
                 </h3>
-                <p className="mt-3 max-w-sm text-base leading-relaxed text-ink/70">
+                <p className="mt-3 max-w-sm text-lg leading-relaxed text-ink/70">
                   {step.body}
                 </p>
               </li>

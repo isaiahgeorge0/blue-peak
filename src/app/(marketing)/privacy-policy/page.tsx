@@ -28,7 +28,7 @@ function Tbc({ children }: { children: string }) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="border-t border-ink/10 pt-10 first:border-t-0 first:pt-0">
-      <h2 className="text-2xl tracking-tight text-ink sm:text-3xl">
+      <h2 className="text-2xl tracking-heading text-ink sm:text-3xl">
         {title}
       </h2>
       <div className="mt-5 space-y-4">{children}</div>
@@ -38,7 +38,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function P({ children }: { children: ReactNode }) {
   return (
-    <p className="max-w-3xl text-base leading-relaxed text-ink/80">
+    <p className="max-w-3xl text-lg leading-relaxed text-ink/80">
       {children}
     </p>
   );
@@ -114,10 +114,10 @@ export default function PrivacyPolicyPage() {
     <>
       <section className="bg-panel">
         <div className="mx-auto max-w-4xl px-6 py-16 lg:py-24">
-          <p className="text-sm font-medium tracking-wide text-accent uppercase">
+          <p className="text-sm font-bold tracking-wide text-accent uppercase">
             Blue Peak
           </p>
-          <h1 className="mt-3 text-4xl tracking-tight text-ink sm:text-5xl">
+          <h1 className="mt-3 text-4xl leading-display tracking-heading text-ink sm:text-5xl sm:tracking-display">
             Privacy policy
           </h1>
           <p className="mt-4 text-sm text-ink/70">

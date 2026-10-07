@@ -18,7 +18,7 @@ export function ClosingBand() {
             <SectionHeading eyebrow="Next step">
               Ready to get a <em>price</em> on the job?
             </SectionHeading>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
+            <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/80">
               Tell us what you&apos;re planning. We usually reply the same
               working day.
             </p>
@@ -28,7 +28,7 @@ export function ClosingBand() {
               </Link>
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="text-sm font-semibold text-ink underline-offset-4 hover:underline"
+                className="text-sm font-bold text-ink underline-offset-4 hover:underline"
               >
                 Call {sitePhoneDisplay}
               </a>

@@ -21,7 +21,7 @@ export function SampleTag({
 
   return (
     <span
-      className={`inline-block rounded-full font-semibold text-navy uppercase ${size} ${onFrost ? "bg-page" : "bg-frost"} ${className}`}
+      className={`inline-block rounded-full font-bold text-navy uppercase ${size} ${onFrost ? "bg-page" : "bg-frost"} ${className}`}
     >
       {overPhoto ? "Sample" : "Sample project"}
     </span>

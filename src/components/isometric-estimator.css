@@ -26,12 +26,12 @@
 }
 
 .ie-title {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-weight: 400;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1.15;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
   margin: 0 0 12px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   color: var(--ie-text);
 }
@@ -39,7 +39,7 @@
 .ie-lede {
   max-width: 660px;
   color: var(--ie-text-dim);
-  font-size: 14.5px;
+  font-size: 16px;
   line-height: 1.6;
   margin: 0 0 32px;
 }
@@ -130,7 +130,7 @@
 }
 
 .ie-fig-value {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 700;
   font-size: 26px;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -236,11 +236,11 @@
 }
 
 .ie-step-title {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-weight: 400;
+  font-family: var(--font-sans);
+  font-weight: 700;
   font-size: clamp(22px, 2.4vw, 26px);
   line-height: 1.2;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   margin: 0 0 6px;
   color: var(--ie-text);
   scroll-margin-top: calc(var(--ie-sticky-top) + 16px);
@@ -537,7 +537,7 @@
   color: var(--on-accent);
   font-family: inherit;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition:
     filter 0.15s ease,
@@ -561,7 +561,7 @@
   color: var(--ie-text-dim);
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   text-underline-offset: 3px;
 }

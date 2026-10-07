@@ -32,7 +32,7 @@ export function PageHeader({
       <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
         {breadcrumb ? (
           <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-medium tracking-[0.2em] uppercase">
+            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
               <li>
                 <Link
                   href={breadcrumb.href}
@@ -52,15 +52,15 @@ export function PageHeader({
             </ol>
           </nav>
         ) : (
-          <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
+          <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-4 max-w-4xl text-4xl leading-tight tracking-tight text-ink lg:text-6xl">
+        <h1 className="mt-4 max-w-4xl text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
           {title}
         </h1>
         {lede ? (
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink/70">
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-ink/70">
             {lede}
           </p>
         ) : null}

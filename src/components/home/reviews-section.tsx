@@ -41,12 +41,12 @@ export function ReviewsSection() {
                     className="object-cover"
                   />
                   {review.sample ? (
-                    <span className="absolute top-3 left-3 rounded-full bg-frost px-3 py-1 text-xs font-semibold tracking-[0.2em] text-navy uppercase">
+                    <span className="absolute top-3 left-3 rounded-full bg-frost px-3 py-1 text-xs font-bold tracking-[0.2em] text-navy uppercase">
                       Sample
                     </span>
                   ) : null}
                 </div>
-                <blockquote className="mt-6 font-serif text-xl leading-snug text-ink">
+                <blockquote className="mt-6 font-serif text-2xl leading-snug tracking-heading text-ink">
                   <p>&ldquo;{review.quote}&rdquo;</p>
                 </blockquote>
                 <figcaption className="mt-5 text-sm">

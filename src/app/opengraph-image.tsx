@@ -7,9 +7,9 @@ export const alt = OG_IMAGE_ALT;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const [fraunces, inter, hero, wordmark] = await Promise.all([
-  readFile(join(process.cwd(), "assets/og/fraunces-latin-400-normal.woff")),
-  readFile(join(process.cwd(), "assets/og/inter-latin-500-normal.woff")),
+const [tinos, nunitoSans, hero, wordmark] = await Promise.all([
+  readFile(join(process.cwd(), "assets/og/tinos-latin-400-normal.woff")),
+  readFile(join(process.cwd(), "assets/og/nunito-sans-latin-600-normal.woff")),
   readFile(join(process.cwd(), "public/home/hero.jpg"), "base64"),
   readFile(join(process.cwd(), "public/brand/wordmark-white.svg"), "base64"),
 ]);
@@ -64,9 +64,10 @@ export default function OpengraphImage() {
           <div
             style={{
               marginTop: 36,
-              fontFamily: "Fraunces",
-              fontSize: 64,
-              lineHeight: 1.1,
+              fontFamily: "Tinos",
+              fontSize: 72,
+              lineHeight: 1.05,
+              letterSpacing: "-0.03em",
               color: "#ffffff",
             }}
           >
@@ -75,8 +76,8 @@ export default function OpengraphImage() {
           <div
             style={{
               marginTop: 28,
-              fontFamily: "Inter",
-              fontSize: 26,
+              fontFamily: "Nunito Sans",
+              fontSize: 28,
               color: "rgba(255,255,255,0.85)",
             }}
           >
@@ -88,8 +89,8 @@ export default function OpengraphImage() {
     {
       ...size,
       fonts: [
-        { name: "Fraunces", data: fraunces, style: "normal", weight: 400 },
-        { name: "Inter", data: inter, style: "normal", weight: 500 },
+        { name: "Tinos", data: tinos, style: "normal", weight: 400 },
+        { name: "Nunito Sans", data: nunitoSans, style: "normal", weight: 600 },
       ],
     },
   );

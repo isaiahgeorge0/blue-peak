@@ -152,17 +152,17 @@ export function PhotoGlide() {
             ref={copyRef}
             className="theme-photo absolute bottom-0 left-0 max-w-lg px-6 pt-16 pb-8 sm:px-10 sm:pb-12 md:motion-safe:translate-y-7 md:motion-safe:opacity-0 lg:px-14 lg:pb-14"
           >
-            <p className="text-xs font-medium tracking-[0.2em] text-accent uppercase">
+            <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
               While we&apos;re on site
             </p>
             <h2
               id="on-site-heading"
-              className="mt-3 text-3xl leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl"
+              className="mt-3 text-3xl leading-display tracking-heading text-ink sm:text-4xl lg:text-5xl lg:tracking-display"
             >
               Stripped back, <em className="text-accent italic">built</em>{" "}
               properly.
             </h2>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-ink/80 sm:text-base">
+            <p className="mt-4 max-w-md text-base leading-relaxed text-ink/80 sm:text-lg">
               You get photos, not surprises.
             </p>
           </div>

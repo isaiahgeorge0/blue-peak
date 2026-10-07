@@ -56,7 +56,7 @@ export function WorkCard({
           <SampleTag overPhoto className="absolute top-2 left-2 lg:top-3 lg:left-3" />
         ) : null}
       </div>
-      <p className="mt-5 font-serif text-xl text-ink transition-colors duration-200 group-hover:text-accent">
+      <p className="mt-5 text-xl font-semibold text-ink transition-colors duration-200 group-hover:text-accent">
         {title}
       </p>
       <p className="mt-1.5 text-sm text-ink/70">{description.replace(/\.$/, "")}</p>

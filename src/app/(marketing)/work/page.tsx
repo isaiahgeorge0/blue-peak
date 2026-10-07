@@ -62,10 +62,10 @@ export default function WorkPage() {
             </Link>
             <div>
               {featured.sample ? <SampleTag /> : null}
-              <h2 className="mt-5 text-3xl leading-tight tracking-tight text-ink lg:text-4xl">
+              <h2 className="mt-5 text-4xl leading-display tracking-heading text-ink lg:text-5xl lg:tracking-display">
                 {featured.title}, {featured.location}
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-ink/70">
+              <p className="mt-4 text-xl leading-relaxed text-ink/70">
                 {featured.shortDescription}
               </p>
               {featuredServices ? (

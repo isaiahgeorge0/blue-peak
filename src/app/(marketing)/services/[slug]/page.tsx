@@ -96,7 +96,7 @@ export default async function ServiceDetailPage({
         <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-16 lg:py-28">
           <div>
             <nav aria-label="Breadcrumb">
-              <ol className="flex flex-wrap items-center gap-x-2 text-xs font-medium tracking-[0.2em] uppercase">
+              <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
                 <li>
                   <Link
                     href="/services"
@@ -115,10 +115,10 @@ export default async function ServiceDetailPage({
                 </li>
               </ol>
             </nav>
-            <h1 className="mt-4 text-4xl leading-tight tracking-tight text-ink lg:text-6xl">
+            <h1 className="mt-4 text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
               {service.name}
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/70">
+            <p className="mt-6 max-w-xl text-xl leading-relaxed text-ink/70">
               {service.shortDescription}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -157,12 +157,12 @@ export default async function ServiceDetailPage({
         <Reveal className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16 lg:py-28">
           <div>
             <h2 className={sectionTitleClassName}>What&apos;s involved</h2>
-            <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-ink/80 lg:text-xl lg:leading-relaxed">
+            <p className="mt-6 max-w-[60ch] text-xl leading-relaxed text-ink/80">
               {service.longDescription}
             </p>
           </div>
           <div className="rounded-xl border border-ink/10 p-6 lg:self-start lg:p-8">
-            <h3 className="text-2xl leading-tight text-ink">
+            <h3 className="text-2xl leading-tight font-semibold text-ink">
               Typically includes
             </h3>
             <ul className="mt-6 space-y-4">
@@ -183,18 +183,18 @@ export default async function ServiceDetailPage({
       <section className="theme-brand bg-page">
         <Reveal className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
           <SectionHeading eyebrow="How we work">
-            From first call to <em>final tidy-up</em>.
+            From first call to <em>final tidy-up.</em>
           </SectionHeading>
           <ol className="mt-12 grid gap-10 md:grid-cols-2 md:gap-x-8 lg:mt-16 lg:grid-cols-4 lg:gap-x-10">
             {howWeWorkSteps.map((step, stepIndex) => (
               <li key={step.title} className="border-t border-white/20 pt-6">
-                <h3 className="flex items-baseline gap-3 text-2xl leading-tight text-ink">
-                  <span className="font-sans text-sm font-medium tracking-[0.2em] text-accent">
+                <h3 className="flex items-baseline gap-3 text-2xl leading-tight font-semibold text-ink">
+                  <span className="text-sm font-bold tracking-[0.2em] text-accent">
                     {String(stepIndex + 1).padStart(2, "0")}
                   </span>
                   {step.title}
                 </h3>
-                <p className="mt-3 text-base leading-relaxed text-ink/80">
+                <p className="mt-3 text-lg leading-relaxed text-ink/80">
                   {step.body}
                 </p>
               </li>
@@ -217,7 +217,7 @@ export default async function ServiceDetailPage({
           <Reveal className="mx-auto grid max-w-6xl gap-10 px-6 py-20 lg:grid-cols-3 lg:gap-x-12 lg:py-28">
             <div className="flex flex-col">
               <SectionHeading eyebrow="Recent work">
-                A recent job in <em>{project.location}</em>.
+                A recent job in <em>{project.location}.</em>
               </SectionHeading>
               <div className="mt-8 lg:mt-auto">
                 <Link href="/work" className={textLinkClassName}>
@@ -273,7 +273,7 @@ export default async function ServiceDetailPage({
                     )}
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
-                    <h3 className="text-xl leading-tight text-ink transition-colors duration-200 group-hover:text-accent">
+                    <h3 className="text-xl leading-tight font-semibold text-ink transition-colors duration-200 group-hover:text-accent">
                       {other.name}
                     </h3>
                     <ArrowIcon className="mt-1 shrink-0 text-accent" />

@@ -17,7 +17,7 @@ export function SiteFooter() {
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-medium tracking-wide text-accent uppercase">
+          <h2 className="font-sans text-sm font-bold tracking-wide text-accent uppercase">
             Contact
           </h2>
           <ul className="mt-3 space-y-2 text-sm text-ink/80">
@@ -35,7 +35,7 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h2 className="text-sm font-medium tracking-wide text-accent uppercase">
+          <h2 className="font-sans text-sm font-bold tracking-wide text-accent uppercase">
             Service area
           </h2>
           <p className="mt-3 text-sm text-ink/80">
