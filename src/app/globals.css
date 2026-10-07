@@ -55,6 +55,31 @@
   color: var(--ink);
 }
 
+/* Unlayered so it beats both the base h1/h2 serif rule and the font-serif utility. */
+.theme-admin :is(h1, h2, h3, h4, h5, h6, .font-serif) {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+  Stacked tables below sm (privacy policy): each cell is prefixed with its
+  column heading. The second declaration gives the prefix empty alt text so
+  screen readers, which already announce the column header, skip it; browsers
+  without alt-text support fall back to the first.
+*/
+@media (width < 40rem) {
+  .stacked-table td[data-label]::before {
+    content: attr(data-label);
+    content: attr(data-label) / "";
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+}
+
 @theme inline {
   --color-page: var(--page);
   --color-panel: var(--panel);

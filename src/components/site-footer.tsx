@@ -41,18 +41,9 @@ export function SiteFooter() {
           <p className="mt-3 text-sm text-ink/80">
             Ipswich and the surrounding Suffolk area.
           </p>
-          <p className="mt-6 text-sm text-ink/80">
-            <Link
-              href="/roadmap"
-              className="transition-colors hover:text-accent"
-            >
-              Roadmap
-            </Link>
-            <span className="text-ink/40"> · </span>
-            <span className="text-ink/70">What we&apos;re building next</span>
-          </p>
+          {/* At launch, add the registered company name and number here. */}
           <p className="mt-6 text-sm text-ink/70">
-            © 2026 Blue Peak Solutions. All rights reserved.
+            © 2026 Blue Peak. All rights reserved.
           </p>
         </div>
       </div>

@@ -3,13 +3,18 @@ import Link from "next/link";
 import { roadmapFeatures } from "@/lib/roadmap";
 import { pageMetadata } from "@/lib/page-metadata";
 
+// Internal build plans, not for customers: always noindex, regardless of
+// NEXT_PUBLIC_SITE_LIVE, and kept out of the sitemap and footer.
 export async function generateMetadata(): Promise<Metadata> {
-  return pageMetadata({
-    title: "Roadmap",
-    description:
-      "What Blue Peak is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
-    path: "/roadmap",
-  });
+  return {
+    ...pageMetadata({
+      title: "Roadmap",
+      description:
+        "What Blue Peak is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
+      path: "/roadmap",
+    }),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default function RoadmapPage() {
