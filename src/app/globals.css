@@ -469,6 +469,45 @@ h1[tabindex="-1"]:focus {
 }
 
 /*
+  Footer tape measure. The blade slides out of its clipped track rather than
+  scaling, so the ticks and the hook keep their size. --tape is 0 to 1; at 0
+  only the hook shows at the case. Ticks are counted from the hook, a longer
+  one every fifth, cut in the footer's background colour.
+*/
+.tape-blade {
+  transform: translateX(calc((var(--tape, 0) - 1) * (100% - 3px)));
+  transition-property: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tape-blade {
+    transition: none;
+  }
+}
+
+.tape-blade::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background:
+    repeating-linear-gradient(to left, transparent 0 29px, var(--page) 29px 30px) top / 100% 4px no-repeat,
+    repeating-linear-gradient(to left, transparent 0 5px, var(--page) 5px 6px) top / 100% 2px no-repeat,
+    var(--accent);
+}
+
+.tape-blade::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 10px;
+  border-radius: 0 0 1px 1px;
+  background: var(--accent);
+}
+
+/*
   Primary buttons: on hover the label nudges 2px left and an arrow slides in on
   the right. The arrow sits in the button's right padding, so the width never
   changes.
