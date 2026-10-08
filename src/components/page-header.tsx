@@ -16,8 +16,9 @@ type PageHeaderProps = {
 };
 
 /**
- * Frost White band that opens an inner page. It runs up behind the floating
- * header, so its top padding includes the header's clearance.
+ * Frost White band that opens an inner page without a photo opener. It runs
+ * up behind the floating header, so its top padding includes the header's
+ * clearance; the h1 matches the photo openers' size.
  * Not wrapped in Reveal: it is above the fold and must paint without waiting
  * for hydration.
  */
@@ -30,7 +31,8 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <section className="bg-panel">
-      <div className="mx-auto max-w-6xl px-6 pt-38 pb-20 lg:pt-46 lg:pb-28">
+      <div className="mx-auto max-w-6xl px-6 pt-44 pb-20 lg:pt-56 lg:pb-28 [@media(max-height:31.2499rem)]:pt-[calc(var(--site-header-height)+2rem)] [@media(max-height:31.2499rem)]:pb-12">
+
         {breadcrumb ? (
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
@@ -57,7 +59,7 @@ export function PageHeader({
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-4 max-w-4xl text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
+        <h1 className="page-title mt-4 max-w-4xl text-ink">
           {title}
         </h1>
         {lede ? (

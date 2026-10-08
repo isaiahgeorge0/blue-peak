@@ -6,8 +6,8 @@ import { CheckIcon } from "@/components/check-icon";
 import { ClosingBand } from "@/components/closing-band";
 import { textLinkClassName } from "@/components/cta-styles";
 import { JsonLd } from "@/components/JsonLd";
+import { PageOpener } from "@/components/page-opener";
 import { Reveal } from "@/components/reveal";
-import { SampleTag } from "@/components/sample-tag";
 import { ArrowIcon, sectionTitleClassName } from "@/components/section-heading";
 import { WorkCard } from "@/components/work-card";
 import {
@@ -92,48 +92,14 @@ export default async function ProjectDetailPage({
     <>
       <JsonLd data={breadcrumbJsonLd} />
 
-      <section className="bg-panel">
-        <div className="mx-auto max-w-6xl px-6 pt-38 pb-20 lg:pt-46 lg:pb-28">
-          <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-x-2 text-xs font-bold tracking-[0.2em] uppercase">
-              <li>
-                <Link
-                  href="/work"
-                  className="link-draw tap-target text-accent"
-                >
-                  Work
-                </Link>
-              </li>
-              <li aria-hidden className="text-ink/40">
-                /
-              </li>
-              <li>
-                <span aria-current="page" className="text-ink/70">
-                  {project.title}
-                </span>
-              </li>
-            </ol>
-          </nav>
-          {project.sample ? <SampleTag onFrost className="mt-6" /> : null}
-          <h1 className="mt-4 max-w-4xl text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
-            {project.title}, {project.location}
-          </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-ink/70">
-            {project.shortDescription}
-          </p>
-          <div className="relative mt-12 aspect-[4/3] overflow-hidden rounded-xl bg-ink/10 md:aspect-video lg:mt-16">
-            <Image
-              src={project.image}
-              alt={project.imageAlt}
-              fill
-              loading="eager"
-              fetchPriority="high"
-              sizes={`${containerWide(1104)}, (max-width: 1152px) calc(100vw - 3rem), 1104px`}
-              className="object-cover"
-            />
-          </div>
-        </div>
-      </section>
+      <PageOpener
+        eyebrow="Work"
+        breadcrumb={{ href: "/work", current: project.title }}
+        sample={project.sample}
+        title={`${project.title}, ${project.location}`}
+        lede={project.shortDescription}
+        image={{ src: project.image, alt: project.imageAlt }}
+      />
 
       <section className="bg-page">
         <Reveal className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16 lg:py-28">

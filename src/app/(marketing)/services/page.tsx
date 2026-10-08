@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { BrandMark } from "@/components/brand/brand-logo";
 import { ClosingBand } from "@/components/closing-band";
-import { PageHeader } from "@/components/page-header";
+import { PageOpener } from "@/components/page-opener";
 import { Reveal } from "@/components/reveal";
-import { ArrowIcon, SectionHeading } from "@/components/section-heading";
+import { SectionHeading } from "@/components/section-heading";
+import { ServicesIndex } from "@/components/services-index";
 import { services } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
-import { containerWide } from "@/lib/image-sizes";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -37,53 +34,30 @@ const pricingSteps = [
 export default function ServicesPage() {
   return (
     <>
-      <PageHeader
+      <PageOpener
         eyebrow="Services"
         title="Building and renovation, done by one team."
         lede="The jobs we take on most often. Every price is fixed in writing after a site visit."
+        image={{
+          src: "/work/mid-build.jpg",
+          alt: "Room part-way through renovation, with fresh plaster and a half-boarded stud wall",
+        }}
       />
 
       <section className="bg-page">
-        <ul className="mx-auto grid max-w-6xl gap-6 px-6 py-20 lg:grid-cols-2 lg:gap-8 lg:py-28">
-          {services.map((service, index) => (
-            <li key={service.slug}>
-              <Reveal delay={(index % 2) * 0.08} className="h-full">
-                <Link
-                  href={`/services/${service.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-xl border border-ink/10 bg-page transition-colors duration-200 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:min-h-56 sm:flex-row"
-                >
-                  <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-panel sm:aspect-auto sm:w-2/5">
-                    {service.image ? (
-                      <Image
-                        src={service.image}
-                        alt={service.imageAlt ?? ""}
-                        fill
-                        sizes={`${containerWide(220)}, (max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 40vw, 220px`}
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <BrandMark title="" className="h-14 w-auto text-brand/15" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col p-6 lg:p-8">
-                    <h2 className="font-sans text-2xl leading-tight font-semibold text-ink">
-                      {service.name}
-                    </h2>
-                    <p className="mt-3 text-base leading-relaxed text-ink/70">
-                      {service.shortDescription}
-                    </p>
-                    <span className="link-arrow mt-auto inline-flex items-center gap-2 self-start pt-6 text-sm font-bold text-accent">
-                      Learn more
-                      <ArrowIcon />
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
+        <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+          <ServicesIndex
+            services={services.map(
+              ({ slug, name, shortDescription, image, imageAlt }) => ({
+                slug,
+                name,
+                shortDescription,
+                image,
+                imageAlt,
+              }),
+            )}
+          />
+        </div>
       </section>
 
       <section className="bg-panel">

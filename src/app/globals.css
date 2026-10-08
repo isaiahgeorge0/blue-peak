@@ -1007,6 +1007,133 @@ h1[tabindex="-1"]:focus {
   }
 }
 
+/*
+  Inner pages: photo openers (/services, /work, project pages) and the
+  stacked project panels on /work. Type on the photo follows the homepage
+  hero: the same navy scrim, hung off the copy and fading out over
+  --scrim-fade above it, so white text passes AA over the brightest part of
+  each photo behind it.
+*/
+.page-opener,
+.work-panel {
+  --scrim-fade: 8rem;
+  --scrim: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--navy) 0%, transparent) 0,
+    color-mix(in srgb, var(--navy) 45%, transparent) calc(var(--scrim-fade) * 0.55),
+    color-mix(in srgb, var(--navy) 70%, transparent) var(--scrim-fade),
+    color-mix(in srgb, var(--navy) 80%, transparent) 100%
+  );
+}
+
+.page-opener-copy::before,
+.work-panel-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(-1 * var(--scrim-fade)) -100vw -12rem;
+  background: var(--scrim);
+  pointer-events: none;
+}
+
+/* Inner page h1, on a photo or in the Frost White header: about 40px at 390
+   and 72px at 1440, then growing with the root size; held to 12% of the
+   height on short screens. */
+.page-title {
+  font-size: min(clamp(2.5rem, 1.757rem + 3.048vw, 4.5rem), 12svh);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.work-panel-title {
+  font-size: min(clamp(2.25rem, 1.66rem + 2.4vw, 4rem), 11svh);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+/* The parallax layers get their own layers up front, so the first scroll
+   does not stall while the photo is promoted. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-opener-photo {
+    will-change: transform;
+  }
+
+  .page-opener-copy {
+    will-change: transform, opacity;
+  }
+}
+
+/*
+  Opener entrance: each word of the h1 sits in a mask and rises its own
+  height, words on the same line together (--line, set before first paint by
+  the opener), 60ms a line; the eyebrow, tag, lede and extras fade up around
+  them. All done by about 700ms. While a page transition covers the screen
+  the entrance waits, so it plays once the panel has gone.
+*/
+.page-opener-word,
+.page-opener-word > span {
+  display: inline-block;
+  vertical-align: top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Room inside each mask for descenders, without moving the lines apart. */
+  .page-opener-word {
+    overflow: hidden;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .page-opener-word > span {
+    animation: page-opener-line 480ms var(--ease-out)
+      calc(40ms + var(--line, 0) * 60ms) backwards;
+  }
+
+  .page-opener-item {
+    animation: page-opener-rise 350ms var(--ease-out) var(--item-at, 0ms)
+      backwards;
+  }
+
+  html[data-page-transition] :is(.page-opener-word > span, .page-opener-item) {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes page-opener-line {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes page-opener-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/*
+  /services index from lg: while a row is hovered or focused the others drop
+  back. Not while a row is only active from scrolling, so the list at rest
+  keeps full contrast.
+*/
+@media (min-width: 64rem) {
+  .services-row {
+    transition: opacity 250ms var(--ease-out);
+  }
+
+  .services-index:has(.services-row:focus-visible)
+    .services-row:not(:focus-visible) {
+    opacity: 0.4;
+  }
+}
+
+@media (min-width: 64rem) and (hover: hover) {
+  .services-index:has(.services-row:hover) .services-row:not(:hover) {
+    opacity: 0.4;
+  }
+}
+
 @layer base {
   /* The serif ships at 400 only; anything heavier would be faux bold. */
   h1,
