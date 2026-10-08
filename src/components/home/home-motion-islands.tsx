@@ -10,7 +10,7 @@ const BeforeAfterSlider = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex aspect-[16/10] w-full items-center justify-center rounded-xl border border-ink/10 bg-page text-sm text-ink/70">
+      <div className="flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-panel text-sm text-ink/70 sm:aspect-video">
         Loading before and after...
       </div>
     ),

@@ -9,10 +9,9 @@ import {
   type MotionStyle,
 } from "motion/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { BrandMark } from "@/components/brand/brand-logo";
 import {
+  onPhotoSecondaryCtaClassName,
   primaryCtaClassName,
-  secondaryCtaClassName,
 } from "@/components/cta-styles";
 import { useHomeMotionPreference } from "@/components/home/use-home-motion";
 
@@ -61,9 +60,9 @@ function ScrollCue() {
 }
 
 /**
- * Full-bleed hero, one dynamic viewport tall. The header floats over it, so
- * the first screen is exactly the hero; on screens too short for the card it
- * grows to fit rather than clipping it.
+ * Full-bleed hero, one screen tall, with the type set on the photo. The header
+ * floats over it; on screens too short for the copy it grows to fit rather
+ * than clipping it.
  */
 export function HomeHero() {
   const reduceMotion = useHomeMotionPreference();
@@ -78,18 +77,23 @@ export function HomeHero() {
   const imageWillChange = useTransform(scrollYProgress, (progress) =>
     progress < 1 ? "transform" : "auto",
   );
+  const copyY = useTransform(scrollYProgress, [0, 0.6], [0, -40]);
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   // The reduced-motion preference is unknown on the server, so the first render
   // has no inline transform; .home-hero-image holds the starting frame until then.
-  const imageMotionStyle: MotionStyle | undefined =
-    mounted && !reduceMotion
-      ? { scale: imageScale, y: imageY, willChange: imageWillChange }
-      : undefined;
+  const animate = mounted && !reduceMotion;
+  const imageMotionStyle: MotionStyle | undefined = animate
+    ? { scale: imageScale, y: imageY, willChange: imageWillChange }
+    : undefined;
+  const copyMotionStyle: MotionStyle | undefined = animate
+    ? { y: copyY, opacity: copyOpacity }
+    : undefined;
 
   return (
     <section
       ref={sectionRef}
-      className="home-hero relative isolate flex min-h-[100dvh] overflow-hidden bg-navy"
+      className="home-hero relative isolate flex min-h-svh overflow-hidden bg-navy lg:min-h-screen"
     >
       <div className="home-hero-media absolute inset-0">
         <motion.div
@@ -106,39 +110,35 @@ export function HomeHero() {
             className="object-cover"
           />
         </motion.div>
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/25 to-navy/10"
-          aria-hidden
-        />
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
-        {/*
-          Frosted glass: solid near-opaque fallback first, then blur where supported
-          so content never sits on a fully transparent plate.
-        */}
-        <div className="home-frost-card home-hero-card w-full max-w-2xl rounded-2xl border border-white/60 p-6 shadow-2xl shadow-navy/25 sm:p-8 lg:p-10">
-          <BrandMark className="h-10 w-auto text-brand sm:h-12" />
-          <p className="mt-5 text-xs font-bold tracking-[0.2em] text-accent uppercase">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col justify-end px-6 pt-[calc(var(--site-header-height)+1.5rem)] pb-[4.75rem] sm:pb-10 lg:pb-14 [@media(max-height:31.2499rem)]:pb-5">
+        <motion.div className="home-hero-copy relative isolate max-w-3xl" style={copyMotionStyle}>
+          <p className="home-hero-eyebrow text-xs font-bold tracking-[0.2em] text-white/85 uppercase">
             Building and renovation · Ipswich and Suffolk
           </p>
-          <h1 className="mt-3 text-display-sm leading-display tracking-heading text-ink sm:text-5xl sm:tracking-display lg:text-6xl xl:text-7xl">
-            Everything under one roof.
+          <h1 className="home-hero-title mt-4 font-serif text-white">
+            <span className="home-hero-line">
+              <span>Everything</span>
+            </span>{" "}
+            <span className="home-hero-line">
+              <span>under one roof.</span>
+            </span>
           </h1>
-          <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink/80 lg:text-xl">
+          <p className="home-hero-lede mt-5 max-w-[34rem] text-lg leading-relaxed text-white/90 lg:text-xl [@media(max-height:31.2499rem)]:mt-3 [@media(max-height:31.2499rem)]:text-base">
             Kitchens, extensions, roofing and full refurbs across Ipswich and
             Suffolk. One team for every trade, and a written price before we
             start.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
+          <div className="home-hero-actions mt-7 flex flex-wrap gap-3 sm:mt-8 [@media(max-height:31.2499rem)]:mt-4">
             <Link href="/contact" className={primaryCtaClassName}>
               <span className="cta-label">Get a quote</span>
             </Link>
-            <Link href="/quote" className={secondaryCtaClassName}>
+            <Link href="/quote" className={onPhotoSecondaryCtaClassName}>
               Build an estimate
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <ScrollCue />

@@ -593,25 +593,49 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* Homepage hero card: near-solid white fallback, frosted where supported */
-.home-frost-card {
-  background: rgba(254, 254, 254, 0.96);
+/*
+  Homepage hero type on the photo. The scrim is navy rising from the bottom
+  of the photo, solid enough behind the copy for white text to pass AA over
+  the brightest part of the photo there (measured, not judged), and fading
+  out over --scrim-fade above the copy. It hangs off the copy rather than the
+  photo so it always reaches the eyebrow, however tall the copy is; it runs
+  past the bottom (clipped by the hero) so the copy's scroll lift never shows
+  a gap, and it fades with the copy, in the intro and on scroll.
+  The headline is about 44px at 390 and 96px at 1440, then grows with the
+  root size; on short screens it is held to 13% of the height so the copy
+  and buttons fit on the first screen.
+*/
+.home-hero-copy::before {
+  --scrim-fade: 8rem;
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(-1 * var(--scrim-fade)) -100vw -12rem;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--navy) 0%, transparent) 0,
+    color-mix(in srgb, var(--navy) 45%, transparent) calc(var(--scrim-fade) * 0.55),
+    color-mix(in srgb, var(--navy) 70%, transparent) var(--scrim-fade),
+    color-mix(in srgb, var(--navy) 80%, transparent) 100%
+  );
+  pointer-events: none;
 }
 
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .home-frost-card {
-    background: rgba(254, 254, 254, 0.88);
-    -webkit-backdrop-filter: blur(16px) saturate(1.15);
-    backdrop-filter: blur(16px) saturate(1.15);
-  }
+.home-hero-title {
+  font-size: min(clamp(2.5rem, 1.54rem + 4.95vw, 6rem), 13svh);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .home-frost-card {
-    background: rgba(254, 254, 254, 0.97);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
+.home-hero-line,
+.home-hero-line > span {
+  display: block;
+}
+
+/* Room inside each line's mask for descenders, without moving the lines apart. */
+.home-hero-line {
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
 }
 
 /* Starting frame of the hero's scroll-linked zoom. The server and first client
@@ -627,8 +651,11 @@ h1[tabindex="-1"]:focus {
   Homepage intro, first visit of a session only. The inline script in the root
   layout sets html[data-intro="play"]; nothing below applies without it, so the
   page is never left hidden if that script does not run. Timeline (ms):
-    0-200 logo fades in (ease-out), 200-1200 holds at full opacity, 1200-1500
-      lifts 40px and fades out (below 15% opacity by ~1366).
+    0-600 the mark assembles: its four shapes slide up the 31 degree pitch
+      into place, 80ms apart, each from further out than the last (360ms
+      each, ease-out); BLUE and PEAK fade in under them by 600.
+    600-1200 the finished logo holds; 1200-1500 it lifts 40px and fades out
+      (below 15% opacity by ~1366).
     1350-1600 photo fades in, small (scaled to --intro-scale) and still, so it
       never visibly overlaps the logo and is fully opaque before it grows.
       Both fades are tuned against each other: the logo leaves on ease and the
@@ -637,15 +664,17 @@ h1[tabindex="-1"]:focus {
       whole rather than being clipped, so it grows evenly on every frame.
     2350 the centre header pill drops in; the phone and quote pills follow at
       2470 (done by 2920).
-    2450 hero card rises 48px; its five children (mark, eyebrow, headline,
-      supporting line, buttons) rise 12px, 70ms apart (done by 3000).
+    2450 the eyebrow fades up and the headline rises line by line out of its
+      masks, 60ms apart; the supporting line and buttons fade up after it
+      (all done by 3000).
     3000 scroll lock ends and the head script marks the intro done.
   Everything after the logo's hold is keyed off the hold's end: lengthening
   the hold means shifting every later delay by the same amount.
   Shortened below md, see the second block. Only opacity and transform on
   non-scroll-linked elements animate, so nothing shifts layout. The reveal
   scales .home-hero-media; the scroll-linked zoom is on .home-hero-image inside
-  it, so the two never write the same transform.
+  it, so the two never write the same transform; likewise the copy's scroll
+  fade is on .home-hero-copy and the entrance on its children.
 */
 .home-intro {
   display: none;
@@ -654,10 +683,10 @@ h1[tabindex="-1"]:focus {
 @media (prefers-reduced-motion: no-preference) {
   html[data-intro="play"] {
     --intro-glide: cubic-bezier(0.37, 0, 0.63, 1);
-    --intro-settle: cubic-bezier(0.22, 1, 0.36, 1);
     --intro-scale: 0.3;
+    --intro-piece-ms: 360ms;
     --intro-header-at: 2350ms;
-    --intro-card-at: 2450ms;
+    --intro-copy-at: 2450ms;
     scrollbar-gutter: stable;
     animation: home-intro-lock 3000ms;
   }
@@ -666,10 +695,29 @@ h1[tabindex="-1"]:focus {
     display: grid;
   }
 
-  /* Easing is set per phase inside the keyframes. */
+  /* The logo is opaque from the start of its animation (its shapes and
+     letters bring their own opacity) and hidden once it ends. Easing is set
+     per phase inside the keyframes. */
   html[data-intro="play"] .home-intro > svg {
+    overflow: visible;
     opacity: 0;
     animation: home-intro-logo 1500ms linear backwards;
+  }
+
+  /* Each shape travels 14, 20, 26 then 32 viewBox units (about 16 to 37px at
+     160px wide) along the pitch: cos 31deg = 0.85717, sin 31deg = 0.51504. */
+  html[data-intro="play"] .home-intro .logo-piece {
+    --piece-run: calc(14px + var(--piece) * 6px);
+    animation:
+      home-intro-piece var(--intro-piece-ms) var(--ease-out)
+        calc(var(--piece) * 80ms) backwards,
+      home-intro-fade calc(var(--intro-piece-ms) * 0.6) var(--ease-out)
+        calc(var(--piece) * 80ms) backwards;
+  }
+
+  html[data-intro="play"] .home-intro .logo-letters {
+    animation: home-intro-fade var(--intro-piece-ms) var(--ease-out) 240ms
+      backwards;
   }
 
   html[data-intro="play"] .home-hero {
@@ -686,62 +734,67 @@ h1[tabindex="-1"]:focus {
   }
 
   html[data-intro="play"] .site-header-center {
-    animation: home-intro-drop 450ms var(--intro-settle)
-      var(--intro-header-at) backwards;
+    animation: home-intro-drop 450ms var(--ease-out) var(--intro-header-at)
+      backwards;
   }
 
   html[data-intro="play"] .site-header-side {
-    animation: home-intro-drop 450ms var(--intro-settle)
+    animation: home-intro-drop 450ms var(--ease-out)
       calc(var(--intro-header-at) + 120ms) backwards;
   }
 
   html[data-intro="play"] .home-scroll-cue {
     animation: home-intro-fade 400ms ease-out
-      calc(var(--intro-card-at) + 300ms) backwards;
+      calc(var(--intro-copy-at) + 300ms) backwards;
   }
 
-  html[data-intro="play"] .home-hero-card {
-    animation: home-intro-card 550ms var(--intro-settle) var(--intro-card-at)
+  html[data-intro="play"] .home-hero-copy::before {
+    animation: home-intro-fade 400ms var(--ease-out)
+      calc(var(--intro-copy-at) - 100ms) backwards;
+  }
+
+  html[data-intro="play"] .home-hero-line {
+    overflow: hidden;
+  }
+
+  html[data-intro="play"] .home-hero-line > span {
+    animation: home-intro-line 480ms var(--ease-out)
+      calc(var(--intro-copy-at) + var(--line, 0) * 60ms) backwards;
+  }
+
+  html[data-intro="play"] .home-hero-line + .home-hero-line > span {
+    --line: 1;
+  }
+
+  html[data-intro="play"] .home-hero-eyebrow {
+    animation: home-intro-rise 350ms var(--ease-out) var(--intro-copy-at)
       backwards;
   }
 
-  html[data-intro="play"] .home-hero-card > * {
-    animation: home-intro-item 270ms var(--intro-settle)
-      calc(var(--intro-card-at) + var(--i, 0) * var(--intro-stagger, 70ms))
-      backwards;
+  html[data-intro="play"] .home-hero-lede {
+    animation: home-intro-item 350ms var(--ease-out)
+      calc(var(--intro-copy-at) + 120ms) backwards;
   }
 
-  /* The buttons share one wrapper, the last child, so they arrive together. */
-  html[data-intro="play"] .home-hero-card > :nth-child(2) {
-    --i: 1;
-  }
-
-  html[data-intro="play"] .home-hero-card > :nth-child(3) {
-    --i: 2;
-  }
-
-  html[data-intro="play"] .home-hero-card > :nth-child(4) {
-    --i: 3;
-  }
-
-  html[data-intro="play"] .home-hero-card > :nth-child(5) {
-    --i: 4;
+  html[data-intro="play"] .home-hero-actions {
+    animation: home-intro-rise 350ms var(--ease-out)
+      calc(var(--intro-copy-at) + 180ms) backwards;
   }
 }
 
 /*
-  Below md the same sequence settles by 2.18s: logo in 0-150, holds to 900,
-  out 900-1120 (its own keyframes, since the phase split differs); photo fades
-  in 1000-1180 and grows 1180-1830; header 1730-2100, card 1830-2180. The card's
-  children stagger 40ms here, not 70ms: four 70ms steps would not leave room
-  for the rise itself inside the card's 350ms.
+  Below md the same sequence settles by 2.18s: the mark assembles 0-540
+  (300ms slides), the logo holds to 900 and leaves 900-1120 (its own
+  keyframes, since the phase split differs); photo fades in 1000-1180 and
+  grows 1180-1830; header 1730-2100; copy 1830-2180, with shorter rises so
+  the 60ms line stagger still fits.
 */
 @media (prefers-reduced-motion: no-preference) and (max-width: 47.99rem) {
   html[data-intro="play"] {
     --intro-scale: 0.42;
+    --intro-piece-ms: 300ms;
     --intro-header-at: 1730ms;
-    --intro-card-at: 1830ms;
-    --intro-stagger: 40ms;
+    --intro-copy-at: 1830ms;
     animation-duration: 2180ms;
   }
 
@@ -768,12 +821,26 @@ h1[tabindex="-1"]:focus {
     animation-delay: calc(var(--intro-header-at) + 90ms);
   }
 
-  html[data-intro="play"] .home-hero-card {
-    animation-duration: 350ms;
+  html[data-intro="play"] .home-hero-copy::before {
+    animation-duration: 300ms;
   }
 
-  html[data-intro="play"] .home-hero-card > * {
-    animation-duration: 190ms;
+  html[data-intro="play"] .home-hero-line > span {
+    animation-duration: 290ms;
+  }
+
+  html[data-intro="play"] .home-hero-eyebrow {
+    animation-duration: 250ms;
+  }
+
+  html[data-intro="play"] .home-hero-lede {
+    animation-duration: 230ms;
+    animation-delay: calc(var(--intro-copy-at) + 80ms);
+  }
+
+  html[data-intro="play"] .home-hero-actions {
+    animation-duration: 230ms;
+    animation-delay: calc(var(--intro-copy-at) + 120ms);
   }
 }
 
@@ -784,15 +851,10 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* Each keyframe's timing function eases the phase that starts there: fade in
-   on ease-out, a linear hold at exactly 1, then lift and fade out on ease. */
+/* Hold at full opacity, then lift and fade out on ease. The arrival is the
+   shapes' own (.logo-piece), so the logo itself starts opaque. */
 @keyframes home-intro-logo {
   0% {
-    opacity: 0;
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  13.3333% {
     opacity: 1;
     transform: translateY(0);
     animation-timing-function: linear;
@@ -808,15 +870,10 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* Phones: in 0-150, hold to 900, out 900-1120 of 1120ms. The stops are
-   rounded inwards (149.999 and 900.001ms) so the hold covers both ends. */
+/* Phones: hold to 900, out 900-1120 of 1120ms. The stop is rounded inwards
+   (900.001ms) so the hold covers it. */
 @keyframes home-intro-logo-phone {
   0% {
-    opacity: 0;
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  13.3928% {
     opacity: 1;
     transform: translateY(0);
     animation-timing-function: linear;
@@ -829,6 +886,16 @@ h1[tabindex="-1"]:focus {
   100% {
     opacity: 0;
     transform: translateY(-40px);
+  }
+}
+
+/* From down the pitch (left and below), up into place. */
+@keyframes home-intro-piece {
+  from {
+    transform: translate(
+      calc(var(--piece-run) * -0.85717),
+      calc(var(--piece-run) * 0.51504)
+    );
   }
 }
 
@@ -864,16 +931,25 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* The card and its children start at 0.01, not 0: Chrome never counts text
-   first painted at opacity 0 toward LCP, and the full-bleed hero photo is
-   excluded as a background. */
-@keyframes home-intro-card {
+/* Each headline line rises its own height out of its mask. */
+@keyframes home-intro-line {
   from {
-    opacity: 0.01;
-    transform: translateY(48px);
+    transform: translateY(100%);
   }
 }
 
+@keyframes home-intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* The supporting line starts at 0.01, not 0: Chrome never counts text first
+   painted at opacity 0 toward LCP, the full-bleed photo is excluded as a
+   background, and the headline starts hidden in its masks, so without this
+   the first visit would have no early LCP candidate. White on the white
+   underlay, it can't be seen; the blue button could, so it starts at 0. */
 @keyframes home-intro-item {
   from {
     opacity: 0.01;

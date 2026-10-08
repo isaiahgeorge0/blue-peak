@@ -62,19 +62,17 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <div className="mt-14 grid gap-6 lg:mt-20 lg:grid-cols-3 lg:gap-x-12">
-              <div className="lg:col-start-1 lg:row-start-1">
-                <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
-                  See the difference
-                </h3>
-                <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
-                  Drag the handle, or use the arrow keys, to compare.
-                </p>
-              </div>
-              <div className="lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <div className="mt-14 lg:mt-20">
+              <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
+                See the difference
+              </h3>
+              <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
+                Drag the handle, or use the arrow keys, to compare.
+              </p>
+              <div className="-mx-2 mt-8 sm:mx-0 lg:mt-10">
                 <HomeMotionIslands />
               </div>
-              <div className="mt-4 lg:col-start-1 lg:row-start-2 lg:mt-0 lg:self-end">
+              <div className="mt-8 lg:mt-10">
                 <Link href="/work" className={textLinkClassName}>
                   See all our work
                   <ArrowIcon />
