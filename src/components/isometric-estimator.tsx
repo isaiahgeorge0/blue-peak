@@ -139,6 +139,40 @@ export function IsometricEstimator({
     return () => window.removeEventListener("popstate", onPopState);
   }, [goToStep]);
 
+  // On phones the pinned model block slides up under the floating header as
+  // the estimator ends; the header steps aside while the two overlap.
+  useEffect(() => {
+    const sticky = visualRef.current?.querySelector<HTMLElement>(".ie-sticky");
+    if (!sticky) return;
+    const root = document.documentElement;
+    const stacked = window.matchMedia("(max-width: 959px)");
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rem = parseFloat(getComputedStyle(root).fontSize);
+      // The pills end 4rem down (1.25rem offset plus a 2.75rem pill).
+      const pillsBottom = rem * 4;
+      const rect = sticky.getBoundingClientRect();
+      if (stacked.matches && rect.top < pillsBottom + 4 && rect.bottom > 0) {
+        root.dataset.headerYield = "true";
+      } else {
+        delete root.dataset.headerYield;
+      }
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      delete root.dataset.headerYield;
+    };
+  }, []);
+
   // Move focus to the step heading and bring the card into view, on each step
   // change and once the enquiry is sent.
   useEffect(() => {
@@ -151,7 +185,7 @@ export function IsometricEstimator({
 
     const stacked = window.matchMedia("(max-width: 959px)").matches;
     const headerHeight =
-      parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.5;
+      parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.75;
     const sticky = stacked
       ? visualRef.current?.querySelector(".ie-sticky")
       : null;

@@ -7,8 +7,10 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
 } from "react";
 import { BrandWordmark } from "@/components/brand/brand-logo";
@@ -18,52 +20,88 @@ import { projects } from "@/lib/content";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/quote", label: "Estimate" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", label: "Home", photo: "/home/hero.jpg" },
+  { href: "/services", label: "Services", photo: "/services/kitchen-renovations.jpg" },
+  { href: "/work", label: "Work", photo: "/work/colchester-internal-refurb/main.jpg" },
+  { href: "/about", label: "About", photo: "/about/who-we-are.jpg" },
+  { href: "/quote", label: "Estimate", photo: "/home/quote-preview.jpg" },
+  { href: "/contact", label: "Contact", photo: "/home/after.jpg" },
 ];
 
 const recentProjects = projects.slice(0, 3);
 
+/** Scrolled less than this, the centre pill shows the inline links (from 72rem). */
+const TOP_THRESHOLD = 80;
+const WIDE_QUERY = "(min-width: 72rem)";
+
 const pillClassName =
   "pointer-events-auto flex h-[var(--header-pill)] items-center rounded-full bg-peak-white text-ink shadow-lg ring-1 shadow-navy/20 ring-navy/5";
+
+/** Shadow and hairline only; outer shadows are not drawn under a box, so the pieces need no fill. */
+const pillShadowClassName = "shadow-lg ring-1 shadow-navy/20 ring-navy/5";
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+function subscribeWide(onChange: () => void) {
+  const query = window.matchMedia(WIDE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+function subscribeNothing() {
+  return () => {};
+}
+
 /**
- * Below the first screen, scrolling down hides the side pills and scrolling up
- * brings them back. Small movements are ignored so they do not flicker.
+ * Tracks whether the page is at the top (the centre pill shows the inline
+ * links) and whether the side pills are hidden: below the first screen,
+ * scrolling down hides them and scrolling up brings them back. Small
+ * movements are ignored so they do not flicker. `ready` turns on transitions
+ * once the first reading has been applied, so a reload part-way down a page
+ * does not animate.
  */
-function useSidesHidden() {
-  const [hidden, setHidden] = useState(false);
+function useHeaderScroll() {
+  const [state, setState] = useState({ atTop: true, sidesHidden: false, ready: false });
 
   useEffect(() => {
     let lastY = window.scrollY;
+    let hidden = false;
     let frame = 0;
     const update = () => {
       frame = 0;
       const y = window.scrollY;
-      if (y <= window.innerHeight) setHidden(false);
-      else if (y > lastY + 4) setHidden(true);
-      else if (y < lastY - 4) setHidden(false);
+      if (y <= window.innerHeight) hidden = false;
+      else if (y > lastY + 4) hidden = true;
+      else if (y < lastY - 4) hidden = false;
       if (Math.abs(y - lastY) > 4) lastY = y;
+      const atTop = y < TOP_THRESHOLD;
+      setState((previous) =>
+        previous.atTop === atTop && previous.sidesHidden === hidden
+          ? previous
+          : { ...previous, atTop, sidesHidden: hidden },
+      );
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    let readyFrame = 0;
+    frame = requestAnimationFrame(() => {
+      update();
+      readyFrame = requestAnimationFrame(() =>
+        setState((previous) => ({ ...previous, ready: true })),
+      );
+    });
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(readyFrame);
     };
   }, []);
 
-  return hidden;
+  return state;
 }
 
 function PhoneIcon({ className = "" }: { className?: string }) {
@@ -97,26 +135,42 @@ function NudgeArrow({ className = "" }: { className?: string }) {
 }
 
 /**
- * Floating header: a phone pill on the left, the wordmark and menu button in
- * one pill at the centre, and Get a quote on the right. The centre pill opens
- * into the menu panel. The header itself ignores pointer events, so only the
- * pills catch clicks and the page between them stays clickable.
+ * Floating header: a phone pill on the left, one pill at the centre, and Get
+ * a quote on the right. At the top of a page on wide screens the centre pill
+ * carries the wordmark and the inline links; otherwise it draws in to the
+ * wordmark and the menu button, and opens into the menu panel. The header
+ * itself ignores pointer events, so only the pills catch clicks and the page
+ * between them stays clickable.
  */
 export function SiteHeader() {
   const pathname = usePathname();
-  const sidesHidden = useSidesHidden();
+  const { atTop, sidesHidden, ready } = useHeaderScroll();
+  const wideViewport = useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia(WIDE_QUERY).matches,
+    () => false,
+  );
+  const hydrated = useSyncExternalStore(subscribeNothing, () => true, () => false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [openedPath, setOpenedPath] = useState(pathname);
+  const [photosMounted, setPhotosMounted] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const centreRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const linksRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
   // Back or forward while the menu is open closes it.
   if (menuOpen && openedPath !== pathname) setMenuOpen(false);
 
+  const top = atTop && !menuOpen;
+  const wide = top && wideViewport;
+
   const openMenu = () => {
     setOpenedPath(pathname);
+    setPhotoIndex(null);
+    setPhotosMounted(true);
     setMenuOpen(true);
   };
 
@@ -124,6 +178,23 @@ export function SiteHeader() {
     setMenuOpen(false);
     if (restoreFocus) toggleRef.current?.focus();
   }, []);
+
+  // Whichever of the inline links and the menu button is going away hands
+  // focus to the one arriving, so focus is never left on a hidden control.
+  // Runs before the browser moves focus off a control that has just become inert.
+  useLayoutEffect(() => {
+    if (!hydrated) return;
+    const active = document.activeElement;
+    if (!wide && active && linksRef.current?.contains(active)) {
+      toggleRef.current?.focus({ preventScroll: true });
+    } else if (wide && active === toggleRef.current) {
+      const links = linksRef.current;
+      (
+        links?.querySelector<HTMLElement>('a[aria-current="page"]') ??
+        links?.querySelector<HTMLElement>("a")
+      )?.focus({ preventScroll: true });
+    }
+  }, [wide, hydrated]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -183,6 +254,9 @@ export function SiteHeader() {
     ? "pointer-events-none invisible -translate-y-1 opacity-0"
     : "visible translate-y-0 opacity-100";
 
+  const activeIndex = navLinks.findIndex((link) => isActive(pathname, link.href));
+  const shownPhoto = photoIndex ?? Math.max(activeIndex, 0);
+
   return (
     <>
       <div
@@ -196,7 +270,10 @@ export function SiteHeader() {
       />
 
       <header
-        className="site-header pointer-events-none fixed inset-x-0 top-[var(--header-top)] z-50 [--panel-w:min(55rem,calc(100vw_-_2rem))] [--pill-w:11.75rem] sm:[--pill-w:13.75rem]"
+        data-top={top ? "true" : "false"}
+        data-menu-open={menuOpen ? "true" : "false"}
+        data-ready={ready ? "" : undefined}
+        className="site-header pointer-events-none fixed inset-x-0 top-[var(--header-top)] z-50 [--panel-w:min(55rem,calc(100vw_-_2rem))]"
       >
         <div className="mx-auto grid max-w-[90rem] grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:px-6 lg:px-8">
           <div
@@ -216,20 +293,27 @@ export function SiteHeader() {
 
           <div
             ref={centreRef}
-            className="site-header-center pointer-events-auto relative h-[var(--header-pill)] w-[var(--pill-w)]"
+            className="site-header-center relative h-[var(--header-pill)] w-[var(--pill-span)]"
           >
             <div
               aria-hidden
-              className={`absolute inset-0 rounded-full shadow-lg ring-1 shadow-navy/20 ring-navy/5 transition-opacity duration-200 ${
-                menuOpen ? "opacity-0" : "opacity-100"
-              }`}
-            />
+              className={`transition-opacity duration-200 ${menuOpen ? "opacity-0" : "opacity-100"}`}
+            >
+              <div className={`pill-cap pill-cap-l pill-shadow rounded-full ${pillShadowClassName}`} />
+              <div className={`pill-cap pill-cap-r pill-shadow rounded-full ${pillShadowClassName}`} />
+              <div className="pill-mid pill-shadow">
+                <div className={`absolute inset-y-0 -inset-x-8 ${pillShadowClassName}`} />
+              </div>
+              <div className="pill-cap pill-cap-l pointer-events-auto rounded-full bg-peak-white" />
+              <div className="pill-cap pill-cap-r pointer-events-auto rounded-full bg-peak-white" />
+              <div className="pill-mid pointer-events-auto bg-peak-white" />
+            </div>
 
             <div
               id={menuId}
               ref={surfaceRef}
               data-open={menuOpen ? "true" : "false"}
-              className="menu-surface absolute top-0 left-1/2 max-h-[calc(100dvh_-_2*var(--header-top))] w-[var(--panel-w)] -translate-x-1/2 overflow-y-auto overscroll-contain bg-peak-white"
+              className="menu-surface pointer-events-auto absolute top-0 left-1/2 max-h-[calc(100dvh_-_2*var(--header-top))] w-[var(--panel-w)] -translate-x-1/2 overflow-y-auto overscroll-contain bg-peak-white"
             >
               <div aria-hidden className="sticky top-0 z-10 h-[var(--header-pill)] bg-peak-white" />
               <div
@@ -238,42 +322,71 @@ export function SiteHeader() {
                   menuOpen ? "visible" : "invisible transition-[visibility] delay-250"
                 }`}
               >
-                <nav aria-label="Menu">
-                  <ul className="group/menu">
-                    {navLinks.map((link, index) => {
-                      const active = isActive(pathname, link.href);
-                      return (
-                        <li
-                          key={link.href}
-                          className={`transition-[opacity,translate] ease-out motion-reduce:transition-none ${
-                            menuOpen
-                              ? "translate-y-0 opacity-100 duration-500"
-                              : "translate-y-3 opacity-0 duration-150"
-                          }`}
-                          style={
-                            {
-                              transitionDelay: menuOpen ? `${90 + index * 30}ms` : "0ms",
-                            } as CSSProperties
-                          }
-                        >
-                          <Link
-                            href={link.href}
-                            onClick={() => closeMenu()}
-                            aria-current={active ? "page" : undefined}
-                            className={`group/link relative inline-flex rounded-sm py-0.5 font-serif text-[2.125rem] leading-[1.05] tracking-heading transition-[opacity,color] duration-200 ease-out group-has-[a:hover]/menu:opacity-40 group-has-[a:focus-visible]/menu:opacity-40 hover:opacity-100! focus-visible:opacity-100! sm:text-[2.75rem] ${
-                              active ? "text-accent" : "text-ink"
+                <div className="lg:flex lg:items-start lg:justify-between lg:gap-10">
+                  <nav aria-label="Menu">
+                    <ul className="group/menu">
+                      {navLinks.map((link, index) => {
+                        const active = index === activeIndex;
+                        return (
+                          <li
+                            key={link.href}
+                            className={`transition-[opacity,translate] ease-out motion-reduce:transition-none ${
+                              menuOpen
+                                ? "translate-y-0 opacity-100 duration-500"
+                                : "translate-y-3 opacity-0 duration-150"
                             }`}
+                            style={
+                              {
+                                transitionDelay: menuOpen ? `${90 + index * 30}ms` : "0ms",
+                              } as CSSProperties
+                            }
                           >
-                            <NudgeArrow className="absolute top-1/2 -left-2.5 h-[0.45em] w-[0.45em] -translate-x-2 -translate-y-1/2 opacity-0 transition-[opacity,translate] duration-200 ease-out group-hover/link:translate-x-0 group-hover/link:opacity-100 group-focus-visible/link:translate-x-0 group-focus-visible/link:opacity-100 motion-reduce:transition-none" />
-                            <span className="inline-block transition-transform duration-200 ease-out group-hover/link:translate-x-3 group-focus-visible/link:translate-x-3 motion-reduce:transition-none">
-                              {link.label}
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
+                            <Link
+                              href={link.href}
+                              onClick={() => closeMenu()}
+                              onMouseEnter={() => setPhotoIndex(index)}
+                              onFocus={() => setPhotoIndex(index)}
+                              aria-current={active ? "page" : undefined}
+                              className={`group/link relative inline-flex rounded-sm py-0.5 font-serif text-[2.125rem] leading-[1.05] tracking-heading transition-[opacity,color] duration-200 ease-out group-has-[a:hover]/menu:opacity-40 group-has-[a:focus-visible]/menu:opacity-40 hover:opacity-100! focus-visible:opacity-100! sm:text-[2.75rem] ${
+                                active ? "text-accent" : "text-ink"
+                              }`}
+                            >
+                              <NudgeArrow className="absolute top-1/2 -left-2.5 h-[0.45em] w-[0.45em] -translate-x-2 -translate-y-1/2 opacity-0 transition-[opacity,translate] duration-200 ease-out group-hover/link:translate-x-0 group-hover/link:opacity-100 group-focus-visible/link:translate-x-0 group-focus-visible/link:opacity-100 motion-reduce:transition-none" />
+                              <span className="inline-block transition-transform duration-200 ease-out group-hover/link:translate-x-3 group-focus-visible/link:translate-x-3 motion-reduce:transition-none">
+                                {link.label}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </nav>
+
+                  <div
+                    aria-hidden
+                    className={`relative hidden aspect-[5/6] w-[18.75rem] shrink-0 overflow-hidden rounded-xl bg-frost transition-[opacity,translate] ease-out motion-reduce:transition-none lg:block ${
+                      menuOpen
+                        ? "translate-y-0 opacity-100 delay-[150ms] duration-500"
+                        : "translate-y-3 opacity-0 duration-150"
+                    }`}
+                  >
+                    {photosMounted
+                      ? navLinks.map((link, index) => (
+                          <Image
+                            key={link.href}
+                            src={link.photo}
+                            alt=""
+                            fill
+                            loading="eager"
+                            sizes="300px"
+                            className={`object-cover transition-opacity duration-200 ease-out motion-reduce:transition-none ${
+                              index === shownPhoto ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
+                        ))
+                      : null}
+                  </div>
+                </div>
 
                 <div
                   className={`mt-6 border-t border-ink/10 pt-5 transition-[opacity,translate] ease-out motion-reduce:transition-none sm:mt-8 sm:pt-6 ${
@@ -338,16 +451,37 @@ export function SiteHeader() {
               </div>
             </div>
 
-            <div className="absolute inset-0 flex items-center justify-between pr-0.5 pl-4">
+            <div className="pointer-events-none absolute inset-0 flex items-center pr-1.5 pl-4">
               <Link
                 href="/"
                 onClick={() => closeMenu()}
                 aria-label="Blue Peak, home"
-                className="flex items-center rounded-full text-brand transition-[color,translate] duration-250 ease-out hover:text-traverse motion-reduce:transition-none data-[open=true]:translate-x-[calc((var(--pill-w)_-_var(--panel-w))/2_+_0.5rem)] data-[open=true]:duration-350 sm:data-[open=true]:translate-x-[calc((var(--pill-w)_-_var(--panel-w))/2_+_1.5rem)]"
                 data-open={menuOpen ? "true" : "false"}
+                className="pill-wordmark pointer-events-auto flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-traverse"
               >
                 <BrandWordmark title="" className="h-4 w-auto sm:h-5" />
               </Link>
+
+              <div ref={linksRef} className="pill-links ml-4 flex h-full min-w-0 flex-1 items-center overflow-hidden">
+                <nav
+                  aria-label="Main"
+                  inert={hydrated && !wide}
+                  className="pill-links-track flex w-full items-center justify-between"
+                >
+                  {navLinks.map((link, index) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      aria-current={index === activeIndex ? "page" : undefined}
+                      className={`pointer-events-auto rounded-full px-2.5 py-1.5 text-[0.9375rem] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-accent ${
+                        index === activeIndex ? "text-accent" : "text-ink"
+                      }`}
+                    >
+                      <span className="link-draw">{link.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </div>
 
               <button
                 ref={toggleRef}
@@ -357,7 +491,8 @@ export function SiteHeader() {
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
                 onClick={() => (menuOpen ? closeMenu() : openMenu())}
                 data-open={menuOpen ? "true" : "false"}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-brand transition-[color,translate] duration-250 ease-out hover:text-traverse motion-reduce:transition-none data-[open=true]:translate-x-[calc((var(--panel-w)_-_var(--pill-w))/2_-_0.75rem)] data-[open=true]:duration-350 sm:data-[open=true]:translate-x-[calc((var(--panel-w)_-_var(--pill-w))/2_-_1.75rem)]"
+                inert={hydrated && wide}
+                className="pill-toggle pointer-events-auto absolute inset-y-0 my-auto flex h-10 w-10 items-center justify-center rounded-full text-brand hover:text-traverse"
               >
                 <span aria-hidden className="relative block h-3 w-5">
                   <span

@@ -157,7 +157,7 @@ body {
 */
 .menu-surface {
   clip-path: inset(
-    0 calc((100% - var(--pill-w)) / 2) calc(100% - var(--header-pill))
+    0 calc((100% - var(--pill-c)) / 2) calc(100% - var(--header-pill))
       round calc(var(--header-pill) / 2)
   );
   transition: clip-path 250ms var(--ease-out);
@@ -168,9 +168,206 @@ body {
   transition-duration: 350ms;
 }
 
+/*
+  Centre pill. Compact, it holds the wordmark and the menu button. From 72rem
+  up, at the top of a page (data-top on the header), it widens to hold the
+  wordmark and the inline links instead. The centre column is always as wide
+  as the wide pill there, so nothing around it reflows, and the change is
+  transform and opacity only: the white and its shadow are two caps that
+  slide and a middle strip that scales; the wordmark rides the left cap; the
+  links sit in a window whose right edge follows the right cap, counter-moved
+  so they travel with the wordmark while the pill closes over them.
+  Positions are written for the wide pill; compact is the default state.
+*/
+.site-header {
+  --pill-c: 11.75rem;
+  --pill-span: var(--pill-c);
+  --pill-d: calc((var(--pill-span) - var(--pill-c)) / 2);
+  --pill-ms: 300ms;
+}
+
+/* Opening the menu moves the wordmark and button with the 350ms panel. */
+.site-header[data-menu-open="true"] {
+  --pill-ms: 350ms;
+}
+
+@media (min-width: 40rem) {
+  .site-header {
+    --pill-c: 13.75rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  .site-header {
+    --pill-span: 39rem;
+  }
+}
+
+/* Layers are made up front, so starting the change never costs a frame. */
+.pill-cap,
+.pill-mid,
+.pill-wordmark,
+.pill-links,
+.pill-links-track,
+.pill-toggle {
+  transition:
+    translate var(--pill-ms) var(--ease-out),
+    scale var(--pill-ms) var(--ease-out);
+  will-change: translate, scale;
+}
+
+.pill-cap {
+  position: absolute;
+  top: 0;
+  width: var(--pill-c);
+  height: var(--header-pill);
+}
+
+.pill-cap-l {
+  left: 0;
+  translate: var(--pill-d) 0;
+}
+
+.pill-cap-r {
+  right: 0;
+  translate: calc(-1 * var(--pill-d)) 0;
+}
+
+.pill-mid {
+  position: absolute;
+  top: 0;
+  left: calc(var(--pill-c) / 2);
+  right: calc(var(--pill-c) / 2);
+  height: var(--header-pill);
+  scale: 0 1;
+}
+
+/*
+  The shadow pieces are cut to meet exactly (the 2rem outsets keep the
+  shadow; only the inner edge is cut) so no strip of shadow is drawn twice.
+  The white pieces above them overlap freely, so no seam shows between them.
+*/
+.pill-cap-l.pill-shadow {
+  clip-path: inset(-2rem 50% -2rem -2rem);
+}
+
+.pill-cap-r.pill-shadow {
+  clip-path: inset(-2rem -2rem -2rem 50%);
+}
+
+.pill-mid.pill-shadow {
+  clip-path: inset(-2rem 0);
+}
+
+.pill-wordmark {
+  translate: var(--pill-d) 0;
+}
+
+.pill-wordmark[data-open="true"] {
+  translate: calc(var(--pill-d) + (var(--pill-c) - var(--panel-w)) / 2 + 0.5rem) 0;
+}
+
+.pill-links {
+  translate: calc(-1 * var(--pill-d)) 0;
+}
+
+.pill-links-track {
+  translate: calc(2 * var(--pill-d)) 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    translate var(--pill-ms) var(--ease-out),
+    opacity 150ms var(--ease-out),
+    visibility 0s 150ms;
+}
+
+.pill-toggle {
+  right: calc(var(--pill-d) + 0.125rem);
+  transition:
+    translate var(--pill-ms) var(--ease-out),
+    opacity 150ms var(--ease-out) 150ms,
+    color 200ms var(--ease-out);
+}
+
+.pill-toggle[data-open="true"] {
+  translate: calc((var(--panel-w) - var(--pill-c)) / 2 - 0.75rem) 0;
+}
+
+@media (min-width: 40rem) {
+  .pill-wordmark[data-open="true"] {
+    translate: calc(var(--pill-d) + (var(--pill-c) - var(--panel-w)) / 2 + 1.5rem) 0;
+  }
+
+  .pill-toggle[data-open="true"] {
+    translate: calc((var(--panel-w) - var(--pill-c)) / 2 - 1.75rem) 0;
+  }
+}
+
+@media (min-width: 72rem) {
+  .site-header[data-top="true"] :is(.pill-cap, .pill-wordmark, .pill-links, .pill-links-track) {
+    translate: none;
+  }
+
+  .site-header[data-top="true"] .pill-mid {
+    scale: none;
+  }
+
+  /* Widening, the button leaves first and the links arrive as the pill opens. */
+  .site-header[data-top="true"] .pill-links-track {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      translate var(--pill-ms) var(--ease-out),
+      opacity 150ms var(--ease-out) 90ms,
+      visibility 0s;
+  }
+
+  .site-header[data-top="true"] .pill-toggle {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      translate var(--pill-ms) var(--ease-out),
+      opacity 100ms var(--ease-out),
+      visibility 0s 100ms,
+      color 200ms var(--ease-out);
+  }
+}
+
+/* The first sync with the scroll position (a reload part-way down) is not animated. */
+.site-header:not([data-ready])
+  :is(.pill-cap, .pill-mid, .pill-wordmark, .pill-links, .pill-links-track, .pill-toggle) {
+  transition: none;
+}
+
+/*
+  Content that has to pass under the header (the estimator's pinned model on
+  phones, as it scrolls away) sets data-header-yield on the root while it does.
+*/
+.site-header-center {
+  transition:
+    opacity 200ms var(--ease-out),
+    visibility 0s;
+}
+
+html[data-header-yield] :is(.site-header-center, .site-header-side) {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 200ms var(--ease-out),
+    visibility 0s 200ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .menu-surface {
-    transition: none;
+  .menu-surface,
+  .pill-cap,
+  .pill-mid,
+  .pill-wordmark,
+  .pill-links,
+  .pill-links-track,
+  .pill-toggle,
+  .site-header .pill-links-track,
+  .site-header .pill-toggle {
+    transition: none !important;
   }
 }
 

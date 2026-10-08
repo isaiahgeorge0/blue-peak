@@ -13,10 +13,12 @@ const FADE_MS = 150;
 const HOLD_MAX_MS = 3000;
 /** tan(31deg): the roof pitch. */
 const PITCH = 0.60086;
+/** Half the height of the centred mark (56px). */
+const MARK_HALF = 28;
 
 type Phase = "idle" | "covering" | "holding" | "revealing";
 
-type Geometry = { rise: number; height: number };
+type Geometry = { rise: number; height: number; markOut: number };
 
 /** The internal page an anchor click would open, or null if it should be left alone. */
 function transitionTarget(event: MouseEvent): URL | null {
@@ -73,7 +75,7 @@ export function PageTransition() {
     phase: "idle" as Phase,
     from: "",
     arrived: false,
-    geometry: { rise: 0, height: 0 } as Geometry,
+    geometry: { rise: 0, height: 0, markOut: 0 } as Geometry,
     timers: [] as number[],
   });
   const revealRef = useRef<() => void>(() => {});
@@ -95,7 +97,9 @@ export function PageTransition() {
       state.phase = "idle";
       state.arrived = false;
       panel.getAnimations().forEach((animation) => animation.cancel());
+      mark.getAnimations().forEach((animation) => animation.cancel());
       panel.style.display = "none";
+      mark.style.display = "none";
       delete document.documentElement.dataset.pageTransition;
     };
 
@@ -104,12 +108,16 @@ export function PageTransition() {
       state.phase = "revealing";
       clearTimers();
       try {
-        const { rise, height } = state.geometry;
+        const { rise, height, markOut } = state.geometry;
         const exit = panel.animate(
           [
             { transform: `translateY(${-rise}px)` },
             { transform: `translateY(${-height}px)` },
           ],
+          { duration: EXIT_MS, easing: EASE_IN_OUT, fill: "forwards" },
+        );
+        mark.animate(
+          [{ opacity: 1 }, { opacity: 0, offset: markOut }, { opacity: 0 }],
           { duration: EXIT_MS, easing: EASE_IN_OUT, fill: "forwards" },
         );
         document.getElementById("main")?.animate(
@@ -138,7 +146,23 @@ export function PageTransition() {
         document.documentElement.clientHeight,
       );
       const height = viewport + 2 * rise;
-      state.geometry = { rise, height };
+      // The mark stays still at the centre of the screen and is only shown
+      // while the panel fully covers it. Keyframe offsets are in the eased
+      // progress the panel moves by, so these line up exactly with its edges.
+      // At the centre column the top edge sits topEdge below the panel's top
+      // and the bottom edge bottomEdge below it.
+      const centre = width / 2;
+      const topEdge = centre < slope ? rise * (1 - centre / slope) : 0;
+      const bottomEdge = height - (centre < slope ? rise * (centre / slope) : rise);
+      // Across the mark's width the pitched edges drop by up to PITCH times
+      // its half-width, so the mark's far corners clear later than its centre.
+      const reach = MARK_HALF + (centre < slope ? PITCH * MARK_HALF : 0);
+      const clampOffset = (value: number) => Math.min(0.99, Math.max(0.01, value));
+      const markIn = clampOffset((viewport / 2 + reach + topEdge) / (viewport + rise));
+      const markOut = clampOffset(
+        (bottomEdge - rise - viewport / 2 - reach) / (height - rise),
+      );
+      state.geometry = { rise, height, markOut };
       state.phase = "covering";
       state.arrived = false;
       state.from = window.location.pathname;
@@ -146,8 +170,8 @@ export function PageTransition() {
 
       panel.style.height = `${height}px`;
       panel.style.clipPath = `polygon(0 ${rise}px, ${slope}px 0, 100% 0, 100% ${height - rise}px, ${slope}px ${height - rise}px, 0 100%)`;
-      mark.style.top = `${rise + viewport / 2}px`;
       panel.style.display = "block";
+      mark.style.display = "grid";
 
       const href = url.pathname + url.search + url.hash;
       router.prefetch(href);
@@ -157,6 +181,10 @@ export function PageTransition() {
           { transform: `translateY(${viewport}px)` },
           { transform: `translateY(${-rise}px)` },
         ],
+        { duration: COVER_MS, easing: EASE_IN_OUT, fill: "forwards" },
+      );
+      mark.animate(
+        [{ opacity: 0 }, { opacity: 0, offset: markIn }, { opacity: 1 }],
         { duration: COVER_MS, easing: EASE_IN_OUT, fill: "forwards" },
       );
 
@@ -238,15 +266,21 @@ export function PageTransition() {
   }, [pathname]);
 
   return (
-    <div
-      ref={panelRef}
-      aria-hidden
-      className="pointer-events-auto fixed top-0 left-0 z-[70] w-screen bg-brand will-change-transform"
-      style={{ display: "none" }}
-    >
-      <div ref={markRef} className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <BrandMark title="" className="h-10 w-auto text-peak-white sm:h-12" />
+    <>
+      <div
+        ref={panelRef}
+        aria-hidden
+        className="pointer-events-auto fixed top-0 left-0 z-[70] w-screen bg-brand will-change-transform"
+        style={{ display: "none" }}
+      />
+      <div
+        ref={markRef}
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[71] place-items-center opacity-0"
+        style={{ display: "none" }}
+      >
+        <BrandMark title="" className="h-14 w-auto text-peak-white" />
       </div>
-    </div>
+    </>
   );
 }
