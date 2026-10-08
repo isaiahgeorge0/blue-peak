@@ -18,6 +18,7 @@ import { primaryCtaClassName } from "@/components/cta-styles";
 import { SampleTag } from "@/components/sample-tag";
 import { projects } from "@/lib/content";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
+import { remWide } from "@/lib/image-sizes";
 
 const navLinks = [
   { href: "/", label: "Home", photo: "/home/hero.jpg" },
@@ -275,7 +276,7 @@ export function SiteHeader() {
         data-ready={ready ? "" : undefined}
         className="site-header pointer-events-none fixed inset-x-0 top-[var(--header-top)] z-50 [--panel-w:min(55rem,calc(100vw_-_2rem))]"
       >
-        <div className="mx-auto grid max-w-[90rem] grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-[max(90rem,var(--container-6xl)+14rem)] grid-cols-[1fr_auto_1fr] items-start gap-3 px-4 sm:px-6 lg:px-8">
           <div
             className={`site-header-side justify-self-start transition-[opacity,translate,visibility] duration-200 ease-out motion-reduce:transition-none ${sideState}`}
           >
@@ -347,7 +348,7 @@ export function SiteHeader() {
                               onMouseEnter={() => setPhotoIndex(index)}
                               onFocus={() => setPhotoIndex(index)}
                               aria-current={active ? "page" : undefined}
-                              className={`group/link relative inline-flex rounded-sm py-0.5 font-serif text-[2.125rem] leading-[1.05] tracking-heading transition-[opacity,color] duration-200 ease-out group-has-[a:hover]/menu:opacity-40 group-has-[a:focus-visible]/menu:opacity-40 hover:opacity-100! focus-visible:opacity-100! sm:text-[2.75rem] ${
+                              className={`group/link relative inline-flex rounded-sm py-[0.3rem] font-serif text-[2.125rem] leading-[1.05] tracking-heading transition-[opacity,color] duration-200 ease-out group-has-[a:hover]/menu:opacity-40 group-has-[a:focus-visible]/menu:opacity-40 hover:opacity-100! focus-visible:opacity-100! sm:py-0.5 sm:text-[2.75rem] ${
                                 active ? "text-accent" : "text-ink"
                               }`}
                             >
@@ -378,7 +379,7 @@ export function SiteHeader() {
                             alt=""
                             fill
                             loading="eager"
-                            sizes="300px"
+                            sizes={`${remWide(300)}, 300px`}
                             className={`object-cover transition-opacity duration-200 ease-out motion-reduce:transition-none ${
                               index === shownPhoto ? "opacity-100" : "opacity-0"
                             }`}
@@ -412,7 +413,7 @@ export function SiteHeader() {
                               src={project.image}
                               alt=""
                               fill
-                              sizes="(max-width: 640px) 60vw, 250px"
+                              sizes={`${remWide(250)}, (max-width: 640px) 60vw, 250px`}
                               className="object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.03] motion-reduce:transition-none"
                             />
                             {project.sample ? (
@@ -435,7 +436,7 @@ export function SiteHeader() {
                 >
                   <a
                     href={`tel:${sitePhoneTel}`}
-                    className="link-draw text-base font-bold text-ink transition-colors hover:text-accent"
+                    className="link-draw tap-target text-base font-bold text-ink transition-colors hover:text-accent"
                   >
                     <span className="sr-only">Call </span>
                     {sitePhoneDisplay}
@@ -457,7 +458,7 @@ export function SiteHeader() {
                 onClick={() => closeMenu()}
                 aria-label="Blue Peak, home"
                 data-open={menuOpen ? "true" : "false"}
-                className="pill-wordmark pointer-events-auto flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-traverse"
+                className="pill-wordmark tap-target pointer-events-auto relative flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-traverse"
               >
                 <BrandWordmark title="" className="h-4 w-auto sm:h-5" />
               </Link>
@@ -473,7 +474,7 @@ export function SiteHeader() {
                       key={link.href}
                       href={link.href}
                       aria-current={index === activeIndex ? "page" : undefined}
-                      className={`pointer-events-auto rounded-full px-2.5 py-1.5 text-[0.9375rem] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-accent ${
+                      className={`tap-target pointer-events-auto relative rounded-full px-2.5 py-1.5 text-[0.9375rem] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-accent ${
                         index === activeIndex ? "text-accent" : "text-ink"
                       }`}
                     >
@@ -492,7 +493,7 @@ export function SiteHeader() {
                 onClick={() => (menuOpen ? closeMenu() : openMenu())}
                 data-open={menuOpen ? "true" : "false"}
                 inert={hydrated && wide}
-                className="pill-toggle pointer-events-auto absolute inset-y-0 my-auto flex h-10 w-10 items-center justify-center rounded-full text-brand hover:text-traverse"
+                className="pill-toggle tap-target pointer-events-auto absolute inset-y-0 my-auto flex h-10 w-10 items-center justify-center rounded-full text-brand hover:text-traverse"
               >
                 <span aria-hidden className="relative block h-3 w-5">
                   <span

@@ -21,6 +21,8 @@ import { BrandMark } from "@/components/brand/brand-logo";
 import { textLinkClassName } from "@/components/cta-styles";
 import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { services } from "@/lib/content";
+import { remWide } from "@/lib/image-sizes";
+import { PINNABLE_QUERY } from "@/lib/pinnable";
 
 /**
  * Fractions of the pinned travel over which the row moves. The short holds at
@@ -28,17 +30,16 @@ import { services } from "@/lib/content";
  */
 const RAIL_START = 0.06;
 const RAIL_END = 0.94;
-/** Must match the motion-safe:lg: classes that pin the section. */
-const PINNED_QUERY =
-  "(min-width: 1024px) and (prefers-reduced-motion: no-preference)";
+/** Must match the pinnable:lg: classes that pin the section. */
+const PINNED_QUERY = `(min-width: 1024px) and ${PINNABLE_QUERY}`;
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
 }
 
 /**
- * What we do. From lg up (motion allowed) the section pins and vertical scroll
- * slides the row of service cards sideways. Below lg it is a swipeable
+ * What we do. From lg up (motion allowed, screen tall enough) the section pins
+ * and vertical scroll slides the row of service cards sideways. Otherwise it is a swipeable
  * scroll-snap row; with reduced motion it is a plain grid.
  */
 export function ServicesRail() {
@@ -159,23 +160,23 @@ export function ServicesRail() {
     <section
       ref={sectionRef}
       aria-labelledby="services-heading"
-      className="relative bg-page motion-safe:lg:h-[230vh]"
+      className="relative bg-page pinnable:lg:h-[230vh]"
       style={
         {
-          "--rail-gutter": "max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem))",
+          "--rail-gutter": "max(1.5rem, calc((100vw - var(--container-6xl)) / 2 + 1.5rem))",
         } as CSSProperties
       }
     >
-      <div className="motion-safe:lg:sticky motion-safe:lg:top-0 motion-safe:lg:flex motion-safe:lg:h-[100dvh] motion-safe:lg:items-center motion-safe:lg:overflow-hidden">
-        <div className="w-full py-20 lg:py-28 motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:py-0">
-          <div className="mx-auto max-w-6xl px-6 motion-safe:lg:mx-0 motion-safe:lg:w-[calc(var(--rail-gutter)+22rem)] motion-safe:lg:max-w-none motion-safe:lg:shrink-0 motion-safe:lg:pr-12 motion-safe:lg:pl-[var(--rail-gutter)]">
+      <div className="pinnable:lg:sticky pinnable:lg:top-0 pinnable:lg:flex pinnable:lg:h-[100dvh] pinnable:lg:items-center pinnable:lg:overflow-hidden">
+        <div className="w-full py-20 lg:py-28 pinnable:lg:flex pinnable:lg:items-center pinnable:lg:py-0">
+          <div className="mx-auto max-w-6xl px-6 pinnable:lg:mx-0 pinnable:lg:w-[calc(var(--rail-gutter)+22rem)] pinnable:lg:max-w-none pinnable:lg:shrink-0 pinnable:lg:pr-12 pinnable:lg:pl-[var(--rail-gutter)]">
             <SectionHeading eyebrow="What we do" id="services-heading">
               Every trade your home needs, from <em>one team.</em>
             </SectionHeading>
             <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
               No juggling separate firms. We plan it, build it and finish it.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 motion-safe:lg:mt-12 motion-safe:lg:flex-col motion-safe:lg:items-start">
+            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 pinnable:lg:mt-12 pinnable:lg:flex-col pinnable:lg:items-start">
               <p
                 className="text-sm tracking-[0.2em] text-ink/70 tabular-nums motion-reduce:hidden"
                 aria-hidden
@@ -189,22 +190,22 @@ export function ServicesRail() {
             </div>
           </div>
 
-          <div className="min-w-0 motion-safe:lg:flex-1">
+          <div className="min-w-0 pinnable:lg:flex-1">
             <div
               ref={viewportRef}
               onScroll={onViewportScroll}
-              className="mt-10 snap-x snap-mandatory scroll-px-6 overflow-x-auto overscroll-x-contain [scrollbar-width:none] motion-safe:lg:mt-0 motion-safe:lg:snap-none motion-safe:lg:overflow-x-clip motion-reduce:mx-auto motion-reduce:max-w-6xl motion-reduce:snap-none motion-reduce:overflow-x-visible motion-reduce:px-6 [&::-webkit-scrollbar]:hidden"
+              className="mt-10 snap-x snap-mandatory scroll-px-6 overflow-x-auto overscroll-x-contain [scrollbar-width:none] pinnable:lg:mt-0 pinnable:lg:snap-none pinnable:lg:overflow-x-clip motion-reduce:mx-auto motion-reduce:max-w-6xl motion-reduce:snap-none motion-reduce:overflow-x-visible motion-reduce:px-6 [&::-webkit-scrollbar]:hidden"
             >
               <motion.ul
                 ref={trackRef}
                 onFocusCapture={onFocusCapture}
                 style={{ "--rail-x": railX } as MotionStyle}
-                className="flex w-max gap-5 px-6 sm:gap-6 motion-safe:lg:translate-x-[var(--rail-x)] motion-safe:lg:pr-[var(--rail-gutter)] motion-safe:lg:pl-0 motion-reduce:grid motion-reduce:w-auto motion-reduce:grid-cols-2 motion-reduce:gap-x-4 motion-reduce:gap-y-8 motion-reduce:px-0 motion-reduce:sm:gap-x-6 motion-reduce:sm:gap-y-10 motion-reduce:lg:grid-cols-4"
+                className="flex w-max gap-5 px-6 sm:gap-6 pinnable:lg:translate-x-[var(--rail-x)] pinnable:lg:pr-[var(--rail-gutter)] pinnable:lg:pl-0 motion-reduce:grid motion-reduce:w-auto motion-reduce:grid-cols-2 motion-reduce:gap-x-4 motion-reduce:gap-y-8 motion-reduce:px-0 motion-reduce:sm:gap-x-6 motion-reduce:sm:gap-y-10 motion-reduce:lg:grid-cols-4"
               >
                 {services.map((service) => (
                   <li
                     key={service.slug}
-                    className="w-[min(78vw,340px)] shrink-0 snap-start motion-safe:lg:w-[min(340px,calc((100dvh-15rem)*0.75))] motion-reduce:w-auto"
+                    className="w-[min(78vw,340px)] shrink-0 snap-start pinnable:lg:w-[min(21.25rem,calc((100dvh-15rem)*0.75))] motion-reduce:w-auto"
                   >
                     <Link
                       href={`/services/${service.slug}`}
@@ -217,7 +218,7 @@ export function ServicesRail() {
                             alt={service.imageAlt ?? ""}
                             fill
                             loading={nearViewport ? "eager" : "lazy"}
-                            sizes="(max-width: 1023px) 78vw, 340px"
+                            sizes={`${remWide(340)}, (max-width: 1023px) 78vw, 340px`}
                             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                         ) : (
@@ -245,15 +246,15 @@ export function ServicesRail() {
             </div>
 
             <div
-              className="mx-6 mt-8 h-0.5 overflow-hidden bg-ink/10 motion-safe:lg:mr-[var(--rail-gutter)] motion-safe:lg:ml-0 motion-reduce:hidden"
+              className="mx-6 mt-8 h-[2px] overflow-hidden bg-ink/10 pinnable:lg:mr-[var(--rail-gutter)] pinnable:lg:ml-0 motion-reduce:hidden"
               aria-hidden
             >
               <motion.div
-                className="hidden h-full origin-left bg-accent motion-safe:lg:block"
+                className="hidden h-full origin-left bg-accent pinnable:lg:block"
                 style={{ scaleX: railProgress }}
               />
               <motion.div
-                className="h-full origin-left bg-accent motion-safe:lg:hidden"
+                className="h-full origin-left bg-accent pinnable:lg:hidden"
                 style={{ scaleX: swipeProgress }}
               />
             </div>

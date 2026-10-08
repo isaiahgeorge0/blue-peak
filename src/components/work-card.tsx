@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { BrandMark } from "@/components/brand/brand-logo";
 import { SampleTag } from "@/components/sample-tag";
+import { containerWide } from "@/lib/image-sizes";
 
 const MotionLink = motion.create(Link);
 
@@ -29,7 +30,7 @@ export function WorkCard({
   imageSrc,
   imageAlt = "",
   sample = false,
-  sizes = "(max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px",
+  sizes = `${containerWide(370)}, (max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px`,
 }: WorkCardProps) {
   return (
     <MotionLink

@@ -37,7 +37,7 @@ export function PageHeader({
               <li>
                 <Link
                   href={breadcrumb.href}
-                  className="link-draw text-accent"
+                  className="link-draw tap-target text-accent"
                 >
                   {eyebrow}
                 </Link>

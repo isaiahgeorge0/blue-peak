@@ -47,7 +47,7 @@ function ScrollCue() {
   return (
     <div
       aria-hidden
-      className={`home-scroll-cue absolute right-4 bottom-4 z-10 flex h-9 items-center gap-2 rounded-full bg-peak-white pr-4 pl-3 text-xs font-bold tracking-[0.2em] text-ink uppercase shadow-lg shadow-navy/20 transition-opacity duration-300 ease-out sm:right-6 sm:bottom-6 lg:right-8 lg:bottom-10 ${
+      className={`home-scroll-cue absolute right-4 bottom-4 z-10 flex h-9 items-center gap-2 rounded-full bg-peak-white pr-4 pl-3 text-xs font-bold tracking-[0.2em] text-ink uppercase shadow-lg shadow-navy/20 transition-opacity duration-300 ease-out sm:right-6 sm:bottom-6 lg:right-8 lg:bottom-10 [@media(max-height:31.2499rem)]:hidden ${
         gone ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -61,8 +61,9 @@ function ScrollCue() {
 }
 
 /**
- * Full-bleed hero locked to one dynamic viewport height. The header floats
- * over it, so the first screen is exactly the hero.
+ * Full-bleed hero, one dynamic viewport tall. The header floats over it, so
+ * the first screen is exactly the hero; on screens too short for the card it
+ * grows to fit rather than clipping it.
  */
 export function HomeHero() {
   const reduceMotion = useHomeMotionPreference();
@@ -74,20 +75,25 @@ export function HomeHero() {
   });
   const imageScale = useTransform(scrollYProgress, [0, 1], [1.08, 1]);
   const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
+  const imageWillChange = useTransform(scrollYProgress, (progress) =>
+    progress < 1 ? "transform" : "auto",
+  );
 
   // The reduced-motion preference is unknown on the server, so the first render
   // has no inline transform; .home-hero-image holds the starting frame until then.
   const imageMotionStyle: MotionStyle | undefined =
-    mounted && !reduceMotion ? { scale: imageScale, y: imageY } : undefined;
+    mounted && !reduceMotion
+      ? { scale: imageScale, y: imageY, willChange: imageWillChange }
+      : undefined;
 
   return (
     <section
       ref={sectionRef}
-      className="home-hero relative isolate h-[100dvh] overflow-hidden bg-navy"
+      className="home-hero relative isolate flex min-h-[100dvh] overflow-hidden bg-navy"
     >
       <div className="home-hero-media absolute inset-0">
         <motion.div
-          className="home-hero-image absolute inset-0 origin-center will-change-transform"
+          className="home-hero-image absolute inset-0 origin-center"
           style={imageMotionStyle}
         >
           <Image
@@ -106,7 +112,7 @@ export function HomeHero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl items-center px-5 pb-6 pt-[calc(var(--site-header-height)+0.75rem)] sm:px-6 sm:pb-8 lg:items-end lg:pb-10">
         {/*
           Frosted glass: solid near-opaque fallback first, then blur where supported
           so content never sits on a fully transparent plate.

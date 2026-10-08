@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
+import { containerWide } from "@/lib/image-sizes";
 
 type BeforeAfterSliderProps = {
   beforeSrc?: string;
@@ -92,7 +93,7 @@ export function BeforeAfterSlider({
           src={afterSrc}
           alt={afterAlt}
           fill
-          sizes="(max-width: 1152px) 100vw, 1152px"
+          sizes={`${containerWide(718)}, (max-width: 1152px) 100vw, 1152px`}
           className="object-cover"
           draggable={false}
         />
@@ -104,7 +105,7 @@ export function BeforeAfterSlider({
             src={beforeSrc}
             alt={beforeAlt}
             fill
-            sizes="(max-width: 1152px) 100vw, 1152px"
+            sizes={`${containerWide(718)}, (max-width: 1152px) 100vw, 1152px`}
             className="object-cover"
             draggable={false}
           />

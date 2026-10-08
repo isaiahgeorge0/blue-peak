@@ -21,11 +21,11 @@ export function SiteFooter() {
           <h2 className="font-sans text-sm font-bold tracking-wide text-accent uppercase">
             Contact
           </h2>
-          <ul className="mt-3 space-y-2 text-sm text-ink/80">
+          <ul className="mt-3 space-y-2 text-sm text-ink/80 pointer-coarse:space-y-6">
             <li>
               <Link
                 href="/contact#quote-form"
-                className="link-draw transition-colors hover:text-accent"
+                className="link-draw tap-target transition-colors hover:text-accent"
               >
                 Send us a message
               </Link>
@@ -33,7 +33,7 @@ export function SiteFooter() {
             <li>
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="link-draw transition-colors hover:text-accent"
+                className="link-draw tap-target transition-colors hover:text-accent"
               >
                 {sitePhoneDisplay}
               </a>

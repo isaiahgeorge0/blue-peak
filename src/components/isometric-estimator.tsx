@@ -31,6 +31,9 @@ const STEP_TITLES = [
 ] as const;
 
 const LAST_STEP = STEP_TITLES.length - 1;
+/** The stacked layout with the model pinned on top; matches isometric-estimator.css. */
+const STACKED_QUERY =
+  "(max-width: 959px) and (min-height: 500px), (max-width: 959px) and (orientation: portrait)";
 
 const SIZES = Object.keys(ESTIMATOR_SIZE_LABELS) as EstimatorSize[];
 const FINISHES = Object.keys(ESTIMATOR_FINISH_LABELS) as EstimatorFinish[];
@@ -145,7 +148,7 @@ export function IsometricEstimator({
     const sticky = visualRef.current?.querySelector<HTMLElement>(".ie-sticky");
     if (!sticky) return;
     const root = document.documentElement;
-    const stacked = window.matchMedia("(max-width: 959px)");
+    const stacked = window.matchMedia(STACKED_QUERY);
     let frame = 0;
     const update = () => {
       frame = 0;
@@ -183,7 +186,7 @@ export function IsometricEstimator({
     if (!heading || !card) return;
     heading.focus({ preventScroll: true });
 
-    const stacked = window.matchMedia("(max-width: 959px)").matches;
+    const stacked = window.matchMedia(STACKED_QUERY).matches;
     const headerHeight =
       parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.75;
     const sticky = stacked

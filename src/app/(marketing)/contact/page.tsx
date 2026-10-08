@@ -78,12 +78,12 @@ export default function ContactPage() {
 
             <div>
               <h2 className={detailHeadingClassName}>Areas we cover</h2>
-              <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+              <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 pointer-coarse:gap-y-5.5">
                 {serviceAreas.map((area) => (
                   <li key={area.slug}>
                     <Link
                       href={`/areas/${area.slug}`}
-                      className="text-base text-ink underline decoration-ink/30 underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-accent"
+                      className="tap-target relative text-base text-ink underline decoration-ink/30 underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-accent"
                     >
                       {area.name}
                     </Link>

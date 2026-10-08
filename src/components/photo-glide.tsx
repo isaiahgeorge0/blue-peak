@@ -132,7 +132,7 @@ export function PhotoGlide() {
       <div className="md:motion-safe:sticky md:motion-safe:top-0 md:motion-safe:h-dvh md:motion-safe:overflow-hidden">
         <div
           ref={panelRef}
-          className="relative h-[80svh] min-h-[32rem] overflow-hidden md:motion-safe:absolute md:motion-safe:inset-[16vmin] md:motion-safe:h-auto md:motion-safe:min-h-0 md:motion-safe:rounded-[22px] md:motion-safe:shadow-[0_24px_64px_rgba(14,34,64,0.28)] md:motion-safe:will-change-[inset,border-radius]"
+          className="relative h-[80svh] min-h-[32rem] overflow-hidden md:motion-safe:absolute md:motion-safe:inset-[16vmin] md:motion-safe:h-auto md:motion-safe:min-h-0 md:motion-safe:rounded-[22px] md:motion-safe:shadow-[0_24px_64px_rgba(14,34,64,0.28)]"
         >
           <Image
             src="/work/mid-build.jpg"

@@ -13,6 +13,7 @@ import {
 import { serviceAreas } from "@/lib/content";
 import { teamMembers } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
+import { containerWide } from "@/lib/image-sizes";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -64,7 +65,7 @@ export default function AboutPage() {
                 src="/about/who-we-are.jpg"
                 alt="A front room mid-job: brown protection paper taped over the floorboards, the armchair and sideboard under dust sheets, and folded dust sheets, a tool bag and a spirit level set down side by side"
                 fill
-                sizes="(max-width: 1023px) calc(100vw - 3rem), 420px"
+                sizes={`${containerWide(420)}, (max-width: 1023px) calc(100vw - 3rem), 420px`}
                 className="object-cover object-bottom"
               />
             </div>

@@ -11,6 +11,7 @@ import { ArrowIcon } from "@/components/section-heading";
 import { WorkCard } from "@/components/work-card";
 import { getServiceBySlug, projects } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
+import { containerWide } from "@/lib/image-sizes";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -56,7 +57,7 @@ export default function WorkPage() {
                 src={featured.image}
                 alt=""
                 fill
-                sizes="(max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 58vw, 650px"
+                sizes={`${containerWide(650)}, (max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 58vw, 650px`}
                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
               />
             </Link>

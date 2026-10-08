@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { SectionHeading } from "@/components/section-heading";
 import { reviews } from "@/lib/reviews";
+import { containerWide } from "@/lib/image-sizes";
 
 /*
  * No Review or AggregateRating structured data on purpose. It can be added
@@ -37,7 +38,7 @@ export function ReviewsSection() {
                     src={review.image}
                     alt={review.imageAlt}
                     fill
-                    sizes="(max-width: 767px) 78vw, (max-width: 1152px) 33vw, 370px"
+                    sizes={`${containerWide(370)}, (max-width: 767px) 78vw, (max-width: 1152px) 33vw, 370px`}
                     className="object-cover"
                   />
                   {review.sample ? (

@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 /*
+  Scroll-pinned homepage sections need motion allowed and a screen at least
+  500px tall; on shorter screens (phones held sideways) they take their
+  reduced-motion layout. Keep PINNABLE_QUERY in lib/pinnable.ts in step.
+*/
+@custom-variant pinnable (@media (prefers-reduced-motion: no-preference) and (min-height: 31.25rem));
+@custom-variant unpinnable (@media (prefers-reduced-motion: reduce), (max-height: 31.2499rem));
+
+/*
   Blue Peak brand palette ("Deep Contour"), from the brand guidelines.
   Use the semantic tokens (page, panel, ink, accent) in components so a
   section can be re-themed by adding one class to its wrapper:
@@ -33,6 +41,22 @@
   --header-top: 1.25rem;
   --header-pill: 2.75rem;
   --site-header-height: calc(var(--header-top) + var(--header-pill) + 0.75rem);
+}
+
+/*
+  Large screens. From 1440px the root size rises from 100% to 125% at 2560px
+  and stops there, so everything in rem grows in proportion; media queries
+  (always 16px rems) are unaffected. The main container grows faster than
+  the type, by 0.4px per px of extra width, so 1920 and 2560 don't sit in a
+  narrow column; it is fixed from 2560 up, where full-bleed bands carry on.
+  Paragraphs keep their own rem and ch measures, so line lengths hold.
+  The admin dashboard keeps its 1440 sizes.
+*/
+@media (min-width: 90rem) {
+  html:not(:has(.theme-admin)) {
+    font-size: clamp(100%, 67.86% + 0.357vw, 125%);
+    --container-6xl: min(72rem + (100vw - 1440px) * 0.4, 72rem + 448px);
+  }
 }
 
 /*
@@ -166,6 +190,11 @@ body {
 .menu-surface[data-open="true"] {
   clip-path: inset(0 0 0 0 round 1.5rem);
   transition-duration: 350ms;
+}
+
+/* Closed on a short screen, the hidden menu must not soak up wheel scrolls over the pill. */
+.menu-surface:not([data-open="true"]) {
+  overflow-y: hidden;
 }
 
 /*
@@ -401,6 +430,18 @@ h1[tabindex="-1"]:focus {
 .link-arrow:focus-visible::after,
 .group:hover .link-arrow::after {
   transform: scaleX(1);
+}
+
+/*
+  Small controls get a hit area of at least 44×44px without changing how they
+  look: an invisible ::before, centred, that only ever grows the box. The
+  element must be positioned (.link-arrow already is).
+*/
+.tap-target::before,
+.link-arrow::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, (100% - 44px) / 2) min(0px, (100% - 44px) / 2);
 }
 
 /* Short inline links (breadcrumbs, phone numbers): the same draw-in underline. */

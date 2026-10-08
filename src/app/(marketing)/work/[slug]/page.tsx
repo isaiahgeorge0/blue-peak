@@ -18,6 +18,7 @@ import {
   type Service,
 } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
+import { containerWide } from "@/lib/image-sizes";
 
 const panelHeadingClassName = "text-xl leading-tight font-semibold text-ink";
 
@@ -98,7 +99,7 @@ export default async function ProjectDetailPage({
               <li>
                 <Link
                   href="/work"
-                  className="link-draw text-accent"
+                  className="link-draw tap-target text-accent"
                 >
                   Work
                 </Link>
@@ -127,7 +128,7 @@ export default async function ProjectDetailPage({
               fill
               loading="eager"
               fetchPriority="high"
-              sizes="(max-width: 1152px) calc(100vw - 3rem), 1104px"
+              sizes={`${containerWide(1104)}, (max-width: 1152px) calc(100vw - 3rem), 1104px`}
               className="object-cover"
             />
           </div>
@@ -160,7 +161,7 @@ export default async function ProjectDetailPage({
             {services.length > 0 ? (
               <div className="py-6 lg:py-8">
                 <h3 className={panelHeadingClassName}>Services</h3>
-                <ul className="mt-4 space-y-2">
+                <ul className="mt-4 space-y-2 pointer-coarse:space-y-6">
                   {services.map((service) => (
                     <li key={service.slug}>
                       <Link
@@ -195,7 +196,7 @@ export default async function ProjectDetailPage({
                   src={leadPhoto.src}
                   alt={leadPhoto.alt}
                   fill
-                  sizes="(max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 66vw, 728px"
+                  sizes={`${containerWide(728)}, (max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 66vw, 728px`}
                   className="object-cover"
                 />
               </li>
@@ -208,7 +209,7 @@ export default async function ProjectDetailPage({
                     src={photo.src}
                     alt={photo.alt}
                     fill
-                    sizes="(max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 33vw, 364px"
+                    sizes={`${containerWide(364)}, (max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 33vw, 364px`}
                     className="object-cover"
                   />
                 </li>
@@ -237,7 +238,7 @@ export default async function ProjectDetailPage({
                   imageSrc={other.image}
                   imageAlt={other.imageAlt}
                   sample={other.sample}
-                  sizes="(max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 50vw, 536px"
+                  sizes={`${containerWide(536)}, (max-width: 767px) calc(100vw - 3rem), (max-width: 1152px) 50vw, 536px`}
                 />
               </li>
             ))}

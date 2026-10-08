@@ -7,6 +7,7 @@ import {
 import { Reveal } from "@/components/reveal";
 import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
+import { containerWide } from "@/lib/image-sizes";
 
 /** Final band on a page: quote and call buttons, plus the estimator preview. */
 export function ClosingBand() {
@@ -28,7 +29,7 @@ export function ClosingBand() {
               </Link>
               <a
                 href={`tel:${sitePhoneTel}`}
-                className="link-draw text-sm font-bold text-ink"
+                className="link-draw tap-target text-sm font-bold text-ink"
               >
                 Call {sitePhoneDisplay}
               </a>
@@ -43,7 +44,7 @@ export function ClosingBand() {
                 src="/home/quote-preview.jpg"
                 alt="3D quote calculator preview"
                 fill
-                sizes="(max-width: 1024px) 100vw, 540px"
+                sizes={`${containerWide(540)}, (max-width: 1024px) 100vw, 540px`}
                 className="object-cover"
               />
             </Link>

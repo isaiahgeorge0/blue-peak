@@ -26,6 +26,7 @@ import {
 } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
 import { howWeWorkSteps } from "@/lib/site";
+import { containerWide } from "@/lib/image-sizes";
 
 const focusRingClassName =
   "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent";
@@ -100,7 +101,7 @@ export default async function ServiceDetailPage({
                 <li>
                   <Link
                     href="/services"
-                    className="link-draw text-accent"
+                    className="link-draw tap-target text-accent"
                   >
                     Services
                   </Link>
@@ -140,7 +141,7 @@ export default async function ServiceDetailPage({
                   fill
                   loading="eager"
                   fetchPriority="high"
-                  sizes="(max-width: 1023px) calc(100vw - 3rem), 420px"
+                  sizes={`${containerWide(420)}, (max-width: 1023px) calc(100vw - 3rem), 420px`}
                   className="object-cover"
                 />
               ) : (
@@ -234,7 +235,7 @@ export default async function ServiceDetailPage({
                 imageSrc={project.image}
                 imageAlt={project.imageAlt}
                 sample={project.sample}
-                sizes="(max-width: 1023px) calc(100vw - 3rem), 736px"
+                sizes={`${containerWide(736)}, (max-width: 1023px) calc(100vw - 3rem), 736px`}
               />
             </div>
           </Reveal>
@@ -263,7 +264,7 @@ export default async function ServiceDetailPage({
                         src={other.image}
                         alt={other.imageAlt ?? ""}
                         fill
-                        sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 30vw, 352px"
+                        sizes={`${containerWide(352)}, (max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 30vw, 352px`}
                         className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
                       />
                     ) : (

@@ -8,6 +8,8 @@ import {
   SKETCH_RESOLVE_PATHS,
   SKETCH_RESOLVE_VIEWBOX,
 } from "@/lib/sketch-resolve-paths";
+import { containerWide } from "@/lib/image-sizes";
+import { PINNABLE_QUERY } from "@/lib/pinnable";
 
 /**
  * Fractions of the pinned travel (wrapper height minus one viewport). Each
@@ -39,13 +41,6 @@ function easeOutCubic(t: number) {
 function mapRange(value: number, inMin: number, inMax: number) {
   if (inMax <= inMin) return 0;
   return clamp((value - inMin) / (inMax - inMin), 0, 1);
-}
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
 }
 
 /**
@@ -80,29 +75,25 @@ export function SketchResolve() {
       }
     });
 
-    const reduceMotion = prefersReducedMotion();
-
-    paths.forEach((path, index) => {
-      const length = lengths[index] || 0;
-      path.style.strokeDasharray = `${length}`;
-      path.style.strokeDashoffset = reduceMotion ? "0" : `${length}`;
-    });
-
-    if (reduceMotion) {
-      photoLayer.style.opacity = "1";
-      lineLayer.style.opacity = String(LINE_REST_OPACITY);
-      panel.style.transform = "scale(1)";
-      rail.style.transform = "scaleY(1)";
-      return;
-    }
-
-    photoLayer.style.opacity = "0";
-    lineLayer.style.opacity = "1";
-    panel.style.transform = `scale(${PHOTO_SCALE_FROM})`;
-
+    const query = window.matchMedia(PINNABLE_QUERY);
     let raf = 0;
     let ticking = false;
     let activeStage = -1;
+
+    paths.forEach((path, index) => {
+      path.style.strokeDasharray = `${lengths[index] || 0}`;
+    });
+
+    const showStatic = () => {
+      paths.forEach((path) => {
+        path.style.strokeDashoffset = "0";
+      });
+      photoLayer.style.opacity = "1";
+      lineLayer.style.opacity = String(LINE_REST_OPACITY);
+      panel.style.transform = "scale(1)";
+      panel.style.willChange = "";
+      rail.style.transform = "scaleY(1)";
+    };
 
     const applyProgress = (progress: number) => {
       const drawP = mapRange(progress, DRAW_START, DRAW_END);
@@ -123,6 +114,8 @@ export function SketchResolve() {
       photoLayer.style.opacity = String(photoP);
       lineLayer.style.opacity = String(1 - photoP * (1 - LINE_REST_OPACITY));
       panel.style.transform = `scale(${PHOTO_SCALE_FROM - photoP * (PHOTO_SCALE_FROM - 1)})`;
+      panel.style.willChange =
+        progress > 0 && progress < 1 ? "transform" : "";
       rail.style.transform = `scaleY(${mapRange(progress, 0, RAIL_END)})`;
 
       const stage = STAGE_BOUNDS.filter((bound) => progress >= bound).length;
@@ -149,14 +142,31 @@ export function SketchResolve() {
       });
     };
 
-    measure();
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-
-    return () => {
+    const stop = () => {
       window.cancelAnimationFrame(raf);
+      ticking = false;
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
+    };
+
+    const sync = () => {
+      stop();
+      if (!query.matches) {
+        showStatic();
+        return;
+      }
+      activeStage = -1;
+      measure();
+      window.addEventListener("scroll", onScrollOrResize, { passive: true });
+      window.addEventListener("resize", onScrollOrResize);
+    };
+
+    sync();
+    query.addEventListener("change", sync);
+
+    return () => {
+      query.removeEventListener("change", sync);
+      stop();
     };
   }, []);
 
@@ -165,9 +175,9 @@ export function SketchResolve() {
       ref={wrapperRef}
       id="how-we-work"
       aria-labelledby="how-heading"
-      className="theme-brand relative bg-page motion-safe:h-[220vh] motion-safe:lg:h-[240vh]"
+      className="theme-brand relative bg-page pinnable:h-[220vh] pinnable:lg:h-[240vh]"
     >
-      <div className="mx-auto flex max-w-6xl flex-col px-6 py-20 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-12 lg:py-28 xl:gap-16 motion-safe:sticky motion-safe:top-0 motion-safe:h-[100dvh] motion-safe:overflow-hidden motion-safe:pt-20 motion-safe:pb-6 motion-safe:lg:content-center motion-safe:lg:pt-20 motion-safe:lg:pb-12">
+      <div className="mx-auto flex max-w-6xl flex-col px-6 py-20 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-12 lg:py-28 xl:gap-16 pinnable:sticky pinnable:top-0 pinnable:h-[100dvh] pinnable:overflow-hidden pinnable:pt-20 pinnable:pb-6 pinnable:lg:content-center pinnable:lg:pt-20 pinnable:lg:pb-12">
         <div className="max-lg:contents">
           <SectionHeading
             eyebrow="How we work"
@@ -179,7 +189,7 @@ export function SketchResolve() {
 
           <div className="relative order-3 mt-6 shrink-0 pl-6 lg:mt-10">
             <div
-              className="absolute inset-y-0 left-0 w-0.5 overflow-hidden bg-ink/15"
+              className="absolute inset-y-0 left-0 w-[2px] overflow-hidden bg-ink/15"
               aria-hidden
             >
               <div
@@ -196,15 +206,15 @@ export function SketchResolve() {
                     stageRefs.current[index] = node;
                   }}
                   data-active={index === 0 ? "true" : "false"}
-                  className="group transition-opacity duration-500 ease-out motion-safe:max-lg:[grid-area:1/1] motion-safe:max-lg:opacity-0 motion-safe:max-lg:data-[active=true]:opacity-100 motion-safe:lg:opacity-70 motion-safe:lg:data-[active=true]:opacity-100 max-lg:motion-reduce:mt-8 max-lg:motion-reduce:first:mt-0"
+                  className="group transition-opacity duration-500 ease-out pinnable:max-lg:[grid-area:1/1] pinnable:max-lg:opacity-0 pinnable:max-lg:data-[active=true]:opacity-100 pinnable:lg:opacity-70 pinnable:lg:data-[active=true]:opacity-100 max-lg:unpinnable:mt-8 max-lg:unpinnable:first:mt-0"
                 >
                   <h3 className="flex items-baseline gap-3 text-2xl leading-tight font-semibold text-ink">
-                    <span className="text-sm font-bold tracking-[0.2em] text-accent motion-safe:lg:text-ink motion-safe:lg:group-data-[active=true]:text-accent">
+                    <span className="text-sm font-bold tracking-[0.2em] text-accent pinnable:lg:text-ink pinnable:lg:group-data-[active=true]:text-accent">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     {stage.title}
                   </h3>
-                  <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out motion-safe:lg:grid-rows-[0fr] motion-safe:lg:group-data-[active=true]:grid-rows-[1fr]">
+                  <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out pinnable:lg:grid-rows-[0fr] pinnable:lg:group-data-[active=true]:grid-rows-[1fr]">
                     <div className="overflow-hidden">
                       <p className="max-w-md pt-3 text-lg leading-relaxed text-ink/80">
                         {stage.body}
@@ -224,7 +234,7 @@ export function SketchResolve() {
 
         <div
           ref={panelRef}
-          className="sketch-resolve-panel relative order-2 mt-6 aspect-[864/1042] w-full origin-center overflow-hidden border border-ink/25 will-change-transform lg:mt-0 lg:max-h-[calc(100dvh-10rem)] motion-safe:max-lg:aspect-auto motion-safe:max-lg:min-h-0 motion-safe:max-lg:flex-1"
+          className="sketch-resolve-panel relative order-2 mt-6 aspect-[864/1042] w-full origin-center overflow-hidden border border-ink/25 lg:mt-0 lg:max-h-[calc(100dvh-10rem)] pinnable:max-lg:aspect-auto pinnable:max-lg:min-h-0 pinnable:max-lg:flex-1"
         >
           <div
             className="pointer-events-none absolute inset-0"
@@ -245,7 +255,7 @@ export function SketchResolve() {
               src="/home/source.jpg"
               alt="Finished home office with a fireplace and an alcove desk"
               fill
-              sizes="(max-width: 1023px) 92vw, 640px"
+              sizes={`${containerWide(640)}, (max-width: 1023px) 92vw, 640px`}
               className="object-cover"
             />
           </div>

@@ -19,6 +19,7 @@ import {
   services,
 } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
+import { containerWide } from "@/lib/image-sizes";
 
 export function generateStaticParams() {
   return serviceAreas.map((area) => ({ slug: area.slug }));
@@ -74,7 +75,7 @@ export default async function AreaDetailPage({
           </div>
           <div className="rounded-xl border border-ink/10 p-6 lg:self-start lg:p-8">
             <h3 className="text-2xl leading-tight font-semibold text-ink">What we do here</h3>
-            <ul className="mt-6 space-y-4">
+            <ul className="mt-6 space-y-4 pointer-coarse:space-y-4.5">
               {services.map((service) => (
                 <li
                   key={service.slug}
@@ -83,7 +84,7 @@ export default async function AreaDetailPage({
                   <CheckIcon />
                   <Link
                     href={`/services/${service.slug}`}
-                    className="link-draw transition-colors duration-200 hover:text-accent"
+                    className="link-draw tap-target transition-colors duration-200 hover:text-accent"
                   >
                     {service.name}
                   </Link>
@@ -116,7 +117,7 @@ export default async function AreaDetailPage({
                 imageSrc={project.image}
                 imageAlt={project.imageAlt}
                 sample={project.sample}
-                sizes="(max-width: 1023px) calc(100vw - 3rem), 736px"
+                sizes={`${containerWide(736)}, (max-width: 1023px) calc(100vw - 3rem), 736px`}
               />
             </div>
           </Reveal>

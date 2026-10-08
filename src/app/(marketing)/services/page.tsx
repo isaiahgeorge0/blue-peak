@@ -8,6 +8,7 @@ import { Reveal } from "@/components/reveal";
 import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { services } from "@/lib/content";
 import { pageMetadata } from "@/lib/page-metadata";
+import { containerWide } from "@/lib/image-sizes";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -57,7 +58,7 @@ export default function ServicesPage() {
                         src={service.image}
                         alt={service.imageAlt ?? ""}
                         fill
-                        sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 40vw, 220px"
+                        sizes={`${containerWide(220)}, (max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 40vw, 220px`}
                         className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
                       />
                     ) : (
