@@ -10,7 +10,6 @@ import {
   type CSSProperties,
 } from "react";
 import { useHomeMotionPreference } from "@/components/home/use-home-motion";
-import { SampleTag } from "@/components/sample-tag";
 import { containerWide } from "@/lib/image-sizes";
 
 type BeforeAfterSliderProps = {
@@ -18,8 +17,6 @@ type BeforeAfterSliderProps = {
   afterSrc?: string;
   beforeAlt?: string;
   afterAlt?: string;
-  /** Placeholder imagery rather than a real Blue Peak job. */
-  sample?: boolean;
 };
 
 const START = 50;
@@ -72,7 +69,6 @@ export function BeforeAfterSlider({
   afterSrc = "/home/after.jpg",
   beforeAlt = "Living room before renovation",
   afterAlt = "Living room after renovation",
-  sample = true,
 }: BeforeAfterSliderProps) {
   const reduceMotion = useHomeMotionPreference();
   const frameRef = useRef<HTMLDivElement>(null);
@@ -304,10 +300,6 @@ export function BeforeAfterSlider({
       >
         After
       </span>
-      {sample ? (
-        <SampleTag overPhoto className="pointer-events-none absolute bottom-3 left-3 sm:bottom-4 sm:left-4" />
-      ) : null}
-
       <div
         aria-hidden
         className="pointer-events-none absolute inset-y-0 left-0 -ml-px w-0.5 bg-white shadow-[0_0_6px_rgb(14_34_64/0.35)]"

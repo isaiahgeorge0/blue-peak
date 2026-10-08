@@ -68,6 +68,7 @@ export function HomeHero() {
   const reduceMotion = useHomeMotionPreference();
   const mounted = useHasMounted();
   const sectionRef = useRef<HTMLElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -90,6 +91,25 @@ export function HomeHero() {
     ? { y: copyY, opacity: copyOpacity }
     : undefined;
 
+  // Places the intro's in-photo scrim over the copy's box. Read while the
+  // intro holds the page at the top, so the copy's scroll lift is zero.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const copy = copyRef.current;
+    if (!section || !copy || document.documentElement.dataset.intro !== "play") return;
+    const measure = () => {
+      const box = copy.getBoundingClientRect();
+      section.style.setProperty("--copy-top", `${box.top - section.getBoundingClientRect().top}px`);
+      section.style.setProperty("--copy-height", `${box.height}px`);
+      section.dataset.scrim = "";
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(section);
+    observer.observe(copy);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       ref={sectionRef}
@@ -100,20 +120,27 @@ export function HomeHero() {
           className="home-hero-image absolute inset-0 origin-center"
           style={imageMotionStyle}
         >
+          {/* The 16:9 photo covers the hero, so on narrower screens it is drawn
+              at the height's 16:9 width, wider than the viewport. */}
           <Image
             src="/home/hero.jpg"
             alt="Builder sketching a floor plan on a roll of drawings"
             fill
             preload
             fetchPriority="high"
-            sizes="100vw"
+            sizes="(max-aspect-ratio: 16/9) calc(100vh * 16 / 9), 100vw"
             className="object-cover"
           />
         </motion.div>
+        <div aria-hidden className="home-hero-intro-scrim" />
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col justify-end px-6 pt-[calc(var(--site-header-height)+1.5rem)] pb-[4.75rem] sm:pb-10 lg:pb-14 [@media(max-height:31.2499rem)]:pb-5">
-        <motion.div className="home-hero-copy relative isolate max-w-3xl" style={copyMotionStyle}>
+        <motion.div
+          ref={copyRef}
+          className="home-hero-copy relative isolate max-w-3xl"
+          style={copyMotionStyle}
+        >
           <p className="home-hero-eyebrow text-xs font-bold tracking-[0.2em] text-white/85 uppercase">
             Building and renovation · Ipswich and Suffolk
           </p>

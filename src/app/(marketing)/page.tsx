@@ -11,6 +11,7 @@ import { ArrowIcon, SectionHeading } from "@/components/section-heading";
 import { ServicesRail } from "@/components/home/services-rail";
 import { SketchResolve } from "@/components/home/sketch-resolve";
 import { Reveal } from "@/components/reveal";
+import { SampleTag } from "@/components/sample-tag";
 import { TrustBadges } from "@/components/trust-badges";
 import { WorkCard } from "@/components/work-card";
 import { projects } from "@/lib/content";
@@ -63,9 +64,13 @@ export default function HomePage() {
             </ul>
 
             <div className="mt-14 lg:mt-20">
-              <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
-                See the difference
-              </h3>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
+                  See the difference
+                </h3>
+                {/* The slider's photos are placeholders, not a Blue Peak job. */}
+                <SampleTag overPhoto onFrost />
+              </div>
               <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
                 Drag the handle, or use the arrow keys, to compare.
               </p>
