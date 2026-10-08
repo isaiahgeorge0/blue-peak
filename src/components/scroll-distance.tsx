@@ -3,80 +3,15 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { comparisonIcons } from "@/components/comparison-icons";
-
-/** 1 CSS pixel is 1/96 inch: 0.2646mm. */
-const METRES_PER_PX = 0.0002646;
-
-/** Real measurements only. Value in metres; phrase for one, and for n of them. */
-const comparisons: { metres: number; one: string; many: (n: string) => string }[] = [
-  { metres: 0.215, one: "one brick laid lengthways", many: (n) => `${n} bricks laid lengthways` },
-  { metres: 0.9, one: "a kitchen worktop's height", many: (n) => `${n} kitchen worktops stacked up` },
-  { metres: 1.981, one: "a standard door", many: (n) => `${n} standard doors` },
-  { metres: 2.4, one: "floor to ceiling in most homes", many: (n) => `${n} times floor to ceiling in most homes` },
-  { metres: 3.9, one: "a scaffold board", many: (n) => `${n} scaffold boards` },
-  { metres: 5, one: "the length of our van", many: (n) => `${n} lengths of our van` },
-  { metres: 7.5, one: "the height of a two-storey house", many: (n) => `${n} two-storey houses stacked up` },
-  { metres: 20, one: "a cricket pitch", many: (n) => `${n} cricket pitches` },
-];
-
-const numberWords = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+import { METRES_PER_PX, measureUp, scrollSentence } from "@/lib/scroll-comparison";
 
 const PULL_MS = 900;
 const ICON_MS = 200;
 
 /**
- * The closest comparison, allowing whole multiples up to twelve. Each step up
- * in multiple costs a little, so a single item wins when it is nearly as close.
- */
-function compare(metres: number) {
-  let best = { score: Infinity, text: comparisons[0].one };
-  for (const item of comparisons) {
-    const count = Math.max(1, Math.min(12, Math.round(metres / item.metres)));
-    const score = Math.abs(metres - count * item.metres) / metres + (count - 1) * 0.02;
-    if (score < best.score) {
-      best = { score, text: count === 1 ? item.one : item.many(numberWords[count]) };
-    }
-  }
-  return best.text;
-}
-
-/**
- * What the sentence and the tape both show. Below the last milestone the tape
- * runs from the previous milestone to the next one; from there on it stays
- * full and the sentence counts cricket pitches.
- */
-function measureUp(metres: number) {
-  const last = comparisons.length - 1;
-  const pitch = comparisons[last];
-  if (metres >= pitch.metres) {
-    const count = Math.round(metres / pitch.metres);
-    return {
-      about: count === 1 ? pitch.one : pitch.many(numberWords[count] ?? String(count)),
-      next: null,
-      target: last,
-      progress: 1,
-    };
-  }
-  const target = comparisons.findIndex((item) => item.metres > metres);
-  const from = target === 0 ? 0 : comparisons[target - 1].metres;
-  const about = compare(metres);
-  return {
-    about,
-    next: about === comparisons[target].one ? null : comparisons[target].one,
-    target,
-    progress: (metres - from) / (comparisons[target].metres - from),
-  };
-}
-
-function formatDistance(metres: number) {
-  if (metres < 1) return `${Math.round(metres * 100)} centimetres`;
-  return `${metres.toFixed(1)} metres`;
-}
-
-/**
  * Light-hearted footer line and tape measure: how far the visitor has
  * scrolled on this page. Client only, so nothing is in the server HTML (the
- * footer reserves the height). Shown once they have scrolled 10cm; the blade
+ * footer reserves the height). Shown from the first centimetre; the blade
  * pulls out the first time it is in view on each page.
  */
 export function ScrollDistance() {
@@ -111,7 +46,7 @@ export function ScrollDistance() {
   }, [pathname]);
 
   const metres = furthest.path === pathname ? furthest.px * METRES_PER_PX : 0;
-  const visible = metres >= 0.1;
+  const visible = metres >= 0.005;
   const pulled = pulledOn === pathname;
   const settled = settledOn === pathname;
 
@@ -119,8 +54,8 @@ export function ScrollDistance() {
     const tape = tapeRef.current;
     if (!visible || pulled || !tape) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setPulledOn(pathname);
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setPulledOn(pathname);
       },
       { threshold: 1 },
     );
@@ -136,9 +71,9 @@ export function ScrollDistance() {
 
   if (!visible) return null;
 
-  const { about, next, target, progress } = measureUp(metres);
+  const { target, progress } = measureUp(metres);
   // One text node, so an update replaces the text rather than shifting a later node along the line.
-  const sentence = `You've scrolled ${formatDistance(metres)} on this page. That's about ${about}.${next ? ` Next up: ${next}.` : ""}`;
+  const sentence = scrollSentence(metres);
   const bladeStyle = {
     "--tape": pulled ? progress : 0,
     transitionDuration: settled ? "0ms" : `${PULL_MS}ms`,
