@@ -53,7 +53,7 @@ export function SiteFooter() {
           </p>
         </div>
       </div>
-      <div className="mx-auto -mt-4 box-content h-[5.75rem] max-w-6xl px-6 pb-10 sm:h-[4.5rem] lg:h-[3.25rem] [@media(scripting:none)]:hidden">
+      <div className="mx-auto -mt-4 box-content h-[7rem] max-w-6xl px-6 pb-10 min-[22.5rem]:h-[5.75rem] sm:h-[4.5rem] lg:h-[3.25rem] [@media(scripting:none)]:hidden">
         <ScrollDistance />
       </div>
     </footer>
