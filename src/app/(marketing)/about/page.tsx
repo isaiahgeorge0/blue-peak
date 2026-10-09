@@ -90,7 +90,7 @@ export default function AboutPage() {
           <SectionHeading eyebrow="Who you'll deal with">
             Led by Kyle and Steven.
           </SectionHeading>
-          <ul className="mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 sm:gap-8 lg:mt-16">
+          <ul className="mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 sm:gap-8 lg:mt-16 lg:max-w-none">
             {teamMembers.map((member) => (
               <li
                 key={member.name}

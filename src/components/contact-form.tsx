@@ -28,12 +28,16 @@ type ServiceOption = {
 
 type ContactFormProps = {
   services: ServiceOption[];
+  /** Heading above the fields; it gives way with the form once it is sent. */
+  title?: string;
   /** Shown under the form, and inside the confirmation once it is sent. */
   nextSteps?: ReactNode;
 };
 
 /** How long the sent form takes to give way to the confirmation. */
 const LEAVE_MS = 250;
+/** After the confirmation has scrolled into place and finished its entrance. */
+const SETTLE_MS = 1200;
 
 type FormState = {
   name: string;
@@ -54,7 +58,7 @@ const labelClassName = "block font-serif text-xl leading-tight text-ink";
 const quoteButtonClassName =
   "group inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-on-accent transition-[background-color,opacity] duration-200 hover:bg-traverse focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent";
 
-export function ContactForm({ services, nextSteps }: ContactFormProps) {
+export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
@@ -143,11 +147,24 @@ export function ContactForm({ services, nextSteps }: ContactFormProps) {
       // The block keeps its height as the form gives way, so nothing below moves.
       setHeldHeight(blockRef.current?.offsetHeight ?? null);
       setIsSuccess(true);
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion) {
         setConfirmed(true);
       } else {
         window.setTimeout(() => setConfirmed(true), LEAVE_MS);
       }
+      // The confirmation is shorter than the form. Its spare height is let go
+      // only when the panel runs past the bottom of the screen, so everything
+      // that moves up is out of view before and after.
+      window.setTimeout(
+        () => {
+          const panel = blockRef.current?.firstElementChild;
+          if (panel && panel.getBoundingClientRect().bottom >= window.innerHeight) {
+            setHeldHeight(null);
+          }
+        },
+        (reduceMotion ? 0 : LEAVE_MS) + SETTLE_MS,
+      );
     } catch {
       setSubmitError(
         "Unable to submit your enquiry right now. Please try again later.",
@@ -167,6 +184,11 @@ export function ContactForm({ services, nextSteps }: ContactFormProps) {
         <Confirmation nextSteps={nextSteps} />
       ) : (
         <div className={isSuccess ? "contact-leave" : undefined} inert={isSuccess}>
+          {title ? (
+            <h2 className="mb-10 font-serif text-[clamp(1.625rem,1.486rem+0.571vw,2rem)] leading-tight tracking-heading text-ink">
+              {title}
+            </h2>
+          ) : null}
           {renderForm()}
           {nextSteps ? <div className="mt-16">{nextSteps}</div> : null}
         </div>
@@ -298,7 +320,7 @@ export function ContactForm({ services, nextSteps }: ContactFormProps) {
 
         <div>
           <label htmlFor="message" className={labelClassName}>
-            Tell us about the job
+            Anything else we should know?
           </label>
           <textarea
             id="message"
@@ -374,7 +396,7 @@ function Confirmation({ nextSteps }: { nextSteps?: ReactNode }) {
         className="page-opener-item mt-8 text-4xl leading-tight tracking-heading text-ink outline-none lg:text-5xl"
         style={openerItem(300)}
       >
-        Thanks, we have your enquiry
+        Thanks, we have your enquiry.
       </h2>
       <p
         className="page-opener-item mt-4 max-w-xl text-lg leading-relaxed text-ink/75"
