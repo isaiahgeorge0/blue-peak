@@ -47,7 +47,7 @@ const HEIGHT = 0.85;
 const subscribeNever = () => () => {};
 
 /** False on the server and during hydration, true once mounted in the browser. */
-function useHasMounted() {
+export function useHasMounted() {
   return useSyncExternalStore(
     subscribeNever,
     () => true,
@@ -73,7 +73,65 @@ function numberLines(words: Element) {
   });
 }
 
-const item = (at: number) => ({ "--item-at": `${at}ms` }) as CSSProperties;
+/** Entrance delay for an opener's eyebrow, lede or extras (.page-opener-item). */
+export const openerItem = (at: number) =>
+  ({ "--item-at": `${at}ms` }) as CSSProperties;
+
+const item = openerItem;
+
+/**
+ * An opener's h1: read whole by screen readers, drawn as words that rise
+ * line by line out of their masks. Pair it with <OpenerLineScript /> as the
+ * last thing in the same copy block.
+ */
+export function OpenerTitle({
+  title,
+  className,
+}: {
+  title: string;
+  className: string;
+}) {
+  const titleRef = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    if (titleRef.current) numberLines(titleRef.current);
+  }, [title]);
+
+  return (
+    <h1 className={className}>
+      <span className="sr-only">{title}</span>
+      <span ref={titleRef} aria-hidden>
+        {title.split(" ").map((word, index) => (
+          <Fragment key={index}>
+            {index > 0 ? " " : null}
+            <span className="page-opener-word" suppressHydrationWarning>
+              <span>{word}</span>
+            </span>
+          </Fragment>
+        ))}
+      </span>
+    </h1>
+  );
+}
+
+/**
+ * Numbers the title's lines before the first paint of a server render (client
+ * renders use OpenerTitle's layout effect). Put it last in the copy block that
+ * holds the h1: the browser can paint when the parser stops for a script, and
+ * the copy must be complete by then or it grows upwards on the next frame.
+ */
+export function OpenerLineScript() {
+  const mounted = useHasMounted();
+  if (mounted) return null;
+  return (
+    <script
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{
+        __html: `(${numberLines.toString()})(document.currentScript.parentElement.querySelector("h1 > [aria-hidden]"))`,
+      }}
+    />
+  );
+}
 
 /**
  * Full-bleed photo that opens an inner page, with the breadcrumb or eyebrow,
@@ -94,7 +152,6 @@ export function PageOpener({
   const reduceMotion = useReducedMotion() === true;
   const mounted = useHasMounted();
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLSpanElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -102,10 +159,6 @@ export function PageOpener({
   const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
   const copyY = useTransform(scrollYProgress, [0, 0.6], [0, -40]);
   const copyOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-
-  useLayoutEffect(() => {
-    if (titleRef.current) numberLines(titleRef.current);
-  }, [title]);
 
   // No inline transforms until mounted, so the server render and hydration match.
   const animate = mounted && !reduceMotion;
@@ -118,8 +171,6 @@ export function PageOpener({
   // The photo covers the opener, so on screens narrower than that it is drawn
   // wider than the viewport, at the opener height's width.
   const sizes = `(max-aspect-ratio: ${Math.round(aspect * HEIGHT * 1000)}/1000) calc(${HEIGHT * 100}vh * ${aspect.toFixed(4)}), 100vw`;
-
-  const words = title.split(" ");
 
   return (
     <section
@@ -176,19 +227,10 @@ export function PageOpener({
               <SampleTag />
             </span>
           ) : null}
-          <h1 className="page-title mt-4 max-w-4xl font-serif text-white">
-            <span className="sr-only">{title}</span>
-            <span ref={titleRef} aria-hidden>
-              {words.map((word, index) => (
-                <Fragment key={index}>
-                  {index > 0 ? " " : null}
-                  <span className="page-opener-word" suppressHydrationWarning>
-                    <span>{word}</span>
-                  </span>
-                </Fragment>
-              ))}
-            </span>
-          </h1>
+          <OpenerTitle
+            title={title}
+            className="page-title mt-4 max-w-4xl font-serif text-white"
+          />
           {lede ? (
             <p
               className="page-opener-item mt-5 max-w-2xl text-lg leading-relaxed text-white/90 lg:text-xl [@media(max-height:31.2499rem)]:mt-3 [@media(max-height:31.2499rem)]:text-base"
@@ -205,18 +247,7 @@ export function PageOpener({
               {children}
             </div>
           ) : null}
-          {/* Server HTML only (client renders use the layout effect). Last in
-              the copy: the browser can paint when the parser stops for a
-              script, and the copy must be complete by then or it grows
-              upwards on the next frame. */}
-          {mounted ? null : (
-            <script
-              suppressHydrationWarning
-              dangerouslySetInnerHTML={{
-                __html: `(${numberLines.toString()})(document.currentScript.parentElement.querySelector("h1 > [aria-hidden]"))`,
-              }}
-            />
-          )}
+          <OpenerLineScript />
         </motion.div>
       </div>
     </section>

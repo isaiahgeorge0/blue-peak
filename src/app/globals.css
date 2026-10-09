@@ -1015,7 +1015,8 @@ h1[tabindex="-1"]:focus {
   each photo behind it.
 */
 .page-opener,
-.work-panel {
+.work-panel,
+.split-opener {
   --scrim-fade: 8rem;
   --scrim: linear-gradient(
     to bottom,
@@ -1036,6 +1037,18 @@ h1[tabindex="-1"]:focus {
   pointer-events: none;
 }
 
+/* /contact from lg: the copy sits on the photo's lower half. */
+@media (min-width: 64rem) {
+  .split-opener-onphoto::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: calc(-1 * var(--scrim-fade)) -100vw -12rem;
+    background: var(--scrim);
+    pointer-events: none;
+  }
+}
+
 /* Inner page h1, on a photo or in the Frost White header: about 40px at 390
    and 72px at 1440, then growing with the root size; held to 12% of the
    height on short screens. */
@@ -1054,7 +1067,8 @@ h1[tabindex="-1"]:focus {
 /* The parallax layers get their own layers up front, so the first scroll
    does not stall while the photo is promoted. */
 @media (prefers-reduced-motion: no-preference) {
-  .page-opener-photo {
+  .page-opener-photo,
+  .split-opener-photo {
     will-change: transform;
   }
 
@@ -1094,8 +1108,21 @@ h1[tabindex="-1"]:focus {
       backwards;
   }
 
-  html[data-page-transition] :is(.page-opener-word > span, .page-opener-item) {
+  /* Split openers: the photo settles in from a slight zoom. */
+  .split-opener-reveal {
+    animation: split-opener-reveal 900ms var(--ease-out) backwards;
+  }
+
+  html[data-page-transition]
+    :is(.page-opener-word > span, .page-opener-item, .split-opener-reveal) {
     animation-play-state: paused;
+  }
+}
+
+@keyframes split-opener-reveal {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
   }
 }
 
@@ -1131,6 +1158,205 @@ h1[tabindex="-1"]:focus {
 @media (min-width: 64rem) and (hover: hover) {
   .services-index:has(.services-row:hover) .services-row:not(:hover) {
     opacity: 0.4;
+  }
+}
+
+/*
+  /about "Who we are": the paragraph is drawn twice, grey underneath and Blue
+  Solution on top. Each top word's opacity follows --fill (0 to 1, set from
+  scroll), so the blue passes along the paragraph --fill-spread words wide.
+  Fully filled until a script sets --fill.
+*/
+.scroll-fill {
+  --fill: 1;
+  --fill-spread: 4;
+}
+
+.scroll-fill-word {
+  opacity: clamp(
+    0,
+    (var(--fill) * (var(--words) + var(--fill-spread)) - var(--i)) /
+      var(--fill-spread),
+    1
+  );
+}
+
+/*
+  /about "What we stand for": once the band is in view its words rise out of
+  their masks 120ms apart. The statement band only hides them (data-armed)
+  while it is still off screen.
+*/
+.statement-word {
+  display: block;
+}
+
+.statement-word > span {
+  display: inline-block;
+}
+
+@media (min-width: 40rem) {
+  .statement-word {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Room inside each mask for descenders and the italic's overhang. */
+  .statement[data-armed] .statement-word {
+    overflow: hidden;
+    padding: 0 0.1em 0.12em;
+    margin: 0 -0.1em -0.12em;
+  }
+
+  .statement[data-armed] .statement-word > span {
+    transform: translateY(105%);
+  }
+
+  .statement[data-armed] .statement-eyebrow {
+    opacity: 0;
+  }
+
+  .statement[data-shown] .statement-word > span {
+    transform: none;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .statement[data-shown] .statement-word:nth-child(2) > span {
+    transition-delay: 120ms;
+  }
+
+  .statement[data-shown] .statement-word:nth-child(3) > span {
+    transition-delay: 240ms;
+  }
+
+  .statement[data-shown] .statement-eyebrow {
+    opacity: 1;
+    transition: opacity 400ms var(--ease-out);
+  }
+}
+
+/*
+  /about distance diagram. The line out to a town scales from Ipswich; the
+  town's dot grows inside a ring; its name in the list steps right and shows
+  an arrow.
+*/
+/* Labels keep clear of the rings they cross. */
+.area-map-halo-text {
+  text-shadow:
+    0 0 2px var(--page),
+    0 0 4px var(--page),
+    0 0 6px var(--page);
+}
+
+.area-map-line {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 450ms var(--ease-out);
+}
+
+.area-map-line[data-active] {
+  transform: none;
+}
+
+.area-map-pin {
+  transition: transform 300ms var(--ease-out);
+}
+
+.area-map-dot::after {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+  border: 1px solid var(--accent);
+  border-radius: 9999px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out);
+}
+
+.area-map-dot[data-active] .area-map-pin {
+  transform: scale(1.5);
+}
+
+.area-map-dot[data-active]::after {
+  opacity: 1;
+  transform: none;
+}
+
+.area-map-name-row > :first-child,
+.area-map-arrow {
+  transition:
+    opacity 250ms var(--ease-out),
+    transform 250ms var(--ease-out);
+}
+
+.area-map-arrow {
+  opacity: 0;
+  transform: translateX(-0.5rem);
+}
+
+.area-map-name[data-active] .area-map-name-row > :first-child {
+  transform: translateX(0.5rem);
+}
+
+.area-map-name[data-active] .area-map-arrow {
+  opacity: 1;
+  transform: translateX(0.5rem);
+}
+
+/* Without hover the arrow stays out, as the cue that each name is a link. */
+@media (hover: none) {
+  .area-map-arrow {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+  /contact once an enquiry is sent: the form fades and lifts away (250ms),
+  then the confirmation rises into its place while the mark assembles as in
+  the homepage intro, its four shapes sliding up the pitch 80ms apart.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .contact-leave {
+    animation: contact-leave 250ms var(--ease-out) forwards;
+  }
+
+  .contact-confirmation {
+    animation: page-opener-rise 300ms var(--ease-out) backwards;
+  }
+
+  .contact-mark {
+    overflow: visible;
+  }
+
+  .contact-mark .logo-piece {
+    --piece-run: calc(14px + var(--piece) * 6px);
+    animation:
+      home-intro-piece 360ms var(--ease-out) calc(var(--piece) * 80ms)
+        backwards,
+      home-intro-fade 216ms var(--ease-out) calc(var(--piece) * 80ms)
+        backwards;
+  }
+}
+
+@keyframes contact-leave {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .area-map-line,
+  .area-map-pin,
+  .area-map-dot::after,
+  .area-map-name-row > :first-child,
+  .area-map-arrow {
+    transition: none;
   }
 }
 

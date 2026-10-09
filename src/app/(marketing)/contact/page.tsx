@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
 import { secondaryCtaClassName } from "@/components/cta-styles";
-import { PageHeader } from "@/components/page-header";
-import { Reveal } from "@/components/reveal";
+import { NextSteps } from "@/components/next-steps";
+import { SplitOpener } from "@/components/split-opener";
 import { serviceAreas, services } from "@/lib/content";
-import { howWeWorkSteps, sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
+import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,6 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 const detailHeadingClassName =
   "font-sans text-xs font-bold tracking-[0.2em] text-accent uppercase";
 
+/** The form column's right edge lines up with the main container's from lg. */
+const containerInsetRight =
+  "lg:pr-[max(1.5rem,calc((100vw-var(--container-6xl))/2+1.5rem))]";
+
 export default function ContactPage() {
   const serviceOptions = services.map((service) => ({
     slug: service.slug,
@@ -28,55 +32,29 @@ export default function ContactPage() {
 
   return (
     <>
-      <PageHeader
+      <SplitOpener
         eyebrow="Contact"
         title="Get a quote"
         lede="Tell us what you are planning. We usually reply the same working day with a clear next step."
-      />
-
-      <section className="bg-page">
-        <div className="mx-auto grid max-w-6xl gap-16 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16 lg:py-28">
-          {/* First in the source so it leads on phones; placed right on desktop. */}
+        image={{
+          src: "/services/general-renovations.jpg",
+          alt: "Renovated Victorian hallway with a patterned tiled floor, painted panelling and a white staircase",
+        }}
+        aside={
           <div
-            id="quote-form"
-            className="scroll-mt-28 rounded-lg border border-ink/10 bg-panel px-6 py-8 sm:px-8 lg:col-start-2 lg:row-start-1 lg:self-start"
+            className={`px-6 pt-8 pb-20 lg:pt-[calc(var(--site-header-height)+3rem)] lg:pb-28 lg:pl-12 xl:pl-16 ${containerInsetRight}`}
           >
-            <ContactForm services={serviceOptions} />
-          </div>
-
-          <Reveal className="space-y-12 lg:col-start-1 lg:row-start-1">
-            <div>
-              <h2 className={detailHeadingClassName}>Phone</h2>
-              <a
-                href={`tel:${sitePhoneTel}`}
-                className="mt-3 inline-block font-serif text-5xl tracking-display text-ink transition-colors duration-200 hover:text-accent lg:text-6xl"
-              >
-                {sitePhoneDisplay}
-              </a>
+            <div
+              id="quote-form"
+              className="max-w-xl scroll-mt-[calc(var(--site-header-height)+1.5rem)] lg:max-w-none"
+            >
+              <ContactForm
+                services={serviceOptions}
+                nextSteps={<NextSteps />}
+              />
             </div>
 
-            <div>
-              <h2 className={detailHeadingClassName}>What happens next</h2>
-              <ol className="mt-5 space-y-5">
-                {howWeWorkSteps.slice(0, 3).map((step, index) => (
-                  <li key={step.title} className="flex gap-4">
-                    <span className="pt-1 text-sm font-bold tracking-[0.2em] text-accent">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3 className="text-xl leading-tight font-semibold text-ink">
-                        {step.title}
-                      </h3>
-                      <p className="mt-1 text-base leading-relaxed text-ink/70">
-                        {step.body}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <div>
+            <div className="mt-16 border-t border-ink/15 pt-8">
               <h2 className={detailHeadingClassName}>Areas we cover</h2>
               <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 pointer-coarse:gap-y-5.5">
                 {serviceAreas.map((area) => (
@@ -91,17 +69,24 @@ export default function ContactPage() {
                 ))}
               </ul>
             </div>
-          </Reveal>
-        </div>
-      </section>
+          </div>
+        }
+      >
+        <a
+          href={`tel:${sitePhoneTel}`}
+          className="link-draw tap-target font-serif text-4xl tracking-display text-ink lg:text-6xl lg:text-white"
+        >
+          {sitePhoneDisplay}
+        </a>
+      </SplitOpener>
 
       <section className="bg-panel">
-        <Reveal className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 md:flex-row md:items-center md:justify-between md:gap-12 lg:py-14">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-14 md:flex-row md:items-center md:justify-between md:gap-12 lg:py-20">
           <div>
-            <h2 className="text-2xl leading-tight tracking-heading text-ink lg:text-3xl">
+            <h2 className="text-3xl leading-tight tracking-heading text-ink lg:text-5xl lg:tracking-display">
               Not ready to talk yet?
             </h2>
-            <p className="mt-2 max-w-xl text-lg leading-relaxed text-ink/70">
+            <p className="mt-3 max-w-xl text-lg leading-relaxed text-ink/70">
               Build a rough estimate in 3D and see a guide price in a couple of
               minutes.
             </p>
@@ -112,7 +97,7 @@ export default function ContactPage() {
           >
             Build an estimate
           </Link>
-        </Reveal>
+        </div>
       </section>
     </>
   );

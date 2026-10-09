@@ -1,7 +1,17 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { BrandMark } from "@/components/brand/brand-logo";
 import { LeadHoneypot } from "@/components/lead-honeypot";
+import { openerItem } from "@/components/page-opener";
+import { ArrowIcon } from "@/components/section-heading";
 import { useTurnstile } from "@/components/use-turnstile";
 import {
   LEAD_FIELD_LIMITS,
@@ -9,7 +19,7 @@ import {
   LEAD_TURNSTILE_FIELD,
   TURNSTILE_ACTIONS,
 } from "@/lib/lead-limits";
-import { sitePhoneDisplay } from "@/lib/site";
+import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
 type ServiceOption = {
   slug: string;
@@ -18,7 +28,12 @@ type ServiceOption = {
 
 type ContactFormProps = {
   services: ServiceOption[];
+  /** Shown under the form, and inside the confirmation once it is sent. */
+  nextSteps?: ReactNode;
 };
+
+/** How long the sent form takes to give way to the confirmation. */
+const LEAVE_MS = 250;
 
 type FormState = {
   name: string;
@@ -29,15 +44,17 @@ type FormState = {
   message: string;
 };
 
+/* Hairline fields: the border holds 3:1 against the page, and focus turns it
+   Blue Solution with a second ring inside. */
 const fieldClassName =
-  "mt-2 w-full rounded-md border border-ink/20 bg-page px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/40";
+  "mt-3 block min-h-13 w-full rounded-md border border-ink/48 bg-page px-4 py-3 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink/45 focus:border-accent focus:ring-1 focus:ring-accent";
 
-const labelClassName = "block text-sm font-medium text-ink/85";
+const labelClassName = "block font-serif text-xl leading-tight text-ink";
 
 const quoteButtonClassName =
-  "inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold text-on-accent transition-[transform,opacity] duration-200 hover:scale-[1.03] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100";
+  "group inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-on-accent transition-[background-color,opacity] duration-200 hover:bg-traverse focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent";
 
-export function ContactForm({ services }: ContactFormProps) {
+export function ContactForm({ services, nextSteps }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
@@ -54,6 +71,10 @@ export function ContactForm({ services }: ContactFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  // Once the sent form has faded out, the confirmation takes its place.
+  const [confirmed, setConfirmed] = useState(false);
+  const [heldHeight, setHeldHeight] = useState<number | null>(null);
+  const blockRef = useRef<HTMLDivElement>(null);
   const {
     attachContainer: attachTurnstile,
     enabled: turnstileEnabled,
@@ -119,7 +140,14 @@ export function ContactForm({ services }: ContactFormProps) {
         return;
       }
 
+      // The block keeps its height as the form gives way, so nothing below moves.
+      setHeldHeight(blockRef.current?.offsetHeight ?? null);
       setIsSuccess(true);
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setConfirmed(true);
+      } else {
+        window.setTimeout(() => setConfirmed(true), LEAVE_MS);
+      }
     } catch {
       setSubmitError(
         "Unable to submit your enquiry right now. Please try again later.",
@@ -130,159 +158,244 @@ export function ContactForm({ services }: ContactFormProps) {
     }
   }
 
-  if (isSuccess) {
+  return (
+    <div
+      ref={blockRef}
+      style={heldHeight ? ({ minHeight: heldHeight } as CSSProperties) : undefined}
+    >
+      {confirmed ? (
+        <Confirmation nextSteps={nextSteps} />
+      ) : (
+        <div className={isSuccess ? "contact-leave" : undefined} inert={isSuccess}>
+          {renderForm()}
+          {nextSteps ? <div className="mt-16">{nextSteps}</div> : null}
+        </div>
+      )}
+    </div>
+  );
+
+  function renderForm() {
     return (
-      <div className="rounded-lg border border-accent/30 bg-panel px-6 py-10">
-        <h2 className="text-3xl tracking-heading text-ink">
-          Thanks, we have your enquiry
-        </h2>
-        <p className="mt-4 max-w-xl text-lg leading-relaxed text-ink/75">
-          We usually reply the same working day with next steps or a time to
-          visit. If it is urgent, call us and mention you sent this form.
-        </p>
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+        <LeadHoneypot id="contact-company" value={honeypot} onChange={setHoneypot} />
+        <div className="grid gap-8 sm:grid-cols-2">
+          <div>
+            <label htmlFor="name" className={labelClassName}>
+              Name <span className="text-accent">*</span>
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              value={form.name}
+              onChange={(event) => updateField("name", event.target.value)}
+              maxLength={LEAD_FIELD_LIMITS.name}
+              className={fieldClassName}
+              aria-invalid={Boolean(fieldErrors.name)}
+              aria-describedby={fieldErrors.name ? "name-error" : undefined}
+            />
+            {fieldErrors.name ? (
+              <p id="name-error" className="mt-2 text-sm text-accent">
+                {fieldErrors.name}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label htmlFor="phone" className={labelClassName}>
+              Phone <span className="text-accent">*</span>
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              value={form.phone}
+              onChange={(event) => updateField("phone", event.target.value)}
+              maxLength={LEAD_FIELD_LIMITS.phone}
+              className={fieldClassName}
+              aria-invalid={Boolean(fieldErrors.phone)}
+              aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
+            />
+            {fieldErrors.phone ? (
+              <p id="phone-error" className="mt-2 text-sm text-accent">
+                {fieldErrors.phone}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2">
+          <div>
+            <label htmlFor="email" className={labelClassName}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              maxLength={LEAD_FIELD_LIMITS.email}
+              className={fieldClassName}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="postcode" className={labelClassName}>
+              Postcode
+            </label>
+            <input
+              id="postcode"
+              name="postcode"
+              type="text"
+              autoComplete="postal-code"
+              value={form.postcode}
+              onChange={(event) => updateField("postcode", event.target.value)}
+              maxLength={LEAD_FIELD_LIMITS.postcode}
+              className={fieldClassName}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="service_type" className={labelClassName}>
+            Service
+          </label>
+          <div className="relative">
+            <select
+              id="service_type"
+              name="service_type"
+              value={form.service_type}
+              onChange={(event) => updateField("service_type", event.target.value)}
+              className={`${fieldClassName} appearance-none pr-12`}
+            >
+              <option value="">Select a service</option>
+              {services.map((service) => (
+                <option key={service.slug} value={service.slug}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+            <svg
+              viewBox="0 0 16 16"
+              className="pointer-events-none absolute right-4 bottom-[1.625rem] size-4 translate-y-1/2 text-ink/70"
+              aria-hidden
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.5 6l4.5 4.5L12.5 6"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="message" className={labelClassName}>
+            Tell us about the job
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            rows={5}
+            value={form.message}
+            onChange={(event) => updateField("message", event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.message}
+            className={`${fieldClassName} resize-y`}
+            placeholder="What do you want doing, and roughly when?"
+          />
+        </div>
+
+        <div ref={attachTurnstile} />
+
+        {submitError ? (
+          <p
+            role="alert"
+            className="rounded-md border border-accent/40 bg-page px-4 py-3 text-sm text-ink"
+          >
+            {submitError}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          className={quoteButtonClassName}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Sending..." : "Get a quote"}
+          <ArrowIcon />
+        </button>
+      </form>
     );
   }
+}
+
+/**
+ * Takes the form's place once an enquiry is sent: the mark assembles, then
+ * the confirmation, the next steps and the phone number rise in. Focus moves
+ * to its heading so screen readers announce it.
+ */
+function Confirmation({ nextSteps }: { nextSteps?: ReactNode }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    const heading = headingRef.current;
+    if (!panel || !heading) return;
+    heading.focus({ preventScroll: true });
+    const { top, bottom } = heading.getBoundingClientRect();
+    if (top < 0 || bottom > window.innerHeight) {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      panel.scrollIntoView({
+        block: "start",
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+    }
+  }, []);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <LeadHoneypot id="contact-company" value={honeypot} onChange={setHoneypot} />
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className={labelClassName}>
-            Name <span className="text-accent">*</span>
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            value={form.name}
-            onChange={(event) => updateField("name", event.target.value)}
-            maxLength={LEAD_FIELD_LIMITS.name}
-            className={fieldClassName}
-            aria-invalid={Boolean(fieldErrors.name)}
-            aria-describedby={fieldErrors.name ? "name-error" : undefined}
-          />
-          {fieldErrors.name ? (
-            <p id="name-error" className="mt-2 text-sm text-accent">
-              {fieldErrors.name}
-            </p>
-          ) : null}
-        </div>
-
-        <div>
-          <label htmlFor="phone" className={labelClassName}>
-            Phone <span className="text-accent">*</span>
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            value={form.phone}
-            onChange={(event) => updateField("phone", event.target.value)}
-            maxLength={LEAD_FIELD_LIMITS.phone}
-            className={fieldClassName}
-            aria-invalid={Boolean(fieldErrors.phone)}
-            aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
-          />
-          {fieldErrors.phone ? (
-            <p id="phone-error" className="mt-2 text-sm text-accent">
-              {fieldErrors.phone}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="email" className={labelClassName}>
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={form.email}
-            onChange={(event) => updateField("email", event.target.value)}
-            maxLength={LEAD_FIELD_LIMITS.email}
-            className={fieldClassName}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="postcode" className={labelClassName}>
-            Postcode
-          </label>
-          <input
-            id="postcode"
-            name="postcode"
-            type="text"
-            autoComplete="postal-code"
-            value={form.postcode}
-            onChange={(event) => updateField("postcode", event.target.value)}
-            maxLength={LEAD_FIELD_LIMITS.postcode}
-            className={fieldClassName}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="service_type" className={labelClassName}>
-          Service
-        </label>
-        <select
-          id="service_type"
-          name="service_type"
-          value={form.service_type}
-          onChange={(event) => updateField("service_type", event.target.value)}
-          className={fieldClassName}
-        >
-          <option value="">Select a service</option>
-          {services.map((service) => (
-            <option key={service.slug} value={service.slug}>
-              {service.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="message" className={labelClassName}>
-          Tell us about the job
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          rows={5}
-          value={form.message}
-          onChange={(event) => updateField("message", event.target.value)}
-          maxLength={LEAD_FIELD_LIMITS.message}
-          className={`${fieldClassName} resize-y`}
-          placeholder="What do you want doing, and roughly when?"
-        />
-      </div>
-
-      <div ref={attachTurnstile} />
-
-      {submitError ? (
-        <p
-          role="alert"
-          className="rounded-md border border-accent/40 bg-page px-4 py-3 text-sm text-ink"
-        >
-          {submitError}
-        </p>
-      ) : null}
-
-      <button
-        type="submit"
-        className={quoteButtonClassName}
-        disabled={isSubmitting}
+    <div
+      ref={panelRef}
+      className="contact-confirmation scroll-mt-[calc(var(--site-header-height)+1.5rem)]"
+    >
+      <BrandMark pieces title="" className="contact-mark h-14 w-auto text-accent" />
+      <h2
+        ref={headingRef}
+        tabIndex={-1}
+        className="page-opener-item mt-8 text-4xl leading-tight tracking-heading text-ink outline-none lg:text-5xl"
+        style={openerItem(300)}
       >
-        {isSubmitting ? "Sending..." : "Get a quote"}
-      </button>
-    </form>
+        Thanks, we have your enquiry
+      </h2>
+      <p
+        className="page-opener-item mt-4 max-w-xl text-lg leading-relaxed text-ink/75"
+        style={openerItem(380)}
+      >
+        We usually reply the same working day with next steps or a time to
+        visit. If it is urgent, call us and mention you sent this form.
+      </p>
+      {nextSteps ? (
+        <div className="page-opener-item mt-12" style={openerItem(440)}>
+          {nextSteps}
+        </div>
+      ) : null}
+      <div className="page-opener-item mt-12" style={openerItem(500)}>
+        <a
+          href={`tel:${sitePhoneTel}`}
+          className="link-draw tap-target font-serif text-4xl tracking-display text-ink lg:text-5xl"
+        >
+          {sitePhoneDisplay}
+        </a>
+      </div>
+    </div>
   );
 }
