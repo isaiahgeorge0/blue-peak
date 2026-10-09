@@ -55,6 +55,11 @@ function subscribeNothing() {
   return () => {};
 }
 
+function subscribeLoad(onChange: () => void) {
+  window.addEventListener("load", onChange);
+  return () => window.removeEventListener("load", onChange);
+}
+
 /**
  * Tracks whether the page is at the top (the centre pill shows the inline
  * links) and whether the side pills are hidden: below the first screen,
@@ -152,6 +157,11 @@ export function SiteHeader() {
     () => false,
   );
   const hydrated = useSyncExternalStore(subscribeNothing, () => true, () => false);
+  const pageLoaded = useSyncExternalStore(
+    subscribeLoad,
+    () => document.readyState === "complete",
+    () => false,
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [openedPath, setOpenedPath] = useState(pathname);
   const [photosMounted, setPhotosMounted] = useState(false);
@@ -409,13 +419,17 @@ export function SiteHeader() {
                           className="group/card block rounded-md"
                         >
                           <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-ink/10">
-                            <Image
-                              src={project.image}
-                              alt=""
-                              fill
-                              sizes={`${remWide(250)}, (max-width: 640px) 60vw, 250px`}
-                              className="object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.03] motion-reduce:transition-none"
-                            />
+                            {/* Mounted after the page's load event, so they never compete with the page's own loading. */}
+                            {pageLoaded || photosMounted ? (
+                              <Image
+                                src={project.image}
+                                alt=""
+                                fill
+                                loading="eager"
+                                sizes={`${remWide(250)}, (max-width: 640px) 60vw, 250px`}
+                                className="object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.03] motion-reduce:transition-none"
+                              />
+                            ) : null}
                             {project.sample ? (
                               <SampleTag overPhoto className="absolute top-2 left-2" />
                             ) : null}

@@ -333,10 +333,16 @@ export function mountIsometricEstimator(
     modelRoot.add(group);
     addonMeshes[key] = {solid:solidGroup, ghost:ghost, target:0, progress:0, rise:ADDON_RISE, materials:materials, glow:glowMats, shadowsOn:true};
   }
-  makeAddon('extension',   1,0,5,      4,2.2,2.5, 'z', 1);
-  makeAddon('side_return', -1.8,0,1,   1.8,2.4,3, 'x', -1);
-  makeAddon('loft',        1.6,3.5,1.2, 2.2,1.3,2.2, 'z', 1);
-  makeAddon('garden_room', 8,0,1,      3,2.2,3, 'x', 1);
+  // The single-storey add-ons share one height below the eaves. The side return
+  // and rear extension wrap the back corner together; the garden room stands
+  // apart, smaller and lower. The loft is a dormer on the front slope's left
+  // half, set back from the eaves with its flat top tucked under the ridge, so
+  // the solar array keeps the right half.
+  var SINGLE_STOREY_H = 2.3;
+  makeAddon('extension',   0,0,5,      4.4,SINGLE_STOREY_H,2.3, 'z', 1);
+  makeAddon('side_return', -1.5,0,2.55, 1.5,SINGLE_STOREY_H,2.45, 'x', -1);
+  makeAddon('loft',        0.5,3.72,0.9, 2,1.03,1.6, 'z', -1);
+  makeAddon('garden_room', 8.2,0,0.8,  2.6,2.1,2.4, 'z', -1);
 
   function ghostMat(){
     return new THREE.LineDashedMaterial({color:NAVY, dashSize:0.14, gapSize:0.1, transparent:true, opacity:GHOST_OPACITY});
@@ -367,23 +373,26 @@ export function mountIsometricEstimator(
 
     var solidGroup = new THREE.Group();
     var ghostGroup = new THREE.Group();
-    var panelW = 1.6, panelD = 1.35, slopeZ = 1.5, outward = 0.045;
+    // two by two on the right half of the slope, below the chimney and clear of the loft dormer
+    var panelW = 1.3, panelD = 0.82, outward = 0.045;
     var panelMat = addonMat();
     var frameMat = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
-    [0.3,2.2,4.1].forEach(function(sx){
-      var cx = sx + panelW/2;
-      var panel = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.04,panelD), panelMat);
-      panel.position.set(cx, outward, slopeZ);
-      panel.castShadow = true;
-      solidGroup.add(panel);
-      // slim frame edge + a center mullion so it reads as cells, not a slab
-      var frame = new THREE.Mesh(new THREE.BoxGeometry(panelW+0.04,0.03,panelD+0.04), frameMat);
-      frame.position.set(cx, outward-0.015, slopeZ);
-      solidGroup.add(frame);
-      var muln = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.045,0.025), frameMat);
-      muln.position.set(cx, outward+0.006, slopeZ);
-      solidGroup.add(muln);
-      ghostGroup.add(centeredGhost(cx, outward, slopeZ, panelW, 0.08, panelD));
+    [3.05, 4.5].forEach(function(sx){
+      [0.81, 1.75].forEach(function(slopeZ){
+        var cx = sx + panelW/2;
+        var panel = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.04,panelD), panelMat);
+        panel.position.set(cx, outward, slopeZ);
+        panel.castShadow = true;
+        solidGroup.add(panel);
+        // slim frame edge + a center mullion so it reads as cells, not a slab
+        var frame = new THREE.Mesh(new THREE.BoxGeometry(panelW+0.04,0.03,panelD+0.04), frameMat);
+        frame.position.set(cx, outward-0.015, slopeZ);
+        solidGroup.add(frame);
+        var muln = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.045,0.025), frameMat);
+        muln.position.set(cx, outward+0.006, slopeZ);
+        solidGroup.add(muln);
+        ghostGroup.add(centeredGhost(cx, outward, slopeZ, panelW, 0.08, panelD));
+      });
     });
     mount.add(ghostGroup);
     mount.add(solidGroup);

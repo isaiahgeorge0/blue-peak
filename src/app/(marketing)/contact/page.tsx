@@ -46,7 +46,7 @@ export default function ContactPage() {
           >
             <div
               id="quote-form"
-              className="max-w-xl scroll-mt-[calc(var(--site-header-height)+1.5rem)] lg:max-w-none"
+              className="max-w-xl scroll-mt-6 lg:max-w-none"
             >
               <ContactForm
                 services={serviceOptions}
@@ -62,7 +62,7 @@ export default function ContactPage() {
                   <li key={area.slug}>
                     <Link
                       href={`/areas/${area.slug}`}
-                      className="tap-target relative text-base text-ink underline decoration-ink/30 underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-accent"
+                      className="link-draw tap-target text-base text-ink transition-colors duration-200 hover:text-accent"
                     >
                       {area.name}
                     </Link>

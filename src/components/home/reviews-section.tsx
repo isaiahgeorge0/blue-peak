@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SampleTag } from "@/components/sample-tag";
 import { SectionHeading } from "@/components/section-heading";
 import { reviews } from "@/lib/reviews";
 import { containerWide } from "@/lib/image-sizes";
@@ -42,9 +43,7 @@ export function ReviewsSection() {
                     className="object-cover"
                   />
                   {review.sample ? (
-                    <span className="absolute top-3 left-3 rounded-full bg-frost px-3 py-1 text-xs font-bold tracking-[0.2em] text-navy uppercase">
-                      Sample
-                    </span>
+                    <SampleTag overPhoto className="absolute top-2 left-2 lg:top-3 lg:left-3" />
                   ) : null}
                 </div>
                 <blockquote className="mt-6 font-serif text-2xl leading-snug tracking-heading text-ink">

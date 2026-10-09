@@ -555,7 +555,7 @@ export function IsometricEstimator({
                     className="ie-btn-back"
                     onClick={handleBack}
                   >
-                    Back
+                    <span className="link-draw">Back</span>
                   </button>
                 ) : (
                   <span />

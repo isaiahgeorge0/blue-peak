@@ -104,7 +104,7 @@ export function SplitOpener({
       />
       {lede ? (
         <p
-          className={`page-opener-item mt-5 max-w-2xl text-lg leading-relaxed text-ink/75 lg:mt-6 lg:text-xl ${onPhoto ? "lg:text-white/90" : ""}`}
+          className={`page-opener-item page-opener-lede mt-5 max-w-2xl text-lg leading-relaxed text-ink/75 lg:mt-6 lg:text-xl ${onPhoto ? "lg:text-white/90" : ""}`}
           style={openerItem(200)}
         >
           {lede}

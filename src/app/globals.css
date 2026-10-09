@@ -50,6 +50,17 @@
 }
 
 /*
+  Focused fields and links, and #anchors, stop clear of the floating header
+  and of a browser's bottom bar. Full-width sections linked by #id cancel the
+  top padding (scroll-mt-[calc(-1*var(--site-header-height))]) so they still
+  land flush with the top, their own padding clearing the header.
+*/
+html:not(:has(.theme-admin)) {
+  scroll-padding-top: var(--site-header-height);
+  scroll-padding-bottom: 2rem;
+}
+
+/*
   Large screens. From 1440px the root size rises from 100% to 125% at 2560px
   and stops there, so everything in rem grows in proportion; media queries
   (always 16px rems) are unaffected. The main container grows faster than
@@ -184,23 +195,34 @@ body {
   centre); open, the clip widens to the whole panel. Scaling it instead would
   squash the rounded corners, so the clip is the one animated property here
   that is not transform or opacity; it touches only this layer's pixels.
+  Once the close has played out, the surface is hidden and cut down to the
+  pill's height, so a closed menu leaves no box over the page; opening shows
+  it again at once, still clipped to the pill.
 */
 .menu-surface {
   clip-path: inset(
     0 calc((100% - var(--pill-c)) / 2) calc(100% - var(--header-pill))
       round calc(var(--header-pill) / 2)
   );
-  transition: clip-path 250ms var(--ease-out);
+  transition:
+    clip-path 250ms var(--ease-out),
+    visibility 0s 250ms,
+    max-height 0s 250ms;
 }
 
 .menu-surface[data-open="true"] {
   clip-path: inset(0 0 0 0 round 1.5rem);
-  transition-duration: 350ms;
+  transition:
+    clip-path 350ms var(--ease-out),
+    visibility 0s,
+    max-height 0s;
 }
 
 /* Closed on a short screen, the hidden menu must not soak up wheel scrolls over the pill. */
 .menu-surface:not([data-open="true"]) {
   overflow-y: hidden;
+  visibility: hidden;
+  max-height: var(--header-pill);
 }
 
 /*
@@ -1108,6 +1130,10 @@ h1[tabindex="-1"]:focus {
       backwards;
   }
 
+  .page-opener-lede {
+    animation-name: page-opener-lede;
+  }
+
   /* Split openers: the photo settles in from a slight zoom. */
   .split-opener-reveal {
     animation: split-opener-reveal 900ms var(--ease-out) backwards;
@@ -1135,6 +1161,15 @@ h1[tabindex="-1"]:focus {
 @keyframes page-opener-rise {
   from {
     opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* As home-intro-item: the lede starts at 0.01 so it is painted in the first
+   frame and counts toward LCP, while still reading as a fade from nothing. */
+@keyframes page-opener-lede {
+  from {
+    opacity: 0.01;
     transform: translateY(12px);
   }
 }
@@ -1233,6 +1268,22 @@ h1[tabindex="-1"]:focus {
   .statement[data-shown] .statement-eyebrow {
     opacity: 1;
     transition: opacity 400ms var(--ease-out);
+  }
+}
+
+/* Footer wordmark: rises a little into place the first time it is in view. */
+@media (prefers-reduced-motion: no-preference) {
+  .footer-wordmark[data-armed] > svg {
+    opacity: 0;
+    transform: translateY(18%);
+  }
+
+  .footer-wordmark[data-shown] > svg {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 900ms var(--ease-out);
   }
 }
 

@@ -116,7 +116,7 @@ export default async function ServiceDetailPage({
                 </li>
               </ol>
             </nav>
-            <h1 className="mt-4 text-display-sm leading-display tracking-heading text-ink lg:text-7xl lg:tracking-display">
+            <h1 className="page-title mt-4 text-ink">
               {service.name}
             </h1>
             <p className="mt-6 max-w-xl text-xl leading-relaxed text-ink/70">

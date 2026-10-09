@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { primaryCtaClassName } from "@/components/cta-styles";
 import { LeadHoneypot } from "@/components/lead-honeypot";
 import { useTurnstile } from "@/components/use-turnstile";
 import {
@@ -35,8 +36,7 @@ const SUBMIT_ERROR =
 const fieldClassName =
   "mt-1.5 w-full rounded-md border border-ink/20 bg-page px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus-visible:ring-2 focus-visible:ring-accent/40";
 
-const buttonClassName =
-  "inline-flex items-center justify-center rounded-[7px] bg-accent px-5 py-3 text-[13.5px] font-bold text-on-accent transition-[filter,opacity] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
+const buttonClassName = `${primaryCtaClassName} disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:hover:bg-accent disabled:after:hidden`;
 
 function describeEstimate(
   estimate: EstimateSummary | null,
@@ -168,7 +168,7 @@ export function EstimatorBooking({
           className={buttonClassName}
           onClick={() => setStep("open")}
         >
-          Choose a visit
+          <span className="cta-label">Choose a visit</span>
         </button>
       );
     }
@@ -264,7 +264,9 @@ export function EstimatorBooking({
             className={buttonClassName}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Sending..." : "Request a visit"}
+            <span className="cta-label">
+              {isSubmitting ? "Sending..." : "Request a visit"}
+            </span>
           </button>
           {embedded ? null : (
             <button
