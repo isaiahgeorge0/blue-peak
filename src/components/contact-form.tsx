@@ -14,6 +14,7 @@ import { LeadHoneypot } from "@/components/lead-honeypot";
 import { openerItem } from "@/components/page-opener";
 import { ArrowIcon } from "@/components/section-heading";
 import { useTurnstile } from "@/components/use-turnstile";
+import { EMAIL_FORMAT_MESSAGE, looksLikeEmail } from "@/lib/email-format";
 import {
   LEAD_FIELD_LIMITS,
   LEAD_HONEYPOT_FIELD,
@@ -86,6 +87,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
     phone?: string;
+    email?: string;
   }>({});
   const [honeypot, setHoneypot] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -110,12 +112,15 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
     event.preventDefault();
     setSubmitError(null);
 
-    const nextErrors: { name?: string; phone?: string } = {};
+    const nextErrors: { name?: string; phone?: string; email?: string } = {};
     if (!form.name.trim()) {
       nextErrors.name = "Please enter your name.";
     }
     if (!form.phone.trim()) {
       nextErrors.phone = "Please enter your phone number.";
+    }
+    if (form.email.trim() && !looksLikeEmail(form.email)) {
+      nextErrors.email = EMAIL_FORMAT_MESSAGE;
     }
 
     setFieldErrors(nextErrors);
@@ -278,7 +283,14 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
               onChange={(event) => updateField("email", event.target.value)}
               maxLength={LEAD_FIELD_LIMITS.email}
               className={fieldClassName}
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={fieldErrors.email ? "email-error" : undefined}
             />
+            {fieldErrors.email ? (
+              <p id="email-error" className="mt-2 text-sm text-accent">
+                {fieldErrors.email}
+              </p>
+            ) : null}
           </div>
 
           <div>

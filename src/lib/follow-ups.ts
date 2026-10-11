@@ -2,9 +2,11 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { siteUrl } from "@/lib/content";
+import { houseImageFor } from "@/lib/email-house-image";
+import { emailImages, type EmailAttachment } from "@/lib/email-images";
 import { estimateFromLead } from "@/lib/estimate-summary";
 import { renderFollowUpEmail, type RenderedEmail } from "@/lib/follow-up-email";
-import { EMAIL_MARK_CONTENT_ID, EMAIL_MARK_PNG_BASE64 } from "@/lib/follow-up-email-mark";
+import { jobCardFor, jobStage, STEP_STAGE } from "@/lib/job-card";
 import {
   FOLLOW_UP_STEPS,
   MAX_ATTEMPTS,
@@ -26,7 +28,7 @@ import { createStopToken, readStopToken } from "@/lib/follow-up-token";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-const LEAD_SELECT = "id, created_at, name, email, status, service_type, message, follow_ups_paused, completed_at";
+const LEAD_SELECT = "id, created_at, reference_number, name, email, status, service_type, message, follow_ups_paused, completed_at";
 export const SEND_SELECT = "id, lead_id, step, scheduled_for, sent_at, status, error, recipient, attempts, created_at, updated_at";
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Leads older than this with nothing in progress can't have anything due (longest delay plus the stale limit). */
@@ -137,8 +139,13 @@ async function releaseStuckSends(admin: SupabaseClient, leadIds?: string[]) {
   return data?.length ?? 0;
 }
 
-export function renderForLead(setting: FollowUpSetting, lead: FollowUpLead, intendedRecipient: string | null): RenderedEmail {
-  return renderFollowUpEmail({
+export type PreparedEmail = { email: RenderedEmail; attachments: EmailAttachment[] };
+
+/** A lead's follow-up, rendered with its job card and images ready to attach. */
+export async function prepareForLead(setting: FollowUpSetting, lead: FollowUpLead, intendedRecipient: string | null): Promise<PreparedEmail> {
+  const estimate = setting.step === "acknowledgement" ? estimateFromLead(lead.service_type, lead.message) : null;
+  const images = await emailImages(houseImageFor(estimate?.addonKeys));
+  const email = renderFollowUpEmail({
     step: setting.step,
     subject: setting.subject,
     body: setting.body,
@@ -149,9 +156,11 @@ export function renderForLead(setting: FollowUpSetting, lead: FollowUpLead, inte
     reviewUrl: readFollowUpConfig(process.env).reviewUrl,
     stopUrl: stopUrlFor(lead.id),
     intendedRecipient,
-    estimate: estimateFromLead(lead.service_type, lead.message),
-    markSrc: `cid:${EMAIL_MARK_CONTENT_ID}`,
+    estimate,
+    jobCard: jobCardFor({ ...lead, stage: jobStage(lead) ?? STEP_STAGE[setting.step] }),
+    images: images.sources,
   });
+  return { email, attachments: images.attachments };
 }
 
 export type DeliveryResult = { ok: true; id: string } | { ok: false; unknown: boolean; message: string };
@@ -170,6 +179,22 @@ export function missingSendSettings() {
   ].filter((name): name is string => Boolean(name));
 }
 
+/**
+ * Whether an estimator lead who leaves an email address will really get a copy
+ * of their estimate: follow-ups on, everything needed to send set, and the
+ * acknowledgement switched on. Anything uncertain counts as no.
+ */
+export async function estimateCopyAvailable(): Promise<boolean> {
+  if (!readFollowUpConfig(process.env).enabled || missingSendSettings().length > 0) return false;
+  try {
+    const settings = await loadFollowUpSettings();
+    return settings.some((setting) => setting.step === "acknowledgement" && setting.enabled);
+  } catch (error) {
+    console.error("follow-ups: couldn't check the acknowledgement setting", error instanceof Error ? error.message : error);
+    return false;
+  }
+}
+
 /** Test sends carry an example stop link rather than a signed one, so they don't need the link secret. */
 export function testSendBlockers(missing: string[]) {
   return missing.filter((name) => name !== "FOLLOW_UP_LINK_SECRET");
@@ -179,12 +204,14 @@ export function testSendBlockers(missing: string[]) {
 export async function deliverFollowUpEmail({
   to,
   email,
+  attachments,
   stopUrl,
   step,
   idempotencyKey,
 }: {
   to: string;
   email: RenderedEmail;
+  attachments: EmailAttachment[];
   stopUrl: string;
   step: FollowUpStep;
   idempotencyKey?: string;
@@ -204,14 +231,7 @@ export async function deliverFollowUpEmail({
         html: email.html,
         text: email.text,
         headers: { "List-Unsubscribe": `<${stopUrl}>` },
-        attachments: [
-          {
-            filename: "blue-peak.png",
-            content: Buffer.from(EMAIL_MARK_PNG_BASE64, "base64"),
-            contentType: "image/png",
-            contentId: EMAIL_MARK_CONTENT_ID,
-          },
-        ],
+        attachments,
         tags: [
           { name: "category", value: "follow_up" },
           { name: "step", value: step },
@@ -339,10 +359,11 @@ export async function runFollowUps({ now = new Date(), leadIds }: { now?: Date; 
     if (!claimed) continue;
 
     if (index > 0) await new Promise((resolve) => setTimeout(resolve, SEND_SPACING_MS));
-    const email = renderForLead(setting, lead, recipient.redirected ? recipient.intended : null);
+    const { email, attachments } = await prepareForLead(setting, lead, recipient.redirected ? recipient.intended : null);
     const delivery = await deliverFollowUpEmail({
       to: recipient.to,
       email,
+      attachments,
       stopUrl: stopUrlFor(lead.id),
       step: item.step,
       idempotencyKey: `follow-up-${claimed.id}-${claimed.attempts}`,

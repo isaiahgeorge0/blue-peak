@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 type LeadRow = {
   id: string;
   created_at: string;
+  reference_number: number | null;
   name: string | null;
   phone: string | null;
   email: string | null;
@@ -41,7 +42,7 @@ export default async function AdminLeadsPage({ searchParams }: PageProps<"/admin
   const [{ data: leads, error }, { data: notes, error: notesError }, { data: visits, error: visitsError }] = await Promise.all([
     admin
       .from("leads")
-      .select("id, created_at, name, phone, email, postcode, service_type, message, status")
+      .select("id, created_at, reference_number, name, phone, email, postcode, service_type, message, status")
       .order("created_at", { ascending: false }),
     admin.from("lead_notes").select("lead_id"),
     admin
@@ -66,6 +67,7 @@ export default async function AdminLeadsPage({ searchParams }: PageProps<"/admin
     return {
       id: lead.id,
       created_at: lead.created_at,
+      reference_number: lead.reference_number,
       name: lead.name,
       phone: lead.phone,
       email: lead.email,

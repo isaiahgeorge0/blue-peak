@@ -7,14 +7,14 @@ import { ChevronDownIcon, ClockIcon, SendIcon } from "@/components/admin/icons";
 import { safeAction } from "@/components/admin/safe-action";
 import { useToast } from "@/components/admin/toast";
 import { Card, primaryButton, secondaryButton } from "@/components/admin/ui";
+import { houseImageFor, previewImageSources } from "@/lib/email-house-image";
 import { estimateFromLead } from "@/lib/estimate-summary";
 import { renderFollowUpEmail, templateProblems } from "@/lib/follow-up-email";
-import { EMAIL_MARK_PNG_BASE64 } from "@/lib/follow-up-email-mark";
 import { SAMPLE_LEADS, type SampleKind } from "@/lib/follow-up-sample";
 import { STEP_LABELS, type DelayUnit, type FollowUpSetting, type FollowUpStep } from "@/lib/follow-up-schedule";
+import { jobCardFor, STEP_STAGE } from "@/lib/job-card";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
-const MARK_DATA_URL = `data:image/png;base64,${EMAIL_MARK_PNG_BASE64}`;
 const DELAY_LIMITS: Record<DelayUnit, number> = { hours: 720, days: 90 };
 
 function plural(amount: number, unit: DelayUnit) {
@@ -153,6 +153,10 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
     draft.subject !== saved.subject || draft.body !== saved.body || draft.delay_unit !== saved.delay_unit || delayText !== String(saved.delay_amount);
 
   const shown = useDeferredValue(draft);
+  const sampleEstimate = useMemo(
+    () => (setting.step === "acknowledgement" ? estimateFromLead(sampleLead.serviceType, sampleLead.message) : null),
+    [setting.step, sampleLead],
+  );
   const preview = useMemo(
     () =>
       renderFollowUpEmail({
@@ -161,15 +165,22 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
         body: shown.body,
         name: sampleLead.name,
         serviceType: sampleLead.serviceType,
-        estimate: estimateFromLead(sampleLead.serviceType, sampleLead.message),
+        estimate: sampleEstimate,
         phoneDisplay: sitePhoneDisplay,
         phoneHref: `tel:${sitePhoneTel}`,
         reviewUrl,
         stopUrl: "#",
         intendedRecipient: null,
-        markSrc: MARK_DATA_URL,
+        jobCard: jobCardFor({
+          reference_number: sampleLead.referenceNumber,
+          service_type: sampleLead.serviceType,
+          created_at: new Date().toISOString(),
+          stage: STEP_STAGE[setting.step],
+        }),
+        images: previewImageSources(houseImageFor(sampleEstimate?.addonKeys)),
+        webFont: false,
       }),
-    [setting.step, shown.subject, shown.body, reviewUrl, sampleLead],
+    [setting.step, shown.subject, shown.body, reviewUrl, sampleLead, sampleEstimate],
   );
 
   function fitFrame() {

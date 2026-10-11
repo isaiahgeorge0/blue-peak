@@ -3,10 +3,11 @@ import { ESTIMATOR_SERVICE_TYPE } from "./lead-limits.ts";
 export type SampleKind = "contact" | "estimator";
 
 /** Made-up leads for the admin preview and "Send test to me": one from the contact form, one from the estimator. */
-export const SAMPLE_LEADS: Record<SampleKind, { name: string; serviceType: string; message: string | null }> = {
-  contact: { name: "Sam Taylor", serviceType: "kitchen-renovations", message: null },
+export const SAMPLE_LEADS: Record<SampleKind, { name: string; referenceNumber: number; serviceType: string; message: string | null }> = {
+  contact: { name: "Sam Taylor", referenceNumber: 42, serviceType: "kitchen-renovations", message: null },
   estimator: {
     name: "Sam Taylor",
+    referenceNumber: 42,
     serviceType: ESTIMATOR_SERVICE_TYPE,
     message: [
       "Site visit request from the quote calculator.",

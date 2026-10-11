@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { primaryCtaClassName } from "@/components/cta-styles";
 import { LeadHoneypot } from "@/components/lead-honeypot";
 import { useTurnstile } from "@/components/use-turnstile";
+import { EMAIL_FORMAT_MESSAGE, looksLikeEmail } from "@/lib/email-format";
 import {
   ESTIMATOR_SERVICE_TYPE,
   LEAD_FIELD_LIMITS,
@@ -25,6 +26,8 @@ type EstimatorBookingProps = {
   getExtraLines?: () => string[];
   /** Inside the funnel: the form is shown straight away, with no Cancel. */
   embedded?: boolean;
+  /** Show "Email me a copy of my estimate"; the server decides, so it never promises an email that won't arrive. */
+  offerEmailCopy?: boolean;
   onSent?: () => void;
 };
 
@@ -67,6 +70,7 @@ export function EstimatorBooking({
   getEstimate,
   getExtraLines,
   embedded = false,
+  offerEmailCopy = false,
   onSent,
 }: EstimatorBookingProps) {
   const [step, setStep] = useState<Step>(embedded ? "open" : "closed");
@@ -77,6 +81,7 @@ export function EstimatorBooking({
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
     phone?: string;
+    email?: string;
   }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -96,9 +101,11 @@ export function EstimatorBooking({
     event.preventDefault();
     setSubmitError(null);
 
-    const nextErrors: { name?: string; phone?: string } = {};
+    const sentEmail = offerEmailCopy ? email.trim() : "";
+    const nextErrors: { name?: string; phone?: string; email?: string } = {};
     if (!name.trim()) nextErrors.name = "Please enter your name.";
     if (!phone.trim()) nextErrors.phone = "Please enter your phone number.";
+    if (sentEmail && !looksLikeEmail(sentEmail)) nextErrors.email = EMAIL_FORMAT_MESSAGE;
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -120,7 +127,7 @@ export function EstimatorBooking({
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
-          email: email.trim(),
+          email: sentEmail,
           service_type: ESTIMATOR_SERVICE_TYPE,
           message: describeEstimate(getEstimate(), getExtraLines?.()),
           [LEAD_HONEYPOT_FIELD]: honeypot,
@@ -250,24 +257,38 @@ export function EstimatorBooking({
             ) : null}
           </div>
         </div>
-        <div>
-          <label
-            htmlFor="estimator-email"
-            className="block text-xs font-medium text-ink/85"
-          >
-            Email me a copy of my estimate
-          </label>
-          <input
-            id="estimator-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            maxLength={LEAD_FIELD_LIMITS.email}
-            className={fieldClassName}
-          />
-        </div>
+        {offerEmailCopy ? (
+          <div>
+            <label
+              htmlFor="estimator-email"
+              className="block text-xs font-medium text-ink/85"
+            >
+              Email me a copy of my estimate
+            </label>
+            <input
+              id="estimator-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              maxLength={LEAD_FIELD_LIMITS.email}
+              className={fieldClassName}
+              aria-invalid={Boolean(fieldErrors.email)}
+              aria-describedby={
+                fieldErrors.email ? "estimator-email-error" : undefined
+              }
+            />
+            {fieldErrors.email ? (
+              <p
+                id="estimator-email-error"
+                className="mt-1.5 text-xs text-accent"
+              >
+                {fieldErrors.email}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {submitError ? (
           <p

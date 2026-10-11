@@ -39,25 +39,38 @@ describe("estimator figures", () => {
 
 describe("estimate from a lead's message", () => {
   test("the rows, in the estimator's words", () => {
-    assert.deepEqual(estimateFromLead("quote-calculator", message(valid)), [
-      { label: "Work", value: ALL_SIX },
-      { label: "Size", value: "Compact" },
-      { label: "Finish", value: "Quality" },
-      { label: "Estimated from", value: "£168,500" },
-      { label: "Time on site", value: "22 to 24 weeks" },
-    ]);
+    assert.deepEqual(estimateFromLead("quote-calculator", message(valid)), {
+      rows: [
+        { label: "Work", value: ALL_SIX },
+        { label: "Size", value: "Compact" },
+        { label: "Finish", value: "Quality" },
+        { label: "Estimated from", value: "£168,500" },
+        { label: "Time on site", value: "22 to 24 weeks" },
+      ],
+      addonKeys: ["loft", "extension", "side_return", "garden_room", "solar", "kitchen_bath"],
+    });
+  });
+
+  test("the add-on keys come from the checked work list", () => {
+    const figures = estimatorFigures(["solar", "loft"], "compact", "quality");
+    const estimate = estimateFromLead(
+      "quote-calculator",
+      message({ ...valid, Work: "Solar panels, Loft conversion", "Estimated from": formatPounds(figures.total), "Time on site": figures.weeks }),
+    );
+    assert.deepEqual(estimate?.addonKeys, ["solar", "loft"]);
   });
 
   test("start date when it is one of the estimator's options", () => {
-    const rows = estimateFromLead("quote-calculator", message({ ...valid, "When would you like to start": "Within 3 months" }));
-    assert.deepEqual(rows?.at(-1), { label: "Start", value: "Within 3 months" });
+    const estimate = estimateFromLead("quote-calculator", message({ ...valid, "When would you like to start": "Within 3 months" }));
+    assert.deepEqual(estimate?.rows.at(-1), { label: "Start", value: "Within 3 months" });
     const typed = estimateFromLead("quote-calculator", message({ ...valid, "When would you like to start": "<a href=x>now</a>" }));
-    assert.equal(typed?.length, 5);
+    assert.equal(typed?.rows.length, 5);
   });
 
   test("the sample estimator lead checks out", () => {
-    const rows = estimateFromLead(SAMPLE_LEADS.estimator.serviceType, SAMPLE_LEADS.estimator.message);
-    assert.equal(rows?.find((row) => row.label === "Estimated from")?.value, "£90,000");
+    const estimate = estimateFromLead(SAMPLE_LEADS.estimator.serviceType, SAMPLE_LEADS.estimator.message);
+    assert.equal(estimate?.rows.find((row) => row.label === "Estimated from")?.value, "£90,000");
+    assert.deepEqual(estimate?.addonKeys, ["extension", "kitchen_bath"]);
   });
 
   test("Windows line endings", () => {

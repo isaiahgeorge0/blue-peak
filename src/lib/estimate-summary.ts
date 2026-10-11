@@ -21,6 +21,9 @@ import { ESTIMATOR_SERVICE_TYPE } from "./lead-limits.ts";
 
 export type EstimateRow = { label: string; value: string };
 
+/** A checked estimate: rows for the email and the add-on keys it was built from. */
+export type Estimate = { rows: EstimateRow[]; addonKeys: string[] };
+
 /** The estimator's own caveat, worded for an email. */
 export const ESTIMATE_CAVEAT = "These figures are estimates for scoping a conversation, not a fixed quote.";
 
@@ -42,8 +45,8 @@ function keyFor<K extends string>(labels: Record<K, string>, label: string | und
   return match ? match[0] : null;
 }
 
-/** The estimate as rows for an email, or null when the lead isn't from the estimator or anything doesn't check out. */
-export function estimateFromLead(serviceType: string | null | undefined, message: string | null | undefined): EstimateRow[] | null {
+/** The estimate for an email, or null when the lead isn't from the estimator or anything doesn't check out. */
+export function estimateFromLead(serviceType: string | null | undefined, message: string | null | undefined): Estimate | null {
   if (serviceType !== ESTIMATOR_SERVICE_TYPE || !message) return null;
   const fields = new Map<string, string>();
   for (const line of message.split(/\r?\n/)) {
@@ -58,11 +61,8 @@ export function estimateFromLead(serviceType: string | null | undefined, message
   const finish = keyFor(ESTIMATOR_FINISH_LABELS, fields.get("Finish"));
   if (!size || !finish) return null;
 
-  const figures = estimatorFigures(
-    addons.map((addon) => addon!.key),
-    size,
-    finish,
-  );
+  const addonKeys = addons.map((addon) => addon!.key);
+  const figures = estimatorFigures(addonKeys, size, finish);
   const shownTotal = Number((fields.get("Estimated from") ?? "").replace(/^£/, "").replaceAll(",", ""));
   if (shownTotal !== figures.total || fields.get("Time on site") !== figures.weeks) return null;
 
@@ -75,5 +75,5 @@ export function estimateFromLead(serviceType: string | null | undefined, message
   ];
   const start = fields.get("When would you like to start");
   if (start && (ESTIMATOR_START_OPTIONS as readonly string[]).includes(start)) rows.push({ label: "Start", value: start });
-  return rows;
+  return { rows, addonKeys };
 }

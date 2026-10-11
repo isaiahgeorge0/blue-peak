@@ -9,11 +9,13 @@ import { safeAction } from "@/components/admin/safe-action";
 import { StatusControl } from "@/components/admin/status";
 import { EmptyState, primaryButton, secondaryButton } from "@/components/admin/ui";
 import { normalizeStatus, STATUS_LABELS } from "@/lib/admin-leads";
+import { formatLeadReference, referenceMatches } from "@/lib/job-card";
 import { LEAD_STATUSES, SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
 
 export type LeadListRow = {
   id: string;
   created_at: string;
+  reference_number: number | null;
   name: string | null;
   phone: string | null;
   email: string | null;
@@ -45,10 +47,16 @@ function nameOf(lead: LeadListRow) {
 
 function matchesSearch(lead: LeadListRow, query: string) {
   if (!query) return true;
+  if (referenceMatches(query, lead.reference_number)) return true;
   return [lead.name, lead.phone, lead.email, lead.postcode, lead.service, lead.source]
     .map((value) => (value ?? "").toLowerCase())
     .join(" ")
     .includes(query);
+}
+
+function Reference({ lead }: { lead: LeadListRow }) {
+  if (!lead.reference_number) return null;
+  return <span className="font-bold tabular-nums text-ink">{formatLeadReference(lead.reference_number)} · </span>;
 }
 
 function matchesStatus(lead: LeadListRow, status: StatusFilter) {
@@ -190,7 +198,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Name, phone, email, postcode"
+            placeholder="Name, phone, email, postcode, BP-0001"
             className="h-11 w-full rounded-full border border-admin-edge bg-admin-surface pr-4 pl-10 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-peak-fleet"
           />
         </div>
@@ -335,6 +343,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
                       {nameOf(lead)}
                     </Link>
                     <p className="mt-0.5 text-sm text-ink/80">
+                      <Reference lead={lead} />
                       {lead.service} · {lead.source}
                     </p>
                     <p className="mt-0.5 text-sm text-ink/80">
@@ -388,6 +397,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
                         {nameOf(lead)}
                       </Link>
                       <p className="mt-0.5 text-ink/80">
+                        <Reference lead={lead} />
                         {lead.service} · {lead.source}
                       </p>
                       <div className="mt-1.5">

@@ -37,6 +37,12 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  // Email images are read from disk and attached inline by the routes that send email.
+  outputFileTracingIncludes: {
+    "/api/leads": ["./public/email/**/*"],
+    "/api/cron/follow-ups": ["./public/email/**/*"],
+    "/admin/follow-ups": ["./public/email/**/*"],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

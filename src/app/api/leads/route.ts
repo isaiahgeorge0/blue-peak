@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
+import { EMAIL_FORMAT_MESSAGE, looksLikeEmail } from "@/lib/email-format";
 import { sendLeadAlert } from "@/lib/lead-alert";
 import {
   LEAD_FIELD_LIMITS,
@@ -10,6 +11,7 @@ import { sendNewLeadPush } from "@/lib/send-lead-push";
 import {
   sendNewLeadEmail,
   type LeadNotificationPayload,
+  type StoredLead,
 } from "@/lib/send-new-lead-email";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { isTurnstileEnforced, verifyTurnstileToken } from "@/lib/turnstile";
@@ -75,15 +77,15 @@ async function isRateLimited(submitterHash: string) {
 }
 
 /** Email the inbox; on repeated failure, raise the separate failure alert. */
-async function emailNewLead(leadId: string, lead: LeadNotificationPayload) {
+async function emailNewLead(stored: StoredLead, lead: LeadNotificationPayload) {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      await sendNewLeadEmail(lead);
+      await sendNewLeadEmail(lead, stored);
       await getSupabaseAdmin()
         .from("leads")
         .update({ notified_at: new Date().toISOString() })
-        .eq("id", leadId);
+        .eq("id", stored.id);
       return;
     } catch (error) {
       lastError = error;
@@ -195,6 +197,10 @@ export async function POST(request: Request) {
       );
     }
 
+    if (fields.email && !looksLikeEmail(fields.email)) {
+      return NextResponse.json({ error: EMAIL_FORMAT_MESSAGE }, { status: 400 });
+    }
+
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !serviceRoleKey) {
       console.error("leads API: missing Supabase admin environment variables");
@@ -226,7 +232,7 @@ export async function POST(request: Request) {
         status: "new",
         submitter_hash: submitterHash,
       })
-      .select("id")
+      .select("id, reference_number, created_at")
       .single();
 
     if (error || !inserted) {
@@ -244,7 +250,10 @@ export async function POST(request: Request) {
     };
     // Both channels catch their own errors, so neither can fail the request.
     await Promise.all([
-      emailNewLead(inserted.id, notification),
+      emailNewLead(
+        { id: inserted.id, referenceNumber: inserted.reference_number, createdAt: inserted.created_at },
+        notification,
+      ),
       pushNewLead(notification),
     ]);
 

@@ -21,6 +21,8 @@ type IsometricEstimatorProps = {
   config?: EstimatorConfig;
   /** When true, hide the page-level intro (useful if the parent already provides one). */
   hideIntro?: boolean;
+  /** Show "Email me a copy of my estimate" only when the server can actually send it. */
+  offerEmailCopy?: boolean;
 };
 
 const STEP_TITLES = [
@@ -53,6 +55,7 @@ function formatPounds(value: number) {
 export function IsometricEstimator({
   config = defaultEstimatorConfig,
   hideIntro = false,
+  offerEmailCopy = false,
 }: IsometricEstimatorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<IsometricEstimatorHandle | null>(null);
@@ -521,6 +524,7 @@ export function IsometricEstimator({
               <div className="ie-booking">
                 <EstimatorBooking
                   embedded
+                  offerEmailCopy={offerEmailCopy}
                   getEstimate={() => estimateRef.current}
                   getExtraLines={() =>
                     startWhenRef.current

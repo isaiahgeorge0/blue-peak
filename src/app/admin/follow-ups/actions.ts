@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdminClaims } from "@/lib/admin-role";
+import { houseImageFor } from "@/lib/email-house-image";
+import { emailImages } from "@/lib/email-images";
 import { renderFollowUpEmail, templateProblems } from "@/lib/follow-up-email";
-import { EMAIL_MARK_CONTENT_ID } from "@/lib/follow-up-email-mark";
+import { jobCardFor, STEP_STAGE } from "@/lib/job-card";
 import { FOLLOW_UP_STEPS, readFollowUpConfig, type DelayUnit, type FollowUpStep } from "@/lib/follow-up-schedule";
 import { estimateFromLead } from "@/lib/estimate-summary";
 import { deliverFollowUpEmail, EXAMPLE_STOP_URL, missingSendSettings, testSendBlockers } from "@/lib/follow-ups";
@@ -63,6 +65,8 @@ export async function setFollowUpStepEnabled(step: string, enabled: boolean): Pr
   }
   revalidatePath("/admin/follow-ups");
   revalidatePath("/admin");
+  // The estimator only offers an emailed copy while the acknowledgement is on.
+  if (step === "acknowledgement") revalidatePath("/quote");
   return { ok: true };
 }
 
@@ -113,23 +117,32 @@ export async function sendFollowUpTest(
   if (missing.length > 0) return { ok: false, error: `Can't send: ${missing.join(", ")} ${missing.length === 1 ? "isn't" : "aren't"} set.` };
 
   const lead = SAMPLE_LEADS[sample];
+  const estimate = step === "acknowledgement" ? estimateFromLead(lead.serviceType, lead.message) : null;
+  const images = await emailImages(houseImageFor(estimate?.addonKeys));
   const email = renderFollowUpEmail({
     step,
     subject: draft.subject,
     body: draft.body,
     name: lead.name,
     serviceType: lead.serviceType,
-    estimate: estimateFromLead(lead.serviceType, lead.message),
+    estimate,
     phoneDisplay: sitePhoneDisplay,
     phoneHref: `tel:${sitePhoneTel}`,
     reviewUrl: readFollowUpConfig(process.env).reviewUrl,
     stopUrl: EXAMPLE_STOP_URL,
     intendedRecipient: null,
-    markSrc: `cid:${EMAIL_MARK_CONTENT_ID}`,
+    jobCard: jobCardFor({
+      reference_number: lead.referenceNumber,
+      service_type: lead.serviceType,
+      created_at: new Date().toISOString(),
+      stage: STEP_STAGE[step],
+    }),
+    images: images.sources,
   });
   const delivery = await deliverFollowUpEmail({
     to,
     email: { ...email, subject: `Test: ${email.subject}` },
+    attachments: images.attachments,
     stopUrl: EXAMPLE_STOP_URL,
     step,
   });

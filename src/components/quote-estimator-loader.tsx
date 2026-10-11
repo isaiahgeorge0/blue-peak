@@ -40,10 +40,10 @@ const EstimatorErrorBoundary = catchError(function EstimatorErrorFallback() {
 });
 
 /** Wraps the estimator so a WebGL or bundle failure falls back to contact options. */
-export function QuoteEstimatorLoader() {
+export function QuoteEstimatorLoader({ offerEmailCopy = false }: { offerEmailCopy?: boolean }) {
   return (
     <EstimatorErrorBoundary>
-      <IsometricEstimator />
+      <IsometricEstimator offerEmailCopy={offerEmailCopy} />
     </EstimatorErrorBoundary>
   );
 }

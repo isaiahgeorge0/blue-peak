@@ -10,6 +10,7 @@ import { leadFollowUpView } from "@/lib/follow-up-admin";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { dayLabel, mailHref, SERVICE_NAMES, telHref, timeRange, ukStamp } from "@/lib/admin-data";
 import { estimatorDetails, leadSource, serviceLabel } from "@/lib/admin-leads";
+import { formatLeadReference } from "@/lib/job-card";
 import { ESTIMATOR_SERVICE_TYPE } from "@/lib/lead-limits";
 import { buildSiteVisitNotes, todayDateKeyForPrefill } from "@/lib/lead-visits";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -23,6 +24,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 type Lead = {
   id: string;
   created_at: string;
+  reference_number: number | null;
   name: string | null;
   phone: string | null;
   email: string | null;
@@ -54,7 +56,7 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
   const [{ data: lead, error }, { data: notes }, { data: visits }] = await Promise.all([
     admin
       .from("leads")
-      .select("id, created_at, name, phone, email, postcode, service_type, message, status, notified_at, follow_ups_paused, completed_at")
+      .select("id, created_at, reference_number, name, phone, email, postcode, service_type, message, status, notified_at, follow_ups_paused, completed_at")
       .eq("id", id)
       .maybeSingle<Lead>(),
     admin.from("lead_notes").select("id, note, created_at").eq("lead_id", id).order("created_at", { ascending: false }),
@@ -114,6 +116,12 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
         </Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
           <div className="min-w-0">
+            {lead.reference_number ? (
+              <p className="admin-label font-bold tabular-nums text-ink/80">
+                <span className="sr-only">Reference </span>
+                {formatLeadReference(lead.reference_number)}
+              </p>
+            ) : null}
             <h1 className="font-serif text-[2rem] leading-tight tracking-heading break-words text-ink sm:text-[2.5rem]">{name}</h1>
             <p className="mt-2 text-[0.9375rem] text-ink/80">
               {serviceLabel(lead.service_type, lead.message, SERVICE_NAMES)} · {source} · Received {ukStamp(lead.created_at)}
