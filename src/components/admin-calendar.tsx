@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { deleteCalendarEvent, type CalendarEventRow } from "@/app/admin/calendar/actions";
 import { AdminDialog } from "@/components/admin/dialog";
-import { ChevronLeftIcon, ChevronRightIcon, PlannerIllustration, PlusIcon, RepeatIcon, TrashIcon } from "@/components/admin/icons";
+import { ChevronLeftIcon, ChevronRightIcon, EditIcon, PlannerIllustration, PlusIcon, RepeatIcon, TrashIcon } from "@/components/admin/icons";
 import { safeAction } from "@/components/admin/safe-action";
 import { useToast } from "@/components/admin/toast";
 import { EmptyState, PageHeader, primaryButton, secondaryButton } from "@/components/admin/ui";
-import { CalendarEventFormDialog } from "@/components/calendar-event-form-dialog";
+import { CalendarEventForm, CalendarEventFormDialog, type LeadOption } from "@/components/calendar-event-form-dialog";
 import {
   expandEventsForRange,
   formatDateKey,
@@ -19,15 +19,7 @@ import {
   type CalendarOccurrence,
 } from "@/lib/calendar-recurrence";
 
-const WEEKDAYS = [
-  ["Sun", "Sunday"],
-  ["Mon", "Monday"],
-  ["Tue", "Tuesday"],
-  ["Wed", "Wednesday"],
-  ["Thu", "Thursday"],
-  ["Fri", "Friday"],
-  ["Sat", "Saturday"],
-] as const;
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 type AdminCalendarProps = {
   year: number;
@@ -35,7 +27,10 @@ type AdminCalendarProps = {
   rangeStart: string;
   rangeEnd: string;
   events: CalendarEventRow[];
+  leads: LeadOption[];
 };
+
+type ViewMode = "view" | "confirm-delete" | "edit";
 
 function formatMonthLabel(year: number, month: number) {
   return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
@@ -68,7 +63,8 @@ function monthHref(year: number, month: number) {
 }
 
 function buildMonthCells(year: number, month: number) {
-  const firstWeekday = new Date(year, month - 1, 1).getDay();
+  // Days before the 1st in a Monday-first week.
+  const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month, 0).getDate();
   const cells: Array<{ key: string; day: number; inMonth: boolean; dateKey: string }> = [];
 
@@ -93,21 +89,31 @@ function buildMonthCells(year: number, month: number) {
 const navButton =
   "inline-flex size-11 items-center justify-center rounded-full border border-admin-edge text-ink transition-colors hover:border-peak-fleet hover:bg-admin-raised";
 
-export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: AdminCalendarProps) {
+export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads }: AdminCalendarProps) {
   const router = useRouter();
   const toast = useToast();
   const [createDate, setCreateDate] = useState<string | null>(null);
   const [viewing, setViewing] = useState<CalendarOccurrence | null>(null);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [mode, setMode] = useState<ViewMode>("view");
+  const [formBusy, setFormBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const confirmButton = useRef<HTMLButtonElement>(null);
   const deleteButton = useRef<HTMLButtonElement>(null);
+  const editButton = useRef<HTMLButtonElement>(null);
+  const editForm = useRef<HTMLDivElement>(null);
+  const previousMode = useRef<ViewMode>("view");
+  const leadNames = useMemo(() => new Map(leads.map((lead) => [lead.id, lead.name])), [leads]);
 
-  // The confirm step replaces the Delete button, so focus follows it there and back.
+  // Confirm and Edit replace the dialog's buttons, so focus follows them there and back.
   useEffect(() => {
-    (confirmingDelete ? confirmButton : deleteButton).current?.focus();
-  }, [confirmingDelete]);
+    const from = previousMode.current;
+    previousMode.current = mode;
+    if (from === mode) return;
+    if (mode === "confirm-delete") confirmButton.current?.focus();
+    else if (mode === "edit") editForm.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
+    else (from === "edit" ? editButton : deleteButton).current?.focus();
+  }, [mode]);
 
   const prev = adjacentMonth(year, month, -1);
   const next = adjacentMonth(year, month, 1);
@@ -121,14 +127,15 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
 
   function openView(occurrence: CalendarOccurrence) {
     setError(null);
-    setConfirmingDelete(false);
+    previousMode.current = "view";
+    setMode("view");
     setViewing(occurrence);
   }
 
   function closeView() {
-    if (isPending) return;
+    if (isPending || formBusy) return;
     setViewing(null);
-    setConfirmingDelete(false);
+    setMode("view");
     setError(null);
   }
 
@@ -138,11 +145,11 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
       const result = await safeAction(() => deleteCalendarEvent(eventRow.id));
       if (!result.ok) {
         setError(result.error);
-        setConfirmingDelete(false);
+        setMode("view");
         return;
       }
       setViewing(null);
-      setConfirmingDelete(false);
+      setMode("view");
       toast(eventRow.recurrence !== "none" ? "Series deleted." : "Event deleted.");
       router.refresh();
     });
@@ -247,7 +254,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
       {/* Tablets and up: the month grid. */}
       <div className="mt-5 hidden overflow-hidden rounded-xl border border-admin-line bg-admin-surface md:block">
         <div aria-hidden className="grid grid-cols-7 border-b border-admin-line">
-          {WEEKDAYS.map(([short]) => (
+          {WEEKDAYS.map((short) => (
             <div key={short} className="admin-label px-2 py-2.5 text-center">
               {short}
             </div>
@@ -295,6 +302,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
         open={createDate !== null}
         onClose={() => setCreateDate(null)}
         prefill={{ start_date: createDate ?? todayKey }}
+        leads={leads}
         heading="New event"
         onCreated={() => toast("Event added.")}
       />
@@ -302,11 +310,25 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
       <AdminDialog
         open={viewing !== null}
         onClose={closeView}
-        title={viewing?.event.title ?? ""}
-        description={viewing ? formatDay(viewing.occurrenceDate) : null}
-        busy={isPending}
+        title={mode === "edit" ? (viewing?.isRecurring ? "Edit series" : "Edit event") : (viewing?.event.title ?? "")}
+        description={viewing && mode !== "edit" ? formatDay(viewing.occurrenceDate) : null}
+        busy={isPending || formBusy}
       >
-        {viewing ? (
+        {viewing && mode === "edit" ? (
+          <div ref={editForm}>
+            <CalendarEventForm
+              event={viewing.event}
+              leads={leads}
+              onCancel={() => setMode("view")}
+              onBusyChange={setFormBusy}
+              onSaved={() => {
+                setViewing(null);
+                setMode("view");
+                toast(viewing.isRecurring ? "Series updated." : "Event updated.");
+              }}
+            />
+          </div>
+        ) : viewing ? (
           <>
             <dl className="space-y-4 text-[0.9375rem]">
               <div>
@@ -336,7 +358,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
                   <dt className="admin-label">Lead</dt>
                   <dd className="mt-1">
                     <Link href={`/admin/leads/${viewing.event.lead_id}`} className="font-bold text-peak-fleet underline-offset-4 hover:text-ridge-cyan hover:underline">
-                      Open the lead
+                      {leadNames.get(viewing.event.lead_id) ?? "Open the lead"}
                     </Link>
                   </dd>
                 </div>
@@ -349,7 +371,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
               </p>
             ) : null}
 
-            {confirmingDelete ? (
+            {mode === "confirm-delete" ? (
               <div role="group" aria-label="Confirm delete" className="mt-6 rounded-xl border border-admin-edge bg-admin-raised p-4">
                 <p className="text-sm text-ink">
                   {viewing.isRecurring
@@ -357,7 +379,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
                     : "Delete this event? This can't be undone."}
                 </p>
                 <div className="mt-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <button type="button" className={secondaryButton} disabled={isPending} onClick={() => setConfirmingDelete(false)}>
+                  <button type="button" className={secondaryButton} disabled={isPending} onClick={() => setMode("view")}>
                     Keep it
                   </button>
                   <button ref={confirmButton} type="button" className={primaryButton} disabled={isPending} onClick={() => handleDelete(viewing.event)}>
@@ -371,9 +393,13 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: Adm
                 <button type="button" className={secondaryButton} onClick={closeView}>
                   Close
                 </button>
-                <button ref={deleteButton} type="button" className={secondaryButton} onClick={() => setConfirmingDelete(true)}>
+                <button ref={deleteButton} type="button" className={secondaryButton} onClick={() => setMode("confirm-delete")}>
                   <TrashIcon className="size-4" />
                   {viewing.isRecurring ? "Delete series" : "Delete"}
+                </button>
+                <button ref={editButton} type="button" className={primaryButton} onClick={() => setMode("edit")}>
+                  <EditIcon className="size-4" />
+                  {viewing.isRecurring ? "Edit series" : "Edit"}
                 </button>
               </div>
             )}

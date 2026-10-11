@@ -16,11 +16,11 @@ export const addons: Addon[] = [
     href: "/admin/subcontractors",
     name: "Subcontractors",
     summary:
-      "A private record of the trades you work with: what they do, where they cover, how past jobs went and when they're next free. When a job needs an electrician or a plasterer, you can see who to call.",
+      "A private record of the trades you work with: what they do, where they cover, how past jobs went and notes on availability. When a job needs an electrician or a plasterer, you can see who to call.",
     benefits: [
       "Contact details, trades and areas in one place.",
       "Notes and ratings from past jobs.",
-      "See who's already booked before you pick up the phone.",
+      "Know who to call before you need them.",
     ],
   },
   {
@@ -40,7 +40,7 @@ export const addons: Addon[] = [
     href: "/admin/referrals",
     name: "Referrals",
     summary:
-      "When a job is finished, the customer gets a friendly message asking whether they know anyone planning work, with a simple reward if a referral becomes a job. Referred enquiries arrive in Leads, labelled with who sent them.",
+      "When a job is finished, the customer gets a friendly message asking whether they know anyone planning work, with an optional reward if a referral becomes a job. Referred enquiries arrive in Leads, labelled with who sent them.",
     benefits: [
       "The ask goes out at the right moment, without anyone remembering to send it.",
       "Every referral is traced back to the customer who made it.",

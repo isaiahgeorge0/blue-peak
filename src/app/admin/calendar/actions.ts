@@ -66,9 +66,22 @@ function normalizeWeekdays(days: number[] | undefined) {
   return unique.length ? unique : null;
 }
 
-export async function createCalendarEvent(
+type EventFields = {
+  title: string;
+  notes: string | null;
+  start_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  lead_id: string | null;
+  recurrence: RecurrenceValue;
+  recurrence_days_of_week: number[] | null;
+  recurrence_end_date: string | null;
+};
+
+/** Shared by create and update, so both accept and reject exactly the same input. */
+function validateEventInput(
   input: CreateCalendarEventInput,
-): Promise<CalendarActionResult> {
+): { ok: true; fields: EventFields } | { ok: false; error: string } {
   const title = input.title?.trim() ?? "";
   if (!title) {
     return { ok: false, error: "Title is required." };
@@ -116,14 +129,9 @@ export async function createCalendarEvent(
     return { ok: false, error: "Invalid lead id." };
   }
 
-  const supabase = await getAdminActionClient();
-  if (!supabase) {
-    return { ok: false, error: "Not authorised." };
-  }
-
-  const { data, error } = await supabase
-    .from("calendar_events")
-    .insert({
+  return {
+    ok: true,
+    fields: {
       title,
       notes,
       start_date: input.start_date,
@@ -134,7 +142,26 @@ export async function createCalendarEvent(
       recurrence_days_of_week:
         recurrence === "weekly" || recurrence === "biweekly" ? weekdays : null,
       recurrence_end_date: recurrence === "none" ? null : recurrenceEndDate,
-    })
+    },
+  };
+}
+
+export async function createCalendarEvent(
+  input: CreateCalendarEventInput,
+): Promise<CalendarActionResult> {
+  const valid = validateEventInput(input);
+  if (!valid.ok) {
+    return valid;
+  }
+
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
+  }
+
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .insert(valid.fields)
     .select(EVENT_SELECT)
     .maybeSingle();
 
@@ -145,6 +172,46 @@ export async function createCalendarEvent(
 
   if (!data) {
     return { ok: false, error: "Event was not created." };
+  }
+
+  revalidatePath("/admin/calendar");
+  revalidatePath("/admin/leads");
+  return { ok: true, event: data as CalendarEventRow };
+}
+
+/** Updates an event, or a whole series (the single calendar_events row). */
+export async function updateCalendarEvent(
+  eventId: string,
+  input: CreateCalendarEventInput,
+): Promise<CalendarActionResult> {
+  if (!eventId || !isUuid(eventId)) {
+    return { ok: false, error: "Missing event id." };
+  }
+
+  const valid = validateEventInput(input);
+  if (!valid.ok) {
+    return valid;
+  }
+
+  const supabase = await getAdminActionClient();
+  if (!supabase) {
+    return { ok: false, error: "Not authorised." };
+  }
+
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .update(valid.fields)
+    .eq("id", eventId)
+    .select(EVENT_SELECT)
+    .maybeSingle();
+
+  if (error) {
+    console.error("updateCalendarEvent failed", error.message);
+    return { ok: false, error: "Unable to save the event." };
+  }
+
+  if (!data) {
+    return { ok: false, error: "Event not found or update blocked." };
   }
 
   revalidatePath("/admin/calendar");

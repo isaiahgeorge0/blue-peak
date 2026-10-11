@@ -10,6 +10,8 @@ const EXIT_MS = 250;
 const SETTLE_MS = 300;
 const FADE_MS = 150;
 const HOLD_MAX_MS = 3000;
+/** How long focus waits for a streaming page's heading before staying on the page itself. */
+const FOCUS_WAIT_MS = 15000;
 
 /*
   The A of the BLUE PEAK wordmark, 24.87 x 23.44 units: its two legs with the
@@ -70,13 +72,15 @@ function pageReady() {
  */
 function focusWhenReady() {
   const target = main();
-  if (!target || pageReady()) return () => {};
+  // Ready once the skeleton is gone and the page's heading is in (they can land in separate commits).
+  const ready = () => pageReady() && !!target?.querySelector("h1");
+  if (!target || ready()) return () => {};
   const observer = new MutationObserver(() => {
-    if (!pageReady()) return;
+    if (!ready()) return;
     stop();
     if (document.activeElement === target || document.activeElement === document.body) focusNewPage();
   });
-  const timer = window.setTimeout(() => observer.disconnect(), HOLD_MAX_MS * 2);
+  const timer = window.setTimeout(() => observer.disconnect(), FOCUS_WAIT_MS);
   const stop = () => {
     observer.disconnect();
     window.clearTimeout(timer);
@@ -88,9 +92,10 @@ function focusWhenReady() {
 /**
  * Admin page transitions. A link to another admin page is held while the
  * peak A rises from the bottom in Blue Solution and grows to cover the
- * screen; then the route is pushed. When the new page has rendered (its
- * loading skeleton gone), or after HOLD_MAX_MS regardless, the A carries on
- * up and the page settles in with a short fade and rise. Back and forward
+ * screen; then the route is pushed. As soon as the new page's shell has
+ * rendered (usually its loading skeleton, with the data still streaming in)
+ * the A carries on up and the page settles in with a short fade and rise.
+ * Only if the shell itself is slow is the cover held, for up to HOLD_MAX_MS. Back and forward
  * get a plain fade, as does everything under reduced motion. Filters, sorts
  * and calendar months stay on the same path and are left alone. Any failure
  * removes the cover, so it can never trap the page.
@@ -105,7 +110,6 @@ export function AdminTransition() {
     from: "",
     arrived: false,
     timers: [] as number[],
-    observer: null as MutationObserver | null,
     viewport: 0,
   });
   const arriveRef = useRef<() => void>(() => {});
@@ -120,8 +124,6 @@ export function AdminTransition() {
     const clearWaits = () => {
       state.timers.forEach((timer) => window.clearTimeout(timer));
       state.timers = [];
-      state.observer?.disconnect();
-      state.observer = null;
     };
 
     const reset = () => {
@@ -167,19 +169,10 @@ export function AdminTransition() {
       }
     };
 
-    // The new route has rendered: reveal now, or once its skeleton gives way.
+    // The new route's shell has rendered (its loading skeleton counts): reveal it and let the data stream in.
     const arrive = () => {
       if (state.phase !== "holding") return;
-      if (pageReady()) {
-        reveal();
-        return;
-      }
-      const target = main();
-      if (!target) return;
-      state.observer = new MutationObserver(() => {
-        if (pageReady()) reveal();
-      });
-      state.observer.observe(target, { childList: true, subtree: true });
+      reveal();
     };
 
     const start = (url: URL) => {

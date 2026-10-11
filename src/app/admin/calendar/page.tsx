@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { CalendarEventRow } from "@/app/admin/calendar/actions";
 import { AdminCalendar } from "@/components/admin-calendar";
+import type { LeadOption } from "@/components/calendar-event-form-dialog";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { toDateKey } from "@/lib/calendar-recurrence";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -35,7 +36,8 @@ function parseYearMonth(
 }
 
 function visibleRange(year: number, month: number) {
-  const firstWeekday = new Date(year, month - 1, 1).getDay();
+  // Weeks start on Monday: the days shown before the 1st.
+  const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month, 0).getDate();
 
   const prevMonthDate = new Date(year, month - 2, 1);
@@ -77,7 +79,7 @@ export default async function AdminCalendarPage({
   const { year, month } = parseYearMonth(params.year, params.month);
   const { rangeStart, rangeEnd } = visibleRange(year, month);
 
-  const [oneOffResult, recurringResult] = await Promise.all([
+  const [oneOffResult, recurringResult, leadsResult] = await Promise.all([
     supabase
       .from("calendar_events")
       .select(EVENT_SELECT)
@@ -95,17 +97,31 @@ export default async function AdminCalendarPage({
         `recurrence_end_date.is.null,recurrence_end_date.gte.${rangeStart}`,
       )
       .order("start_date", { ascending: true }),
+    // For the "Linked lead" choice when adding or editing an event.
+    supabase
+      .from("leads")
+      .select("id, name")
+      .neq("status", "spam")
+      .order("created_at", { ascending: false })
+      .limit(500),
   ]);
 
   const error = oneOffResult.error ?? recurringResult.error;
   if (error) {
     console.error("admin calendar: failed to load", error.message);
   }
+  if (leadsResult.error) {
+    console.error("admin calendar: failed to load leads", leadsResult.error.message);
+  }
 
   const rows = [
     ...((oneOffResult.data ?? []) as CalendarEventRow[]),
     ...((recurringResult.data ?? []) as CalendarEventRow[]),
   ];
+  const leads: LeadOption[] = ((leadsResult.data ?? []) as { id: string; name: string | null }[]).map((lead) => ({
+    id: lead.id,
+    name: lead.name?.trim() || "Unnamed lead",
+  }));
 
   return (
     <div>
@@ -120,6 +136,7 @@ export default async function AdminCalendarPage({
         rangeStart={rangeStart}
         rangeEnd={rangeEnd}
         events={rows}
+        leads={leads}
       />
     </div>
   );

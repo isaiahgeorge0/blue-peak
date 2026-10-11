@@ -35,10 +35,10 @@ function Figure({ label, value }: { label: string; value: string }) {
 
 function Subcontractors() {
   const trades = [
-    ["Hughes Electrical", "Electrician · Ipswich", "Free this week", "cyan"],
-    ["P. Walsh Plastering", "Plasterer · Felixstowe", "Booked to Fri", "muted"],
-    ["Orwell Plumbing", "Plumber · Woodbridge", "Free from Mon", "fleet"],
-    ["S. Grant Roofing", "Roofer · Colchester", "Free this week", "cyan"],
+    ["Hughes Electrical", "Electrician · Ipswich", "Short notice OK", "cyan"],
+    ["P. Walsh Plastering", "Plasterer · Felixstowe", "2 weeks' notice", "muted"],
+    ["Orwell Plumbing", "Plumber · Woodbridge", "Weekdays only", "fleet"],
+    ["S. Grant Roofing", "Roofer · Colchester", "Short notice OK", "cyan"],
   ] as const;
   return (
     <div className="overflow-hidden rounded-lg border border-admin-line">
@@ -93,7 +93,7 @@ function Referrals() {
     ["Job finished", "Rear extension, Woodbridge"],
     ["Referral message sent", "To J. Patel, two days later"],
     ["New enquiry", "Sam R., referred by J. Patel"],
-    ["Reward recorded", "Once Sam's job is won"],
+    ["Reward recorded", "Optional, once Sam's job is won"],
   ];
   return (
     <ol className="space-y-0">

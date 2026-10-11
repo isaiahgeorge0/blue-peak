@@ -53,6 +53,7 @@ export const AlertMailIcon = icon(<path d="M10.5 15H3V5h14v4.5M3 5.5l7 5.5 7-5.5
 export const RepeatIcon = icon(<path d="M3.5 9V7.5a2 2 0 0 1 2-2h10l-2.5-2.5M16.5 11v1.5a2 2 0 0 1-2 2h-10l2.5 2.5" />);
 export const NoteIcon = icon(<path d="M4 3.5h12v9l-4 4H4zM16 12.5h-4v4M7 7.5h6M7 10h4" />);
 export const ClockIcon = icon(<path d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM10 6.5V10l2.5 1.5" />);
+export const EditIcon = icon(<path d="M12.5 4.5l3 3-8.5 8.5H4v-3zM10.5 6.5l3 3" />);
 export const TrashIcon = icon(<path d="M3.5 5.5h13M8 5.5V3.5h4v2M5.5 5.5l.75 11h7.5l.75-11M8.5 8.5v5M11.5 8.5v5" />);
 
 /* Status marks, drawn small beside the label so status never rests on colour alone. */
