@@ -2,13 +2,17 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { siteUrl } from "@/lib/content";
+import { estimateFromLead } from "@/lib/estimate-summary";
 import { renderFollowUpEmail, type RenderedEmail } from "@/lib/follow-up-email";
 import { EMAIL_MARK_CONTENT_ID, EMAIL_MARK_PNG_BASE64 } from "@/lib/follow-up-email-mark";
 import {
   FOLLOW_UP_STEPS,
   MAX_ATTEMPTS,
+  MIN_LINK_SECRET_LENGTH,
   planLead,
   readFollowUpConfig,
+  readLinkSecret,
+  type LinkSecretStatus,
   resolveRecipient,
   STUCK_AFTER_MS,
   UNKNOWN_OUTCOME,
@@ -22,7 +26,7 @@ import { createStopToken, readStopToken } from "@/lib/follow-up-token";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-const LEAD_SELECT = "id, created_at, name, email, status, service_type, follow_ups_paused, completed_at";
+const LEAD_SELECT = "id, created_at, name, email, status, service_type, message, follow_ups_paused, completed_at";
 export const SEND_SELECT = "id, lead_id, step, scheduled_for, sent_at, status, error, recipient, attempts, created_at, updated_at";
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Leads older than this with nothing in progress can't have anything due (longest delay plus the stale limit). */
@@ -35,19 +39,26 @@ const SEND_SPACING_MS = 600;
 
 type LeadRow = Omit<FollowUpLead, "quoted_at">;
 
-/** The stop-link secret: derived from the service role key, which only the server has. */
+export { MIN_LINK_SECRET_LENGTH };
+
+export function linkSecretStatus(): LinkSecretStatus {
+  return readLinkSecret(process.env).status;
+}
+
+/** Signs stop links. Without a usable one nothing is sent, so every email's stop link works. */
 function stopLinkSecret() {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!secret) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
-  return secret;
+  return readLinkSecret(process.env).secret;
 }
 
 export function stopUrlFor(leadId: string) {
-  return `${siteUrl}/stop-emails?t=${createStopToken(leadId, stopLinkSecret())}`;
+  const secret = stopLinkSecret();
+  if (!secret) throw new Error("FOLLOW_UP_LINK_SECRET is not set");
+  return `${siteUrl}/stop-emails?t=${createStopToken(leadId, secret)}`;
 }
 
 export function leadIdFromStopToken(token: string | null | undefined) {
-  return readStopToken(token, stopLinkSecret());
+  const secret = stopLinkSecret();
+  return secret ? readStopToken(token, secret) : null;
 }
 
 /** Shown in test sends; the stop page explains that nothing was changed. */
@@ -138,6 +149,7 @@ export function renderForLead(setting: FollowUpSetting, lead: FollowUpLead, inte
     reviewUrl: readFollowUpConfig(process.env).reviewUrl,
     stopUrl: stopUrlFor(lead.id),
     intendedRecipient,
+    estimate: estimateFromLead(lead.service_type, lead.message),
     markSrc: `cid:${EMAIL_MARK_CONTENT_ID}`,
   });
 }
@@ -154,7 +166,13 @@ export function missingSendSettings() {
     process.env.RESEND_API_KEY?.trim() ? null : "RESEND_API_KEY",
     config.from ? null : "FOLLOW_UP_FROM",
     config.replyTo ? null : "FOLLOW_UP_REPLY_TO",
+    stopLinkSecret() ? null : "FOLLOW_UP_LINK_SECRET",
   ].filter((name): name is string => Boolean(name));
+}
+
+/** Test sends carry an example stop link rather than a signed one, so they don't need the link secret. */
+export function testSendBlockers(missing: string[]) {
+  return missing.filter((name) => name !== "FOLLOW_UP_LINK_SECRET");
 }
 
 /** Sends one follow-up through Resend. Callers check missingSendSettings() first. */

@@ -7,9 +7,10 @@ import { ChevronDownIcon, ClockIcon, SendIcon } from "@/components/admin/icons";
 import { safeAction } from "@/components/admin/safe-action";
 import { useToast } from "@/components/admin/toast";
 import { Card, primaryButton, secondaryButton } from "@/components/admin/ui";
+import { estimateFromLead } from "@/lib/estimate-summary";
 import { renderFollowUpEmail, templateProblems } from "@/lib/follow-up-email";
 import { EMAIL_MARK_PNG_BASE64 } from "@/lib/follow-up-email-mark";
-import { SAMPLE_LEAD } from "@/lib/follow-up-sample";
+import { SAMPLE_LEADS, type SampleKind } from "@/lib/follow-up-sample";
 import { STEP_LABELS, type DelayUnit, type FollowUpSetting, type FollowUpStep } from "@/lib/follow-up-schedule";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 
@@ -43,8 +44,39 @@ type StepCardProps = {
   setting: FollowUpSetting;
   reviewUrl: string | null;
   adminEmail: string;
-  canSend: boolean;
+  /** Settings that must be set before a test can be sent. */
+  testBlockers: string[];
 };
+
+function ToggleGroup<T extends string | boolean>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; text: string }[];
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex rounded-full border border-admin-edge p-1">
+      {options.map((option) => (
+        <button
+          key={option.text}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={`min-h-9 rounded-full px-4 text-sm font-bold transition-colors ${
+            value === option.value ? "bg-frost text-navy" : "text-ink/80 hover:text-ink"
+          }`}
+        >
+          {option.text}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Switch({ checked, labelledBy, disabled, onChange }: { checked: boolean; labelledBy: string; disabled: boolean; onChange: () => void }) {
   return (
@@ -74,12 +106,14 @@ function Switch({ checked, labelledBy, disabled, onChange }: { checked: boolean;
   );
 }
 
-function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
+function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProps) {
+  const canSend = testBlockers.length === 0;
   const router = useRouter();
   const toast = useToast();
   const ids = { title: useId(), panel: useId(), delay: useId(), unit: useId(), subject: useId(), body: useId(), help: useId(), schedule: useId() };
   const label = STEP_LABELS[setting.step];
   const isReview = setting.step === "review_request";
+  const isAcknowledgement = setting.step === "acknowledgement";
 
   const saved: FollowUpDraft = useMemo(
     () => ({ delay_amount: setting.delay_amount, delay_unit: setting.delay_unit, subject: setting.subject, body: setting.body }),
@@ -102,6 +136,8 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
 
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
+  const [sample, setSample] = useState<SampleKind>("contact");
+  const sampleLead = SAMPLE_LEADS[sample];
   const [message, setMessage] = useState<{ tone: "error" | "info"; text: string } | null>(null);
   const [switchPending, startSwitch] = useTransition();
   const [savePending, startSave] = useTransition();
@@ -123,8 +159,9 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
         step: setting.step,
         subject: shown.subject,
         body: shown.body,
-        name: SAMPLE_LEAD.name,
-        serviceType: SAMPLE_LEAD.serviceType,
+        name: sampleLead.name,
+        serviceType: sampleLead.serviceType,
+        estimate: estimateFromLead(sampleLead.serviceType, sampleLead.message),
         phoneDisplay: sitePhoneDisplay,
         phoneHref: `tel:${sitePhoneTel}`,
         reviewUrl,
@@ -132,7 +169,7 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
         intendedRecipient: null,
         markSrc: MARK_DATA_URL,
       }),
-    [setting.step, shown.subject, shown.body, reviewUrl],
+    [setting.step, shown.subject, shown.body, reviewUrl, sampleLead],
   );
 
   function fitFrame() {
@@ -179,12 +216,13 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
     if (problems.length > 0) return;
     setMessage(null);
     startTest(async () => {
-      const result = await safeAction(() => sendFollowUpTest(setting.step, currentDraft()));
+      const result = await safeAction(() => sendFollowUpTest(setting.step, currentDraft(), sample));
       if (!result.ok) {
         setMessage({ tone: "error", text: result.error });
         return;
       }
-      setMessage({ tone: "info", text: `Test sent to ${adminEmail}, filled in for a made-up lead, ${SAMPLE_LEAD.name}.` });
+      const from = isAcknowledgement && sample === "estimator" ? " from the estimator" : "";
+      setMessage({ tone: "info", text: `Test sent to ${adminEmail}, filled in for a made-up lead${from}, ${sampleLead.name}.` });
       toast("Test email sent.");
     });
   }
@@ -298,8 +336,15 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
               />
               <p id={ids.help} className="mt-2 text-sm leading-relaxed text-ink/80">
                 Use {"{first_name}"}, {"{service}"} and {"{phone}"}
-                {isReview ? <>, and {"{review_link}"} on a line of its own for the review button</> : null}. Leave a blank line between
-                paragraphs; lines starting 1., 2., 3. become numbered steps. The sign-off and the stop link are added for you.
+                {isReview ? <>, and {"{review_link}"} on a line of its own for the review button</> : null}
+                {isAcknowledgement ? (
+                  <>
+                    , and {"{estimate}"} on a line of its own to place an estimator lead&apos;s estimate (otherwise it follows the first
+                    paragraph after the greeting)
+                  </>
+                ) : null}
+                . Leave a blank line between paragraphs; lines starting 1., 2., 3. become numbered steps. The sign-off and the stop
+                link are added for you.
               </p>
             </div>
 
@@ -321,7 +366,9 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
               </button>
             </div>
             <p className="text-sm text-ink/80">
-              {canSend ? `Tests go to ${adminEmail} only, using what's in the boxes above.` : "Tests can't be sent until FOLLOW_UP_FROM and FOLLOW_UP_REPLY_TO are set."}
+              {canSend
+                ? `Tests go to ${adminEmail} only, using what's in the boxes above.`
+                : `Tests can't be sent until ${testBlockers.join(" and ")} ${testBlockers.length === 1 ? "is" : "are"} set.`}
             </p>
             {message ? (
               <p role={message.tone === "error" ? "alert" : "status"} className={`text-sm font-bold ${message.tone === "error" ? "text-ridge-cyan" : "text-ink"}`}>
@@ -333,27 +380,32 @@ function StepCard({ setting, reviewUrl, adminEmail, canSend }: StepCardProps) {
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="admin-label">Preview</p>
-              <div role="group" aria-label="Preview colours" className="inline-flex rounded-full border border-admin-edge p-1">
-                {[
-                  { value: false, text: "Light" },
-                  { value: true, text: "Dark" },
-                ].map((option) => (
-                  <button
-                    key={option.text}
-                    type="button"
-                    aria-pressed={dark === option.value}
-                    onClick={() => setDark(option.value)}
-                    className={`min-h-9 rounded-full px-4 text-sm font-bold transition-colors ${
-                      dark === option.value ? "bg-frost text-navy" : "text-ink/80 hover:text-ink"
-                    }`}
-                  >
-                    {option.text}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {isAcknowledgement ? (
+                  <ToggleGroup
+                    label="Preview lead"
+                    value={sample}
+                    options={[
+                      { value: "contact", text: "Contact form" },
+                      { value: "estimator", text: "Estimator" },
+                    ]}
+                    onChange={setSample}
+                  />
+                ) : null}
+                <ToggleGroup
+                  label="Preview colours"
+                  value={dark}
+                  options={[
+                    { value: false, text: "Light" },
+                    { value: true, text: "Dark" },
+                  ]}
+                  onChange={setDark}
+                />
               </div>
             </div>
             <p className="mt-2 text-sm text-ink/80">
-              As {SAMPLE_LEAD.name} would see it. Subject: <span className="text-ink">{preview.subject}</span>
+              As {sampleLead.name} would see it{isAcknowledgement && sample === "estimator" ? ", after using the estimator" : ""}. Subject:{" "}
+              <span className="text-ink">{preview.subject}</span>
             </p>
             {isReview && !reviewUrl ? (
               <p className="mt-2 text-sm text-ink/80">GOOGLE_REVIEW_URL isn&apos;t set, so the button goes nowhere here and review requests are skipped.</p>
@@ -379,18 +431,18 @@ export function FollowUpEditor({
   settings,
   reviewUrl,
   adminEmail,
-  canSend,
+  testBlockers,
 }: {
   settings: FollowUpSetting[];
   reviewUrl: string | null;
   adminEmail: string;
-  canSend: boolean;
+  testBlockers: string[];
 }) {
   return (
     <ol className="space-y-4">
       {settings.map((setting) => (
         <li key={setting.step}>
-          <StepCard setting={setting} reviewUrl={reviewUrl} adminEmail={adminEmail} canSend={canSend} />
+          <StepCard setting={setting} reviewUrl={reviewUrl} adminEmail={adminEmail} testBlockers={testBlockers} />
         </li>
       ))}
     </ol>

@@ -34,6 +34,8 @@ export type FollowUpLead = {
   email: string | null;
   status: string | null;
   service_type: string | null;
+  /** The estimator stores the visitor's selections here. */
+  message?: string | null;
   follow_ups_paused: boolean;
   completed_at: string | null;
   /** When the lead last moved to Quoted (lead_status_events), or null. */
@@ -96,6 +98,17 @@ export const WINDOW_CLOSES_HOUR = 19;
 function envValue(value: string | undefined) {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+}
+
+export const MIN_LINK_SECRET_LENGTH = 32;
+
+export type LinkSecretStatus = "set" | "too-short" | "unset";
+
+/** FOLLOW_UP_LINK_SECRET, usable only when it is at least MIN_LINK_SECRET_LENGTH characters. */
+export function readLinkSecret(env: Record<string, string | undefined>): { status: LinkSecretStatus; secret: string | null } {
+  const secret = envValue(env.FOLLOW_UP_LINK_SECRET);
+  if (!secret) return { status: "unset", secret: null };
+  return secret.length >= MIN_LINK_SECRET_LENGTH ? { status: "set", secret } : { status: "too-short", secret: null };
 }
 
 export function readFollowUpConfig(env: Record<string, string | undefined>): FollowUpConfig {

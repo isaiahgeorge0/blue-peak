@@ -1,3 +1,4 @@
+import { ESTIMATE_CAVEAT, type EstimateRow } from "./estimate-summary.ts";
 import type { FollowUpStep } from "./follow-up-schedule.ts";
 
 /*
@@ -6,12 +7,15 @@ import type { FollowUpStep } from "./follow-up-schedule.ts";
   the sender render exactly the same thing.
 
   Template rules: {first_name}, {service} and {phone} anywhere; {review_link}
-  in the review request's body. Blank lines separate paragraphs; a paragraph
-  whose lines all start "1. ", "2. " is a numbered list.
+  in the review request's body; {estimate} in the acknowledgement's body.
+  Blank lines separate paragraphs; a paragraph whose lines all start "1. ",
+  "2. " is a numbered list.
 */
 
 export const PLACEHOLDERS = ["first_name", "service", "phone"] as const;
 export const REVIEW_LINK = "{review_link}";
+export const ESTIMATE = "{estimate}";
+export const ESTIMATE_HEADING = "Your estimate";
 export const SIGN_OFF = "Kyle and Steven, Blue Peak";
 export const STOP_LINK_TEXT = "Don't want these emails? Stop them here";
 
@@ -54,9 +58,16 @@ export function servicePhrase(serviceType: string | null | undefined) {
 export function templateProblems(step: FollowUpStep, subject: string, body: string): string[] {
   const problems: string[] = [];
   if (!subject.trim()) problems.push("The subject can't be empty.");
+  else if (!/\p{L}/u.test(subject.replaceAll("{first_name}", ""))) {
+    problems.push("The subject needs some words besides {first_name}, for leads without a usable name.");
+  }
   if (!body.trim()) problems.push("The email can't be empty.");
   const allowed = (inBody: boolean) =>
-    new Set<string>([...PLACEHOLDERS, ...(inBody && step === "review_request" ? ["review_link"] : [])]);
+    new Set<string>([
+      ...PLACEHOLDERS,
+      ...(inBody && step === "review_request" ? ["review_link"] : []),
+      ...(inBody && step === "acknowledgement" ? ["estimate"] : []),
+    ]);
   for (const [text, inBody] of [
     [subject, false],
     [body, true],
@@ -68,7 +79,9 @@ export function templateProblems(step: FollowUpStep, subject: string, body: stri
         problems.push(
           match[1] === "review_link"
             ? `{review_link} can only go in the review request's email, not ${where}.`
-            : `{${match[1]}} in ${where} isn't a placeholder. Use {first_name}, {service} or {phone}.`,
+            : match[1] === "estimate"
+              ? `{estimate} can only go in the acknowledgement's email, not ${where}.`
+              : `{${match[1]}} in ${where} isn't a placeholder. Use {first_name}, {service} or {phone}.`,
         );
       }
     }
@@ -81,39 +94,73 @@ export function templateProblems(step: FollowUpStep, subject: string, body: stri
 
 type Values = { firstName: string | null; service: string; phone: string };
 
-/** Fills the placeholders. With no usable first name, "Hi {first_name}" becomes "Hi there" and other uses drop out. */
-export function fillPlaceholders(text: string, values: Values) {
-  let out = text;
-  if (values.firstName) {
-    out = out.replaceAll("{first_name}", values.firstName);
-  } else {
-    out = out
-      .replace(/\b(Hi|Hello|Hey|Dear)[ \t]+\{first_name\}/gi, "$1 there")
-      .replace(/[ \t]*,?[ \t]*\{first_name\}[ \t]*,?/g, "")
-      .replace(/^[ \t]+/gm, "");
-  }
-  out = out.replaceAll("{service}", values.service).replaceAll("{phone}", values.phone);
-  // Anything else in braces (blocked when saving) is removed rather than shown.
-  return out.replace(/\{(?!review_link\})[^{}\n]*\}/g, "");
+/**
+ * With no usable first name: greetings become "Hi there" ("Dear" becomes
+ * "Hello"), a possessive becomes "your", and anywhere else the name drops out
+ * with the comma or space that went with it, leaving the sentence readable.
+ */
+const NAME = "\u0000";
+
+function withoutFirstName(text: string) {
+  return text
+    .replace(/\b(Hi|Hello|Hey),?[ \t]+\{first_name\}/gi, "$1 there")
+    .replace(/\b(Dear)[ \t]+\{first_name\}/gi, (_match, dear: string) => (dear[0] === "D" ? "Hello" : "hello"))
+    .split("\n")
+    .map((line) => {
+      if (!line.includes("{first_name}")) return line;
+      return line
+        .replaceAll("{first_name}", NAME)
+        .replace(/(^|[.!?])([ \t]*)\u0000['’]s\b/g, "$1$2Your")
+        .replace(/\u0000['’]s\b/g, "your")
+        .replace(
+          /(^|[.!?])[ \t]*\u0000[ \t]*[,.!?;:–—-]*[ \t]*(\p{Ll})?/gu,
+          (_match, end: string, letter?: string) => `${end}${end ? " " : ""}${letter?.toUpperCase() ?? ""}`,
+        )
+        .replace(/,?[ \t]*\u0000/g, "")
+        .replace(/[ \t]+([,.!?;:])/g, "$1")
+        .replace(/,(?=[.!?;:,]|$)/g, "")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim();
+    })
+    .join("\n");
 }
 
-type Block = { kind: "paragraph"; lines: string[] } | { kind: "list"; items: string[] } | { kind: "review" };
+/** Fills the placeholders. {review_link} and {estimate} are left for the layout to place. */
+export function fillPlaceholders(text: string, values: Values) {
+  let out = values.firstName ? text.replaceAll("{first_name}", values.firstName) : withoutFirstName(text);
+  out = out.replaceAll("{service}", values.service).replaceAll("{phone}", values.phone);
+  // Anything else in braces (blocked when saving) is removed rather than shown.
+  return out.replace(/\{(?!(?:review_link|estimate)\})[^{}\n]*\}/g, "");
+}
 
-function parseBody(body: string, withReviewButton: boolean): Block[] {
+type Block =
+  | { kind: "paragraph"; lines: string[] }
+  | { kind: "list"; items: string[] }
+  | { kind: "review" }
+  | { kind: "estimate"; rows: EstimateRow[] };
+
+function parseBody(body: string, withReviewButton: boolean, estimate: EstimateRow[] | null): Block[] {
   const blocks: Block[] = body
     .replace(/\r\n?/g, "\n")
     .split(/\n[ \t]*\n/)
-    .map((paragraph) => paragraph.trim())
+    .map((paragraph) => (paragraph.trim() === ESTIMATE ? ESTIMATE : paragraph.replace(/[ \t]*\{estimate\}/g, "").trim()))
     .filter(Boolean)
-    .map((paragraph): Block => {
-      if (paragraph === REVIEW_LINK) return { kind: "review" };
+    .flatMap((paragraph): Block[] => {
+      if (paragraph === REVIEW_LINK) return [{ kind: "review" }];
+      if (paragraph === ESTIMATE) return estimate ? [{ kind: "estimate", rows: estimate }] : [];
       const lines = paragraph.split("\n").map((line) => line.trim());
       if (lines.length > 0 && lines.every((line) => /^\d+[.)]\s+\S/.test(line))) {
-        return { kind: "list", items: lines.map((line) => line.replace(/^\d+[.)]\s+/, "")) };
+        return [{ kind: "list", items: lines.map((line) => line.replace(/^\d+[.)]\s+/, "")) }];
       }
-      return { kind: "paragraph", lines };
+      return [{ kind: "paragraph", lines }];
     });
   if (withReviewButton && !body.includes(REVIEW_LINK)) blocks.push({ kind: "review" });
+  // Without {estimate} in the template, the estimate follows the first paragraph after the greeting.
+  if (estimate && !blocks.some((block) => block.kind === "estimate")) {
+    const first = blocks[0];
+    const greeting = first?.kind === "paragraph" && first.lines.length === 1 && first.lines[0].length <= 40 && first.lines[0].endsWith(",");
+    blocks.splice(Math.min(greeting ? 2 : 1, blocks.length), 0, { kind: "estimate", rows: estimate });
+  }
   return blocks;
 }
 
@@ -138,6 +185,8 @@ export type FollowUpEmailInput = {
   stopUrl: string;
   /** Set when the email goes to the test address instead: the customer it was meant for. */
   intendedRecipient: string | null;
+  /** An estimator lead's checked estimate; shown in the acknowledgement only. */
+  estimate?: EstimateRow[] | null;
   /** The mark: a cid: reference when sent, a data: URL in the admin preview. */
   markSrc: string;
 };
@@ -152,10 +201,11 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     service: servicePhrase(input.serviceType),
     phone: input.phoneDisplay,
   };
-  const subject = fillPlaceholders(input.subject, values).replace(/\s+/g, " ").trim();
+  const subject = fillPlaceholders(input.subject, values).replace(/\s+/g, " ").trim() || "Blue Peak";
   const isReview = input.step === "review_request";
   const reviewHref = input.reviewUrl ?? "#";
-  const blocks = parseBody(fillPlaceholders(input.body, values), isReview);
+  const estimate = input.step === "acknowledgement" && input.estimate?.length ? input.estimate : null;
+  const blocks = parseBody(fillPlaceholders(input.body, values), isReview, estimate);
 
   const inlineHtml = (line: string) =>
     escapeHtml(line)
@@ -170,6 +220,28 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
 
   const blockHtml = blocks
     .map((block) => {
+      if (block.kind === "estimate") {
+        const rows = block.rows
+          .map(
+            (row, index) => `
+                      <tr>
+                        <td valign="top" class="bp-muted${index > 0 ? " bp-rule" : ""}" style="width: 38%; padding: 8px 12px 8px 0;${index > 0 ? " border-top: 1px solid #cfe3e6;" : ""} font-family: ${SANS}; font-size: 14px; line-height: 20px; color: ${MUTED};">${escapeHtml(row.label)}</td>
+                        <td valign="top" class="bp-text${index > 0 ? " bp-rule" : ""}" style="padding: 8px 0;${index > 0 ? " border-top: 1px solid #cfe3e6;" : ""} font-family: ${SANS}; font-size: 15px; line-height: 22px; color: ${NAVY};${row.label === "Estimated from" ? " font-weight: bold;" : ""}">${escapeHtml(row.value)}</td>
+                      </tr>`,
+          )
+          .join("");
+        return `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-box" style="margin: 4px 0 22px; background-color: ${FROST}; border: 1px solid #cfe3e6; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 18px 20px 4px;">
+                    <p class="bp-text" style="margin: 0 0 6px; font-family: ${SERIF}; font-size: 20px; line-height: 26px; color: ${NAVY};">${ESTIMATE_HEADING}</p>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${rows}
+                    </table>
+                    <p class="bp-muted" style="margin: 8px 0 14px; font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${MUTED};">${escapeHtml(ESTIMATE_CAVEAT)}</p>
+                  </td>
+                </tr>
+              </table>`;
+      }
       if (block.kind === "review") {
         return `
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 8px 0 24px;">
@@ -239,6 +311,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
       .bp-button { background-color: ${BLUE_SOLUTION} !important; border: 1px solid ${PEAK_FLEET} !important; }
       .bp-banner { background-color: #122c54 !important; color: ${FROST} !important; border-color: ${PEAK_FLEET} !important; }
       .bp-rule { border-color: #1a3e75 !important; }
+      .bp-box { background-color: #122c54 !important; border-color: #1a3e75 !important; }
     }
   </style>
 </head>
@@ -284,6 +357,9 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
 </html>`;
 
   const textBlocks = blocks.map((block) => {
+    if (block.kind === "estimate") {
+      return [ESTIMATE_HEADING, ...block.rows.map((row) => `${row.label}: ${row.value}`), ESTIMATE_CAVEAT].join("\n");
+    }
     if (block.kind === "review") return `${REVIEW_BUTTON_TEXT}: ${reviewHref}`;
     if (block.kind === "list") return block.items.map((item, index) => `${index + 1}. ${item}`).join("\n");
     return block.lines.join("\n").replaceAll(REVIEW_LINK, `${REVIEW_BUTTON_TEXT} (${reviewHref})`);

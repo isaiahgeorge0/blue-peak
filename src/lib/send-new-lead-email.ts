@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { leadAlertRecipients } from "@/lib/lead-alert-recipients";
 
 export type LeadNotificationPayload = {
   name: string;
@@ -120,9 +121,14 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload) {
 </html>
   `.trim();
 
+  const recipients = leadAlertRecipients(process.env.LEAD_ALERT_TO);
+  if (recipients.ignored.length > 0) {
+    console.error("new-lead email: LEAD_ALERT_TO entries that aren't addresses were ignored:", recipients.ignored.join(", "));
+  }
+
   const { error } = await resend.emails.send({
     from: "Blue Peak Notifications <notifications@skapa.uk>",
-    to: ["isaiah120303@gmail.com"],
+    to: recipients.to,
     subject,
     text,
     html,

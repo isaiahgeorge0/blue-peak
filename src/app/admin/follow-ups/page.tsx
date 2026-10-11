@@ -4,7 +4,7 @@ import { FollowUpEditor } from "@/components/admin/follow-up-editor";
 import { Card, PageHeader, SectionHeading } from "@/components/admin/ui";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { FOLLOW_UP_STEPS, readFollowUpConfig, type FollowUpSetting } from "@/lib/follow-up-schedule";
-import { missingSendSettings } from "@/lib/follow-ups";
+import { linkSecretStatus, MIN_LINK_SECRET_LENGTH, missingSendSettings, testSendBlockers } from "@/lib/follow-ups";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export const metadata: Metadata = {
@@ -33,6 +33,7 @@ export default async function FollowUpsPage() {
 
   const config = readFollowUpConfig(process.env);
   const missing = missingSendSettings();
+  const linkSecret = linkSecretStatus();
   const adminEmail = typeof claims.email === "string" ? claims.email : "";
 
   return (
@@ -59,6 +60,25 @@ export default async function FollowUpsPage() {
         </section>
       ) : null}
 
+      {config.enabled && missing.length > 0 ? (
+        <section aria-labelledby="blocked-heading" className="flex gap-4 rounded-xl border border-ridge-cyan/60 bg-brand/25 px-5 py-5">
+          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
+          <div className="min-w-0">
+            <h2 id="blocked-heading" className="font-sans text-base font-bold text-ink">
+              Follow-ups are on but can&apos;t send
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-ink/85">
+              {missing.join(" and ")} {missing.length === 1 ? "isn't" : "aren't"} set
+              {missing.includes("FOLLOW_UP_LINK_SECRET") && linkSecret === "too-short"
+                ? ` (FOLLOW_UP_LINK_SECRET must be at least ${MIN_LINK_SECRET_LENGTH} characters)`
+                : ""}
+              , so nothing is being sent until {missing.length === 1 ? "it is" : "they are"}. Due emails wait and go out once it&apos;s
+              fixed, unless they&apos;re too late by then (more than a day for acknowledgements, 3 days for the rest).
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       {config.testRecipient ? (
         <section aria-labelledby="test-heading" className="flex gap-4 rounded-xl border border-admin-edge bg-admin-surface px-5 py-5">
           <FollowUpsIcon className="mt-0.5 size-6 shrink-0 text-peak-fleet" />
@@ -79,7 +99,7 @@ export default async function FollowUpsPage() {
           {error || settings.length === 0 ? (
             <Card className="px-5 py-4 text-sm">The follow-up emails couldn&apos;t be loaded just now. Refresh the page to try again.</Card>
           ) : (
-            <FollowUpEditor settings={settings} reviewUrl={config.reviewUrl} adminEmail={adminEmail} canSend={missing.length === 0} />
+            <FollowUpEditor settings={settings} reviewUrl={config.reviewUrl} adminEmail={adminEmail} testBlockers={testSendBlockers(missing)} />
           )}
         </div>
       </section>
@@ -96,6 +116,13 @@ export default async function FollowUpsPage() {
             </SetupRow>
             <SetupRow label="Replies go to" name="FOLLOW_UP_REPLY_TO">
               {config.replyTo ?? "Not set, so nothing can be sent"}
+            </SetupRow>
+            <SetupRow label="Stop-link secret" name="FOLLOW_UP_LINK_SECRET">
+              {linkSecret === "set"
+                ? "Set"
+                : linkSecret === "too-short"
+                  ? `Too short: it needs at least ${MIN_LINK_SECRET_LENGTH} characters, so nothing can be sent`
+                  : "Not set, so nothing can be sent"}
             </SetupRow>
             <SetupRow label="Google review link" name="GOOGLE_REVIEW_URL">
               {config.reviewUrl ? (

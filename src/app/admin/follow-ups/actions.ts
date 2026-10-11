@@ -5,8 +5,9 @@ import { isAdminClaims } from "@/lib/admin-role";
 import { renderFollowUpEmail, templateProblems } from "@/lib/follow-up-email";
 import { EMAIL_MARK_CONTENT_ID } from "@/lib/follow-up-email-mark";
 import { FOLLOW_UP_STEPS, readFollowUpConfig, type DelayUnit, type FollowUpStep } from "@/lib/follow-up-schedule";
-import { deliverFollowUpEmail, EXAMPLE_STOP_URL, missingSendSettings } from "@/lib/follow-ups";
-import { SAMPLE_LEAD } from "@/lib/follow-up-sample";
+import { estimateFromLead } from "@/lib/estimate-summary";
+import { deliverFollowUpEmail, EXAMPLE_STOP_URL, missingSendSettings, testSendBlockers } from "@/lib/follow-ups";
+import { isSampleKind, SAMPLE_LEADS, type SampleKind } from "@/lib/follow-up-sample";
 import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -94,9 +95,13 @@ export async function saveFollowUpStep(step: string, draft: FollowUpDraft): Prom
   return { ok: true };
 }
 
-/** Sends the draft, filled in with the sample lead, to the signed-in admin's own address only. */
-export async function sendFollowUpTest(step: string, draft: FollowUpDraft): Promise<FollowUpActionResult & { to?: string }> {
-  if (!isStep(step)) return { ok: false, error: "Invalid step." };
+/** Sends the draft, filled in with a sample lead, to the signed-in admin's own address only. */
+export async function sendFollowUpTest(
+  step: string,
+  draft: FollowUpDraft,
+  sample: SampleKind = "contact",
+): Promise<FollowUpActionResult & { to?: string }> {
+  if (!isStep(step) || !isSampleKind(sample)) return { ok: false, error: "Invalid step." };
   const problem = draftProblem(step, draft);
   if (problem) return { ok: false, error: problem };
   const session = await adminSession();
@@ -104,15 +109,17 @@ export async function sendFollowUpTest(step: string, draft: FollowUpDraft): Prom
   const to = typeof session.claims.email === "string" ? session.claims.email.trim() : "";
   if (!to) return { ok: false, error: "Your account has no email address." };
 
-  const missing = missingSendSettings();
+  const missing = testSendBlockers(missingSendSettings());
   if (missing.length > 0) return { ok: false, error: `Can't send: ${missing.join(", ")} ${missing.length === 1 ? "isn't" : "aren't"} set.` };
 
+  const lead = SAMPLE_LEADS[sample];
   const email = renderFollowUpEmail({
     step,
     subject: draft.subject,
     body: draft.body,
-    name: SAMPLE_LEAD.name,
-    serviceType: SAMPLE_LEAD.serviceType,
+    name: lead.name,
+    serviceType: lead.serviceType,
+    estimate: estimateFromLead(lead.serviceType, lead.message),
     phoneDisplay: sitePhoneDisplay,
     phoneHref: `tel:${sitePhoneTel}`,
     reviewUrl: readFollowUpConfig(process.env).reviewUrl,

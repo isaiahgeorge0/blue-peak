@@ -72,6 +72,7 @@ export function EstimatorBooking({
   const [step, setStep] = useState<Step>(embedded ? "open" : "closed");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
@@ -119,6 +120,7 @@ export function EstimatorBooking({
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
+          email: email.trim(),
           service_type: ESTIMATOR_SERVICE_TYPE,
           message: describeEstimate(getEstimate(), getExtraLines?.()),
           [LEAD_HONEYPOT_FIELD]: honeypot,
@@ -247,6 +249,24 @@ export function EstimatorBooking({
               </p>
             ) : null}
           </div>
+        </div>
+        <div>
+          <label
+            htmlFor="estimator-email"
+            className="block text-xs font-medium text-ink/85"
+          >
+            Email me a copy of my estimate
+          </label>
+          <input
+            id="estimator-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            maxLength={LEAD_FIELD_LIMITS.email}
+            className={fieldClassName}
+          />
         </div>
 
         {submitError ? (
