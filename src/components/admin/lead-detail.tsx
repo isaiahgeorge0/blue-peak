@@ -3,14 +3,25 @@
 import { useId, useState, useTransition, type ComponentType } from "react";
 import { addLeadNote } from "@/app/admin/leads/actions";
 import { CalendarEventFormDialog, type CalendarEventFormPrefill } from "@/components/calendar-event-form-dialog";
-import { CalendarIcon, LeadsIcon, MailIcon, NoteIcon } from "@/components/admin/icons";
+import {
+  AlertMailIcon,
+  CalendarIcon,
+  ClockIcon,
+  LeadsIcon,
+  MailIcon,
+  NoteIcon,
+  SendIcon,
+  SkipIcon,
+  StatusWonIcon,
+  SwapIcon,
+} from "@/components/admin/icons";
 import { safeAction } from "@/components/admin/safe-action";
 import { useToast } from "@/components/admin/toast";
 import { secondaryButton } from "@/components/admin/ui";
 
 export type TimelineItem = {
   id: string;
-  kind: "arrived" | "alert" | "note";
+  kind: "arrived" | "alert" | "note" | "status" | "complete" | "sent" | "scheduled" | "skipped" | "failed";
   at: string;
   /** Preformatted UK date and time. */
   when: string;
@@ -22,6 +33,12 @@ const KIND_ICONS: Record<TimelineItem["kind"], ComponentType<{ className?: strin
   arrived: LeadsIcon,
   alert: MailIcon,
   note: NoteIcon,
+  status: SwapIcon,
+  complete: StatusWonIcon,
+  sent: SendIcon,
+  scheduled: ClockIcon,
+  skipped: SkipIcon,
+  failed: AlertMailIcon,
 };
 
 function stamp(value: string) {
@@ -112,7 +129,15 @@ export function LeadActivity({ leadId, items }: { leadId: string; items: Timelin
               {index < timeline.length - 1 ? (
                 <span aria-hidden className="absolute top-9 bottom-1 left-[1.0625rem] w-px bg-admin-line" />
               ) : null}
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-admin-line bg-admin-raised text-peak-fleet">
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full border bg-admin-raised ${
+                  item.kind === "failed"
+                    ? "border-ridge-cyan text-ridge-cyan"
+                    : item.kind === "scheduled"
+                      ? "border-dashed border-admin-edge text-peak-fleet"
+                      : "border-admin-line text-peak-fleet"
+                }`}
+              >
                 <Icon className="size-4" />
               </span>
               <div className="min-w-0 pt-1.5">

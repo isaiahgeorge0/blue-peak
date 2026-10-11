@@ -8,6 +8,7 @@ import {
   CalendarIcon,
   ChartIllustration,
   ClockIcon,
+  FollowUpsIcon,
   LevelIllustration,
   MailIcon,
   PhoneIcon,
@@ -40,6 +41,7 @@ import {
   weeklyVolume,
 } from "@/lib/admin-leads";
 import { recurrenceLabel } from "@/lib/calendar-recurrence";
+import { followUpOverview } from "@/lib/follow-up-admin";
 import { SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -78,7 +80,7 @@ export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient();
 
   // Service-role read bypasses RLS, so it must stay behind the admin check above.
-  const [leadsResult, oneOffResult, recurringResult] = await Promise.all([
+  const [leadsResult, oneOffResult, recurringResult, followUps] = await Promise.all([
     getSupabaseAdmin()
       .from("leads")
       .select("id, created_at, name, phone, email, service_type, message, status, notified_at")
@@ -97,6 +99,10 @@ export default async function AdminDashboardPage() {
       .neq("recurrence", "none")
       .lte("start_date", range.to)
       .or(`recurrence_end_date.is.null,recurrence_end_date.gte.${range.from}`),
+    followUpOverview(now).catch((error: Error) => {
+      console.error("admin dashboard: failed to load follow-ups", error.message);
+      return null;
+    }),
   ]);
 
   if (leadsResult.error) console.error("admin dashboard: failed to load leads", leadsResult.error.message);
@@ -287,6 +293,66 @@ export default async function AdminDashboardPage() {
           </Card>
         </section>
       </div>
+
+      <section aria-labelledby="follow-ups-heading">
+        <SectionHeading id="follow-ups-heading" action={<ArrowLink href="/admin/follow-ups">Settings</ArrowLink>}>
+          Follow-ups
+        </SectionHeading>
+        <Card className="mt-4">
+          {followUps ? (
+            <>
+              <dl className="grid grid-cols-3 divide-x divide-admin-line">
+                {[
+                  { label: "Sending today", value: followUps.sendingToday },
+                  { label: "Next 7 days", value: followUps.nextSevenDays },
+                  { label: "Failed", value: followUps.failures.length },
+                ].map((figure) => (
+                  <div key={figure.label} className="flex flex-col gap-1 px-4 py-4 sm:px-5">
+                    <dt className="text-xs font-bold tracking-[0.14em] text-peak-fleet uppercase">{figure.label}</dt>
+                    <dd
+                      className={`font-serif text-[2rem] leading-none ${
+                        figure.label === "Failed" && figure.value > 0 ? "text-ridge-cyan" : "text-ink"
+                      }`}
+                    >
+                      <CountUp value={figure.value} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {followUps.globallyOff ? (
+                <p className="flex items-start gap-2 border-t border-admin-line px-5 py-4 text-sm text-ink/80">
+                  <FollowUpsIcon className="mt-0.5 size-4 shrink-0 text-peak-fleet" />
+                  Follow-ups are off, so nothing is being sent. Anything due is logged as skipped.
+                </p>
+              ) : null}
+              {followUps.failures.length > 0 ? (
+                <ul className="divide-y divide-admin-line border-t border-admin-line">
+                  {followUps.failures.slice(0, 5).map((failure) => (
+                    <li key={failure.id} className="flex gap-4 px-5 py-4">
+                      <AlertMailIcon className="mt-0.5 size-5 shrink-0 text-ridge-cyan" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-ink">
+                          {failure.step} to{" "}
+                          <Link href={`/admin/leads/${failure.leadId}`} className="rounded-sm text-peak-fleet underline-offset-4 hover:text-ridge-cyan hover:underline">
+                            {failure.leadName}
+                          </Link>{" "}
+                          didn&apos;t send
+                        </p>
+                        <p className="mt-0.5 text-sm break-words text-ink/80">
+                          {failure.when}
+                          {failure.error ? ` · ${failure.error}` : ""}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
+          ) : (
+            <p className="px-5 py-4 text-sm">Follow-ups couldn&apos;t be loaded just now.</p>
+          )}
+        </Card>
+      </section>
 
       <section aria-labelledby="pipeline-heading">
         <SectionHeading id="pipeline-heading">Pipeline</SectionHeading>

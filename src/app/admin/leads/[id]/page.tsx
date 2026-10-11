@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, CalendarIcon, MailIcon, PhoneIcon } from "@/components/admin/icons";
+import { FollowUpControls } from "@/components/admin/follow-up-controls";
 import { LeadActivity, ScheduleVisitButton, type TimelineItem } from "@/components/admin/lead-detail";
 import { StatusControl } from "@/components/admin/status";
-import { Card, SectionHeading, primaryButton, secondaryButton, textLink } from "@/components/admin/ui";
+import { ArrowLink, Card, SectionHeading, primaryButton, secondaryButton, textLink } from "@/components/admin/ui";
+import { leadFollowUpView } from "@/lib/follow-up-admin";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { dayLabel, mailHref, SERVICE_NAMES, telHref, timeRange, ukStamp } from "@/lib/admin-data";
 import { estimatorDetails, leadSource, serviceLabel } from "@/lib/admin-leads";
@@ -29,6 +31,8 @@ type Lead = {
   message: string | null;
   status: string | null;
   notified_at: string | null;
+  follow_ups_paused: boolean;
+  completed_at: string | null;
 };
 
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
@@ -50,7 +54,7 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
   const [{ data: lead, error }, { data: notes }, { data: visits }] = await Promise.all([
     admin
       .from("leads")
-      .select("id, created_at, name, phone, email, postcode, service_type, message, status, notified_at")
+      .select("id, created_at, name, phone, email, postcode, service_type, message, status, notified_at, follow_ups_paused, completed_at")
       .eq("id", id)
       .maybeSingle<Lead>(),
     admin.from("lead_notes").select("id, note, created_at").eq("lead_id", id).order("created_at", { ascending: false }),
@@ -71,6 +75,19 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
   const source = leadSource(lead.service_type);
   const details = lead.service_type === ESTIMATOR_SERVICE_TYPE ? estimatorDetails(lead.message) : null;
   const now = new Date();
+  const followUps = await leadFollowUpView(
+    {
+      id: lead.id,
+      created_at: lead.created_at,
+      name: lead.name,
+      email: lead.email,
+      status: lead.status,
+      service_type: lead.service_type,
+      follow_ups_paused: Boolean(lead.follow_ups_paused),
+      completed_at: lead.completed_at,
+    },
+    now,
+  );
 
   const timeline: TimelineItem[] = [
     { id: "arrived", kind: "arrived", at: lead.created_at, when: ukStamp(lead.created_at), title: `Arrived from the ${source.toLowerCase()}` },
@@ -85,6 +102,7 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
       title: "Note",
       body: note.note,
     })),
+    ...followUps.entries,
   ];
 
   return (
@@ -201,12 +219,32 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
           </section>
         </div>
 
-        <section aria-labelledby="activity-heading">
-          <SectionHeading id="activity-heading">Activity</SectionHeading>
-          <Card className="mt-4 px-5 py-5">
-            <LeadActivity leadId={lead.id} items={timeline} />
-          </Card>
-        </section>
+        <div className="space-y-8 md:space-y-10">
+          <section aria-labelledby="follow-ups-heading">
+            <SectionHeading id="follow-ups-heading" action={<ArrowLink href="/admin/follow-ups">Settings</ArrowLink>}>
+              Follow-ups
+            </SectionHeading>
+            <Card className="mt-4 px-5 py-5">
+              <FollowUpControls
+                leadId={lead.id}
+                leadName={name}
+                blockedReason={followUps.blockedReason}
+                paused={Boolean(lead.follow_ups_paused)}
+                isWon={lead.status === "won"}
+                completedAt={lead.completed_at ? ukStamp(lead.completed_at) : null}
+                next={followUps.next}
+                globallyOff={followUps.globallyOff}
+              />
+            </Card>
+          </section>
+
+          <section aria-labelledby="activity-heading">
+            <SectionHeading id="activity-heading">Activity</SectionHeading>
+            <Card className="mt-4 px-5 py-5">
+              <LeadActivity leadId={lead.id} items={timeline} />
+            </Card>
+          </section>
+        </div>
       </div>
     </div>
   );

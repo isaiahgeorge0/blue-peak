@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import {
   CalendarIcon,
   DashboardIcon,
+  FollowUpsIcon,
   LeadsIcon,
   QuotesIcon,
   ReferralsIcon,
@@ -23,6 +24,7 @@ export const primaryNav: NavItem[] = [
   { href: "/admin", label: "Dashboard", Icon: DashboardIcon, match: (path) => path === "/admin" },
   { href: "/admin/leads", label: "Leads", Icon: LeadsIcon, match: (path) => path.startsWith("/admin/leads") },
   { href: "/admin/calendar", label: "Calendar", Icon: CalendarIcon, match: (path) => path.startsWith("/admin/calendar") },
+  { href: "/admin/follow-ups", label: "Follow-ups", Icon: FollowUpsIcon, match: (path) => path.startsWith("/admin/follow-ups") },
 ];
 
 export const addonNavIcons: Record<AddonId, IconComponent> = {

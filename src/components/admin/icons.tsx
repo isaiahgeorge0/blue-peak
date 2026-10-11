@@ -54,6 +54,13 @@ export const RepeatIcon = icon(<path d="M3.5 9V7.5a2 2 0 0 1 2-2h10l-2.5-2.5M16.
 export const NoteIcon = icon(<path d="M4 3.5h12v9l-4 4H4zM16 12.5h-4v4M7 7.5h6M7 10h4" />);
 export const ClockIcon = icon(<path d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM10 6.5V10l2.5 1.5" />);
 export const EditIcon = icon(<path d="M12.5 4.5l3 3-8.5 8.5H4v-3zM10.5 6.5l3 3" />);
+/** An envelope with a clock: emails that go out on their own, later. */
+export const FollowUpsIcon = icon(<path d="M9 15H3V5h14v3.5M3 5.5l7 5.5 7-5.5M14.5 18a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM14.5 13v1.75l1.25.75" />);
+export const SendIcon = icon(<path d="M17 3 8.5 11.5M17 3l-5 14-3.5-5.5L3 8z" />);
+export const PauseIcon = icon(<path d="M7 4.5v11M13 4.5v11" />);
+export const PlayIcon = icon(<path d="M6 4.25v11.5L15.5 10z" />);
+export const SkipIcon = icon(<path d="m4 5.5 4.5 4.5L4 14.5M10 5.5l4.5 4.5-4.5 4.5M16.5 5v10" />);
+export const SwapIcon = icon(<path d="M3.5 7h12l-3-3M16.5 13h-12l3 3" />);
 export const TrashIcon = icon(<path d="M3.5 5.5h13M8 5.5V3.5h4v2M5.5 5.5l.75 11h7.5l.75-11M8.5 8.5v5M11.5 8.5v5" />);
 
 /* Status marks, drawn small beside the label so status never rests on colour alone. */

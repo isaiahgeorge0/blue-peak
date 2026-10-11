@@ -117,6 +117,56 @@ export async function addLeadNote(
   return { ok: true, note: data as LeadNoteRow };
 }
 
+export type LeadFlagResult = { ok: true } | { ok: false; error: string };
+
+/** Pauses or resumes follow-up emails for one lead. */
+export async function setFollowUpsPaused(leadId: string, paused: boolean): Promise<LeadFlagResult> {
+  if (!UUID_PATTERN.test(leadId)) return { ok: false, error: "Missing lead id." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) return { ok: false, error: "Not authorised." };
+
+  const { data, error } = await supabase
+    .from("leads")
+    .update({ follow_ups_paused: paused })
+    .eq("id", leadId)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    console.error("setFollowUpsPaused failed", error.message);
+    return { ok: false, error: paused ? "Unable to pause follow-ups." : "Unable to resume follow-ups." };
+  }
+  if (!data) return { ok: false, error: "Lead not found or update blocked." };
+
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Marks the job complete (Won leads only), which starts the review request, or undoes it. */
+export async function setJobCompleted(leadId: string, completed: boolean): Promise<LeadFlagResult> {
+  if (!UUID_PATTERN.test(leadId)) return { ok: false, error: "Missing lead id." };
+  const supabase = await getAdminActionClient();
+  if (!supabase) return { ok: false, error: "Not authorised." };
+
+  let query = supabase
+    .from("leads")
+    .update({ completed_at: completed ? new Date().toISOString() : null })
+    .eq("id", leadId);
+  if (completed) query = query.eq("status", "won");
+  const { data, error } = await query.select("id").maybeSingle();
+  if (error) {
+    console.error("setJobCompleted failed", error.message);
+    return { ok: false, error: completed ? "Unable to mark the job complete." : "Unable to undo." };
+  }
+  if (!data) {
+    return { ok: false, error: completed ? "Only Won leads can be marked complete." : "Lead not found or update blocked." };
+  }
+
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
 export async function markLeadsAsSpam(ids: string[]): Promise<BulkLeadsResult> {
   const leadIds = cleanLeadIds(ids);
   if (!leadIds) {

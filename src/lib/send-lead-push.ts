@@ -44,7 +44,7 @@ type NtfyPush = {
 };
 
 /**
- * POST to the ntfy topic (Tom and James both subscribe), opening the admin
+ * POST to the ntfy topic (Kyle and Steven both subscribe), opening the admin
  * leads list on tap. Returns false when NTFY_TOPIC_URL is not configured;
  * throws on a failed POST.
  */
