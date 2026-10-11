@@ -1,86 +1,49 @@
 import type { Metadata } from "next";
-import type { LeadNoteRow } from "@/app/admin/leads/actions";
-import { LeadsTable } from "@/components/leads-table";
-import type { LeadTableRow } from "@/components/lead-notes-panel";
+import { NotepadIllustration } from "@/components/admin/icons";
+import { LeadsList, type LeadListRow } from "@/components/admin/leads-list";
+import { Card, EmptyState, PageHeader } from "@/components/admin/ui";
 import { requireAdminPage } from "@/lib/admin-auth";
+import { SERVICE_NAMES } from "@/lib/admin-data";
+import { leadSource, serviceLabel, waitedFor } from "@/lib/admin-leads";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
-import { groupNextVisitsByLead } from "@/lib/lead-visits";
+import { formatVisitIndicator, groupNextVisitsByLead } from "@/lib/lead-visits";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Leads",
-    description: "Admin leads inbox for Blue Peak Solutions.",
-    robots: {
-      index: false,
-      follow: false,
-    },
-  };
-}
-
-const STATUS_RANK: Record<LeadStatus, number> = {
-  new: 0,
-  contacted: 1,
-  quoted: 2,
-  won: 3,
-  lost: 4,
-  spam: 5,
+export const metadata: Metadata = {
+  title: "Leads",
 };
 
-function sortLeads(rows: LeadTableRow[]) {
-  return [...rows].sort((a, b) => {
-    const aStatus = (
-      a.status && (LEAD_STATUSES as readonly string[]).includes(a.status)
-        ? a.status
-        : "new"
-    ) as LeadStatus;
-    const bStatus = (
-      b.status && (LEAD_STATUSES as readonly string[]).includes(b.status)
-        ? b.status
-        : "new"
-    ) as LeadStatus;
+type LeadRow = {
+  id: string;
+  created_at: string;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  postcode: string | null;
+  service_type: string | null;
+  message: string | null;
+  status: string | null;
+};
 
-    const rankDiff = STATUS_RANK[aStatus] - STATUS_RANK[bStatus];
-    if (rankDiff !== 0) {
-      return rankDiff;
-    }
-
-    return (
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-  });
+function receivedLabel(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric" }).format(date);
 }
 
-function groupNotesByLead(notes: LeadNoteRow[]) {
-  const grouped: Record<string, LeadNoteRow[]> = {};
-  for (const note of notes) {
-    const list = grouped[note.lead_id] ?? [];
-    list.push(note);
-    grouped[note.lead_id] = list;
-  }
-  return grouped;
-}
-
-export default async function AdminLeadsPage() {
+export default async function AdminLeadsPage({ searchParams }: PageProps<"/admin/leads">) {
   await requireAdminPage();
+  const { status } = await searchParams;
+  const initialStatus = (LEAD_STATUSES as readonly string[]).includes(String(status)) ? (status as LeadStatus) : "all";
 
   // Service role read bypasses RLS, so it must stay behind the admin check.
   const admin = getSupabaseAdmin();
-  const [
-    { data: leads, error },
-    { data: notes, error: notesError },
-    { data: visits, error: visitsError },
-  ] = await Promise.all([
+  const [{ data: leads, error }, { data: notes, error: notesError }, { data: visits, error: visitsError }] = await Promise.all([
     admin
       .from("leads")
-      .select(
-        "id, created_at, name, phone, email, postcode, service_type, status",
-      )
+      .select("id, created_at, name, phone, email, postcode, service_type, message, status")
       .order("created_at", { ascending: false }),
-    admin
-      .from("lead_notes")
-      .select("id, lead_id, note, created_at")
-      .order("created_at", { ascending: false }),
+    admin.from("lead_notes").select("lead_id"),
     admin
       .from("calendar_events")
       .select("id, lead_id, start_date, start_time")
@@ -89,47 +52,49 @@ export default async function AdminLeadsPage() {
       .order("start_time", { ascending: true }),
   ]);
 
-  if (error) {
-    console.error("admin leads: failed to load", error.message);
-  }
-  if (notesError) {
-    console.error("admin leads: failed to load notes", notesError.message);
-  }
-  if (visitsError) {
-    console.error("admin leads: failed to load visits", visitsError.message);
-  }
+  if (error) console.error("admin leads: failed to load", error.message);
+  if (notesError) console.error("admin leads: failed to load notes", notesError.message);
+  if (visitsError) console.error("admin leads: failed to load visits", visitsError.message);
 
-  const rows = sortLeads((leads ?? []) as LeadTableRow[]);
-  const notesByLead = groupNotesByLead((notes ?? []) as LeadNoteRow[]);
+  const notesByLead = new Map<string, number>();
+  for (const note of notes ?? []) notesByLead.set(note.lead_id, (notesByLead.get(note.lead_id) ?? 0) + 1);
   const nextVisitByLead = groupNextVisitsByLead(visits ?? []);
+  const now = new Date();
+
+  const rows: LeadListRow[] = ((leads ?? []) as LeadRow[]).map((lead) => {
+    const visit = nextVisitByLead[lead.id];
+    return {
+      id: lead.id,
+      created_at: lead.created_at,
+      name: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      postcode: lead.postcode,
+      status: lead.status,
+      service: serviceLabel(lead.service_type, lead.message, SERVICE_NAMES),
+      source: leadSource(lead.service_type),
+      received: receivedLabel(lead.created_at),
+      waited: waitedFor(lead.created_at, now),
+      notes: notesByLead.get(lead.id) ?? 0,
+      visit: visit ? formatVisitIndicator(visit) : null,
+    };
+  });
 
   return (
     <div>
-      <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
-        Leads
-      </h1>
-      <p className="mt-3 text-sm text-ink/70">
-        Quote requests from the website. New leads are listed first. Expand a
-        row to view or add notes.
-      </p>
+      <PageHeader title="Leads" lede="Every enquiry from the website. New leads come first until you change their status." />
 
       {error ? (
-        <p className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
-          Unable to load leads right now.
-        </p>
-      ) : null}
-
-      {!error && rows.length === 0 ? (
-        <p className="mt-8 text-sm text-ink/65">No leads yet.</p>
-      ) : null}
-
-      {!error && rows.length > 0 ? (
-        <LeadsTable
-          leads={rows}
-          notesByLead={notesByLead}
-          nextVisitByLead={nextVisitByLead}
-        />
-      ) : null}
+        <Card className="mt-8 px-5 py-4 text-sm">Leads couldn&apos;t be loaded just now. Refresh the page to try again.</Card>
+      ) : rows.length === 0 ? (
+        <Card className="mt-8">
+          <EmptyState illustration={<NotepadIllustration />} title="No leads yet.">
+            Enquiries from the contact form and the estimator will appear here.
+          </EmptyState>
+        </Card>
+      ) : (
+        <LeadsList leads={rows} initialStatus={initialStatus} />
+      )}
     </div>
   );
 }

@@ -1,51 +1,54 @@
-import {
-  developerContactHref,
-  type AdminFeaturePreviewConfig,
-} from "@/lib/admin-feature-previews";
-import { AdminFeatureMock } from "@/components/admin-feature-mocks";
+import { AddonPreview } from "@/components/admin/addon-previews";
+import { addonNavIcons } from "@/components/admin/nav-items";
+import { MailIcon } from "@/components/admin/icons";
+import { Card, PageHeader, primaryButton } from "@/components/admin/ui";
+import { addonContactHref, type Addon } from "@/lib/admin-addons";
 
-type AdminFeaturePreviewProps = {
-  feature: AdminFeaturePreviewConfig;
-};
-
-export function AdminFeaturePreview({ feature }: AdminFeaturePreviewProps) {
+/** An add-on's page: what it does, three benefits, a labelled preview and a way to ask about it. */
+export function AdminFeaturePreview({ addon }: { addon: Addon }) {
+  const contactHref = addonContactHref(addon);
+  const Icon = addonNavIcons[addon.id];
   return (
-    <div className="relative min-h-[36rem] overflow-hidden rounded-lg border border-ink/10 bg-page sm:min-h-[42rem]">
-      {/* Decorative locked UI only. Figures are sample data, not live. */}
-      <div
-        className="pointer-events-none select-none px-4 py-6 opacity-55 blur-[2.5px] sm:px-6 sm:py-8 sm:opacity-60 sm:blur-[3px]"
-        aria-hidden="true"
-      >
-        <div className="mb-6">
-          <p className="text-sm tracking-wide text-accent uppercase">
-            {feature.navLabel}
-          </p>
-          <h2 className="mt-2 font-serif text-3xl text-ink">
-            {feature.title}
-          </h2>
-        </div>
-        <AdminFeatureMock id={feature.id} />
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-12">
+      <div>
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex items-center gap-2">
+              <Icon className="size-4" />
+              Add-on
+            </span>
+          }
+          title={addon.name}
+        />
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/90">{addon.summary}</p>
+        <ul className="mt-6 space-y-3">
+          {addon.benefits.map((benefit) => (
+            <li key={benefit} className="flex gap-3 text-[0.9375rem] leading-relaxed text-ink/90">
+              <svg viewBox="0 0 20 20" className="mt-0.5 size-5 shrink-0 text-ridge-cyan" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="m4.5 10.5 3.5 3.5 7.5-8" />
+              </svg>
+              {benefit}
+            </li>
+          ))}
+        </ul>
+        {contactHref ? (
+          <a href={contactHref} className={`${primaryButton} mt-8`}>
+            <MailIcon className="size-4" />
+            Ask about adding this
+          </a>
+        ) : null}
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center bg-panel/55 p-4 backdrop-blur-[1.5px] sm:p-8">
-        <div className="w-full max-w-md rounded-lg border border-ink/15 bg-panel/90 px-6 py-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)] sm:px-8 sm:py-8">
-          <p className="text-xs font-medium tracking-wide text-accent uppercase">
-            {feature.eyebrow}
-          </p>
-          <h1 className="mt-3 font-serif text-2xl tracking-tight text-ink sm:text-3xl">
-            {feature.title}
-          </h1>
-          <p className="mt-4 text-sm leading-relaxed text-ink/70">
-            {feature.whyItMatters}
-          </p>
-          <a
-            href={developerContactHref}
-            className="mt-7 inline-flex w-full items-center justify-center rounded-full bg-accent px-6 py-3 text-center text-sm font-medium text-on-accent transition-[transform,opacity] duration-200 hover:scale-[1.02] hover:opacity-90 sm:w-auto"
-          >
-            Contact developer to get started
-          </a>
+      <Card className="relative self-start p-4 sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <p className="admin-label">{addon.name}</p>
+          <span className="rounded-full bg-frost px-2.5 py-1 text-xs font-bold text-navy">Preview</span>
         </div>
-      </div>
+        <div aria-label={`Illustrative preview of ${addon.name}, with sample data`} role="img">
+          <AddonPreview id={addon.id} />
+        </div>
+        <p className="mt-4 text-xs text-ink/80">Sample names and figures, for illustration.</p>
+      </Card>
     </div>
   );
 }

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { AdminFeaturePreview } from "@/components/admin-feature-preview";
-import { getAdminFeaturePreview } from "@/lib/admin-feature-previews";
+import { requireAdminPage } from "@/lib/admin-auth";
+import { getAddon } from "@/lib/admin-addons";
 
-const feature = getAdminFeaturePreview("subcontractors");
+const addon = getAddon("subcontractors");
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: feature.navLabel,
-    robots: { index: false, follow: false },
-  };
-}
+export const metadata: Metadata = {
+  title: addon.name,
+};
 
-export default function AdminSubcontractorsPage() {
-  return <AdminFeaturePreview feature={feature} />;
+export default async function AdminSubcontractorsPage() {
+  // Also keeps the page dynamic, so ADDON_CONTACT_EMAIL is read at request time.
+  await requireAdminPage();
+  return <AdminFeaturePreview addon={addon} />;
 }

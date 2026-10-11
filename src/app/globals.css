@@ -93,18 +93,33 @@
   color: var(--ink);
 }
 
+/*
+  Admin: dark, built on the brand navy. Base, surface, raised and the two line
+  weights are the navy at different lightnesses (hue 216, saturation 64%), so
+  nothing here adds a hue. Blue Solution carries primary actions, Peak Fleet
+  and Ridge Cyan the highlights, Frost White the text (never below 60%, so
+  5.5:1 or more on every surface). --admin-edge, for field and control
+  borders, is Frost White mixed 45% into the navy: 3.5:1 or more on every
+  surface, where a lighter navy would turn into a new, brighter blue.
+*/
 .theme-admin {
-  --page: #2a2a2a;
-  --panel: #0a0a0a;
-  --ink: #f4f1ea;
-  --accent: #89cff0;
-  --on-accent: #0a0a0a;
+  --admin-base: #09162a;
+  --admin-surface: var(--navy);
+  --admin-raised: #122c54;
+  --admin-line: #1a3e75;
+  --admin-edge: #718292;
+  --page: var(--admin-base);
+  --panel: var(--admin-surface);
+  --ink: var(--frost-white);
+  --accent: var(--peak-fleet);
+  --on-accent: var(--navy);
   color: var(--ink);
+  color-scheme: dark;
 }
 
-/* Unlayered so it beats both the base h1/h2 serif rule and the font-serif utility. */
-.theme-admin :is(h1, h2, h3, h4, h5, h6, .font-serif) {
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+/* Overscroll on phones shows the body, so it takes the admin base too. */
+body:has(> .theme-admin) {
+  background-color: #09162a;
 }
 
 /*
@@ -141,6 +156,11 @@
   --color-frost: var(--frost-white);
   --color-peak-white: var(--peak-white);
   --color-navy: var(--navy);
+  --color-admin-base: var(--admin-base);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-raised: var(--admin-raised);
+  --color-admin-line: var(--admin-line);
+  --color-admin-edge: var(--admin-edge);
 
   --font-sans: var(--font-nunito-sans);
   --font-serif: "Times New Roman", Times, var(--font-tinos), serif;
@@ -1357,6 +1377,62 @@ h1[tabindex="-1"]:focus {
   .area-map-name-row > :first-child,
   .area-map-arrow {
     transition: none;
+  }
+}
+
+/* Admin: one focus ring everywhere, Ridge Cyan, clear of the control. */
+.theme-admin :focus-visible {
+  outline: 2px solid var(--ridge-cyan);
+  outline-offset: 2px;
+}
+
+/* Admin label: eyebrows and small headings above figures, in Peak Fleet. */
+.admin-label {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--peak-fleet);
+}
+
+/* Admin loading placeholders: a slow breathe, static under reduced motion. */
+.admin-skeleton {
+  border-radius: 0.5rem;
+  background: var(--admin-raised);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .admin-skeleton {
+    animation: admin-skeleton 1.4s var(--ease-in-out) infinite alternate;
+  }
+
+  .admin-toast {
+    animation: admin-toast-in 250ms var(--ease-out) backwards;
+  }
+}
+
+@keyframes admin-skeleton {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+@keyframes admin-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+/* Room for the phone tab bar and the home indicator beneath it. */
+.admin-tabbar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.admin-main {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 48rem) {
+  .admin-main {
+    padding-bottom: 0;
   }
 }
 

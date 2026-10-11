@@ -3,64 +3,38 @@
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { loginAdmin, type LoginState } from "@/app/admin/actions";
-
-const fieldClassName =
-  "mt-2 w-full rounded-md border border-ink/15 bg-panel px-4 py-3 text-sm text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-accent focus:ring-2 focus:ring-accent/40";
-
-const labelClassName = "block text-sm font-medium text-ink/85";
-
-const buttonClassName =
-  "inline-flex w-full items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-medium text-on-accent transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60";
+import { fieldClass, fieldLabelClass } from "@/components/admin/dialog";
+import { primaryButton } from "@/components/admin/ui";
 
 const initialState: LoginState = { error: null };
 
 export function AdminLoginForm() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/admin";
-  const [state, formAction, isPending] = useActionState(
-    loginAdmin,
-    initialState,
-  );
+  const [state, formAction, isPending] = useActionState(loginAdmin, initialState);
 
   return (
     <form action={formAction} method="post" className="space-y-5">
       <input type="hidden" name="next" value={nextPath} />
       <div>
-        <label htmlFor="email" className={labelClassName}>
+        <label htmlFor="email" className={fieldLabelClass}>
           Email
         </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className={fieldClassName}
-        />
+        <input id="email" name="email" type="email" autoComplete="email" required className={fieldClass} />
       </div>
       <div>
-        <label htmlFor="password" className={labelClassName}>
+        <label htmlFor="password" className={fieldLabelClass}>
           Password
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className={fieldClassName}
-        />
+        <input id="password" name="password" type="password" autoComplete="current-password" required className={fieldClass} />
       </div>
       {state.error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-accent/40 bg-page px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className="rounded-lg border border-ridge-cyan/60 bg-brand/25 px-4 py-3 text-sm text-ink">
           {state.error}
         </p>
       ) : null}
-      <button type="submit" className={buttonClassName} disabled={isPending}>
-        {isPending ? "Signing in..." : "Sign in"}
+      <button type="submit" className={`${primaryButton} w-full`} disabled={isPending}>
+        {isPending ? "Signing in…" : "Sign in"}
       </button>
     </form>
   );

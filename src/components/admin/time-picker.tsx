@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChevronDownIcon } from "@/components/admin/icons";
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
-const MINUTES = [0, 15, 30, 45] as const;
+const MINUTES = [0, 15, 30, 45];
 
 type TimePickerProps = {
-  id?: string;
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   "aria-label"?: string;
-  placeholder?: string;
 };
 
 function pad2(value: number) {
@@ -24,218 +22,59 @@ function parseTimeValue(value: string): { hour: number; minute: number } | null 
   if (!match) return null;
   const hour = Number(match[1]);
   const minute = Number(match[2]);
-  if (
-    Number.isNaN(hour) ||
-    Number.isNaN(minute) ||
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59
-  ) {
-    return null;
-  }
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
   return { hour, minute };
 }
 
-function toStoredTime(hour: number, minute: number) {
-  return `${pad2(hour)}:${pad2(minute)}`;
-}
+const selectClass =
+  "h-11 w-full cursor-pointer appearance-none rounded-lg border border-admin-edge bg-admin-base pr-8 pl-3 text-[0.9375rem] text-ink tabular-nums hover:border-peak-fleet disabled:opacity-60";
 
-function formatDisplayTime(value: string) {
+/**
+ * A 24-hour time as two native selects, hour and minutes in quarters, so it
+ * uses the phone's own picker. Choosing "No time" for the hour clears it.
+ */
+export function TimePicker({ value, onChange, disabled = false, "aria-label": label = "Time" }: TimePickerProps) {
   const parsed = parseTimeValue(value);
-  if (!parsed) return null;
-
-  const period = parsed.hour >= 12 ? "PM" : "AM";
-  const hour12 = parsed.hour % 12 === 0 ? 12 : parsed.hour % 12;
-  return `${hour12}:${pad2(parsed.minute)} ${period}`;
-}
-
-function hourLabel(hour: number) {
-  const period = hour >= 12 ? "PM" : "AM";
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${hour12} ${period}`;
-}
-
-function nearestQuarter(minute: number) {
-  const snapped = Math.round(minute / 15) * 15;
-  if (snapped === 60) return 45;
-  return snapped as (typeof MINUTES)[number];
-}
-
-export function TimePicker({
-  id,
-  value,
-  onChange,
-  disabled = false,
-  "aria-label": ariaLabel = "Time",
-  placeholder = "Select time",
-}: TimePickerProps) {
-  const generatedId = useId();
-  const triggerId = id ?? generatedId;
-  const listboxId = `${triggerId}-listbox`;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const hourListRef = useRef<HTMLDivElement>(null);
-  const minuteListRef = useRef<HTMLDivElement>(null);
-
-  const [open, setOpen] = useState(false);
-  const parsed = useMemo(() => parseTimeValue(value), [value]);
-  const [draftHour, setDraftHour] = useState<number | null>(parsed?.hour ?? null);
-  const [draftMinute, setDraftMinute] = useState<number | null>(
-    parsed ? nearestQuarter(parsed.minute) : null,
-  );
-
-  useEffect(() => {
-    if (!open) return;
-
-    function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown, true);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const hourEl = hourListRef.current?.querySelector<HTMLElement>(
-      '[data-selected="true"]',
-    );
-    const minuteEl = minuteListRef.current?.querySelector<HTMLElement>(
-      '[data-selected="true"]',
-    );
-    hourEl?.scrollIntoView({ block: "center" });
-    minuteEl?.scrollIntoView({ block: "center" });
-  }, [open, draftHour, draftMinute]);
-
-  function commit(hour: number, minute: number) {
-    onChange(toStoredTime(hour, minute));
-    setOpen(false);
-  }
-
-  function selectHour(hour: number) {
-    setDraftHour(hour);
-    if (draftMinute !== null) {
-      commit(hour, draftMinute);
-    }
-  }
-
-  function selectMinute(minute: number) {
-    setDraftMinute(minute);
-    if (draftHour !== null) {
-      commit(draftHour, minute);
-    }
-  }
-
-  const display = formatDisplayTime(value) ?? placeholder;
+  const minute = parsed ? Math.min(45, Math.round(parsed.minute / 15) * 15) : 0;
 
   return (
-    <div ref={rootRef} className="relative mt-1.5">
-      <button
-        id={triggerId}
-        type="button"
-        disabled={disabled}
-        aria-label={ariaLabel}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={open ? listboxId : undefined}
-        onClick={() => {
-          if (disabled) return;
-          if (!open) {
-            setDraftHour(parsed?.hour ?? null);
-            setDraftMinute(parsed ? nearestQuarter(parsed.minute) : null);
-          }
-          setOpen(!open);
-        }}
-        className={[
-          "flex w-full items-center justify-between rounded-md border bg-panel px-3 py-2 text-left text-sm outline-none transition-colors",
-          open ? "border-accent" : "border-ink/15 hover:border-ink/30",
-          formatDisplayTime(value) ? "text-ink" : "text-ink/45",
-          disabled ? "cursor-not-allowed opacity-60" : "",
-        ].join(" ")}
-      >
-        <span>{display}</span>
-        <span className="text-ink/35" aria-hidden>
-          ▾
-        </span>
-      </button>
-
-      {open ? (
-        <div
-          id={listboxId}
-          role="listbox"
-          aria-label={`${ariaLabel} options`}
-          className="absolute z-20 mt-1.5 grid w-full min-w-[11rem] grid-cols-2 gap-1 rounded-md border border-ink/15 bg-panel p-1.5 shadow-xl"
+    <div className="mt-1.5 grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-2">
+      <span className="relative">
+        <select
+          aria-label={`${label}, hour`}
+          value={parsed ? String(parsed.hour) : ""}
+          disabled={disabled}
+          onChange={(event) => {
+            if (event.target.value === "") onChange("");
+            else onChange(`${pad2(Number(event.target.value))}:${pad2(minute)}`);
+          }}
+          className={selectClass}
         >
-          <div
-            ref={hourListRef}
-            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-ink/10"
-          >
-            {HOURS.map((hour) => {
-              const selected = draftHour === hour;
-              return (
-                <button
-                  key={hour}
-                  type="button"
-                  role="option"
-                  aria-selected={selected}
-                  data-selected={selected ? "true" : undefined}
-                  onClick={() => selectHour(hour)}
-                  className={[
-                    "block w-full px-2.5 py-1.5 text-left text-sm transition-colors",
-                    selected
-                      ? "bg-accent/20 text-accent"
-                      : "text-ink/75 hover:bg-ink/5 hover:text-ink",
-                  ].join(" ")}
-                >
-                  {hourLabel(hour)}
-                </button>
-              );
-            })}
-          </div>
-
-          <div
-            ref={minuteListRef}
-            className="max-h-48 overflow-y-auto overscroll-contain rounded-md border border-ink/10"
-          >
-            {MINUTES.map((minute) => {
-              const selected = draftMinute === minute;
-              return (
-                <button
-                  key={minute}
-                  type="button"
-                  role="option"
-                  aria-selected={selected}
-                  data-selected={selected ? "true" : undefined}
-                  onClick={() => selectMinute(minute)}
-                  className={[
-                    "block w-full px-2.5 py-1.5 text-left text-sm tabular-nums transition-colors",
-                    selected
-                      ? "bg-accent/20 text-accent"
-                      : "text-ink/75 hover:bg-ink/5 hover:text-ink",
-                  ].join(" ")}
-                >
-                  :{pad2(minute)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
+          <option value="">No time</option>
+          {HOURS.map((hour) => (
+            <option key={hour} value={hour}>
+              {pad2(hour)}
+            </option>
+          ))}
+        </select>
+        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2" />
+      </span>
+      <span className="relative">
+        <select
+          aria-label={`${label}, minutes`}
+          value={String(minute)}
+          disabled={disabled || !parsed}
+          onChange={(event) => parsed && onChange(`${pad2(parsed.hour)}:${pad2(Number(event.target.value))}`)}
+          className={selectClass}
+        >
+          {MINUTES.map((option) => (
+            <option key={option} value={option}>
+              :{pad2(option)}
+            </option>
+          ))}
+        </select>
+        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2" />
+      </span>
     </div>
   );
 }

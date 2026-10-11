@@ -1,299 +1,354 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { CalendarEventRow } from "@/app/admin/calendar/actions";
+import { CountUp, CountUpDone } from "@/components/admin/count-up";
 import {
-  LeadVolumeChart,
-  type LeadVolumePoint,
-} from "@/components/lead-volume-chart";
+  AlertMailIcon,
+  ArrowRightIcon,
+  CalendarIcon,
+  ChartIllustration,
+  ClockIcon,
+  LevelIllustration,
+  MailIcon,
+  PhoneIcon,
+  PlannerIllustration,
+  RepeatIcon,
+} from "@/components/admin/icons";
+import { ArrowLink, Card, EmptyState, PageHeader, SectionHeading, secondaryButton } from "@/components/admin/ui";
+import { LeadVolumeChart } from "@/components/lead-volume-chart";
 import { requireAdminPage } from "@/lib/admin-auth";
-import { LEAD_STATUSES, SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
+import {
+  CALENDAR_EVENT_SELECT,
+  dayLabel,
+  mailHref,
+  SERVICE_NAMES,
+  telHref,
+  timeRange,
+  upcomingOccurrences,
+  upcomingRange,
+} from "@/lib/admin-data";
+import {
+  firstNameFromClaims,
+  greetingFor,
+  leadSource,
+  normalizeStatus,
+  serviceLabel,
+  STATUS_LABELS,
+  TEST_LEAD_IDS,
+  VOLUME_MIN_DAYS,
+  waitedFor,
+  weeklyVolume,
+} from "@/lib/admin-leads";
+import { recurrenceLabel } from "@/lib/calendar-recurrence";
+import { SPAM_STATUS, type LeadStatus } from "@/lib/lead-status";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Dashboard",
-    description: "Blue Peak Solutions admin dashboard.",
-    robots: {
-      index: false,
-      follow: false,
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 type LeadRow = {
   id: string;
   created_at: string;
   name: string | null;
+  phone: string | null;
+  email: string | null;
   service_type: string | null;
+  message: string | null;
   status: string | null;
   notified_at: string | null;
 };
 
-function greetingForNow(now = new Date()) {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Europe/London",
-      hour: "numeric",
-      hour12: false,
-    }).format(now),
-  );
+const PIPELINE: LeadStatus[] = ["new", "contacted", "quoted", "won"];
+const CLOSED: LeadStatus[] = ["lost", "spam"];
 
-  if (hour < 12) return "Morning";
-  if (hour < 18) return "Afternoon";
-  return "Evening";
+function leadName(lead: Pick<LeadRow, "name">) {
+  return lead.name?.trim() || "Unnamed lead";
 }
 
-function displayNameFromClaims(claims: Record<string, unknown> | undefined) {
-  const email =
-    typeof claims?.email === "string" ? claims.email.trim() : "";
-  if (email.includes("@")) {
-    const local = email.split("@")[0] ?? "";
-    if (local) {
-      return local.charAt(0).toUpperCase() + local.slice(1);
-    }
-  }
-  // Placeholder until admin profiles store a preferred name.
-  return "Admin";
-}
-
-function normalizeStatus(status: string | null): LeadStatus {
-  if (status && (LEAD_STATUSES as readonly string[]).includes(status)) {
-    return status as LeadStatus;
-  }
-  return "new";
-}
-
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-  }).format(date);
-}
-
-function startOfWeek(date: Date) {
-  const copy = new Date(date);
-  const day = copy.getUTCDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  copy.setUTCDate(copy.getUTCDate() + diff);
-  copy.setUTCHours(0, 0, 0, 0);
-  return copy;
-}
-
-/**
- * Placeholder lead-volume series for the last 8 weeks.
- * Real weekly history is still thin, so the chart uses this trend until
- * enough production leads exist to plot from the database.
- */
-function placeholderLeadVolume(): LeadVolumePoint[] {
-  const points: LeadVolumePoint[] = [];
-  const values = [2, 3, 2, 4, 5, 3, 6, 4];
-  const now = startOfWeek(new Date());
-
-  for (let i = 7; i >= 0; i -= 1) {
-    const weekStart = new Date(now);
-    weekStart.setUTCDate(weekStart.getUTCDate() - i * 7);
-    const label = new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: "short",
-    }).format(weekStart);
-    points.push({
-      week: label,
-      leads: values[7 - i] ?? 0,
-    });
-  }
-
-  return points;
-}
-
-function countCreatedWithinDays(rows: LeadRow[], days: number) {
-  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  return rows.filter((lead) => new Date(lead.created_at).getTime() >= cutoff)
-    .length;
+function plural(count: number, one: string, many = `${one}s`) {
+  return `${count} ${count === 1 ? one : many}`;
 }
 
 export default async function AdminDashboardPage() {
   const { claims } = await requireAdminPage();
+  const now = new Date();
+  const range = upcomingRange(now);
+  const supabase = await createSupabaseServerClient();
 
-  const { data: leads, error } = await getSupabaseAdmin()
-    .from("leads")
-    .select("id, created_at, name, service_type, status, notified_at")
-    .order("created_at", { ascending: false });
+  // Service-role read bypasses RLS, so it must stay behind the admin check above.
+  const [leadsResult, oneOffResult, recurringResult] = await Promise.all([
+    getSupabaseAdmin()
+      .from("leads")
+      .select("id, created_at, name, phone, email, service_type, message, status, notified_at")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("calendar_events")
+      .select(CALENDAR_EVENT_SELECT)
+      .eq("recurrence", "none")
+      .gte("start_date", range.from)
+      .lte("start_date", range.to)
+      .order("start_date", { ascending: true })
+      .order("start_time", { ascending: true }),
+    supabase
+      .from("calendar_events")
+      .select(CALENDAR_EVENT_SELECT)
+      .neq("recurrence", "none")
+      .lte("start_date", range.to)
+      .or(`recurrence_end_date.is.null,recurrence_end_date.gte.${range.from}`),
+  ]);
 
-  if (error) {
-    console.error("admin dashboard: failed to load leads", error.message);
-  }
+  if (leadsResult.error) console.error("admin dashboard: failed to load leads", leadsResult.error.message);
+  const eventsError = oneOffResult.error ?? recurringResult.error;
+  if (eventsError) console.error("admin dashboard: failed to load events", eventsError.message);
 
-  const allRows = (leads ?? []) as LeadRow[];
-  const rows = allRows.filter(
-    (lead) => normalizeStatus(lead.status) !== SPAM_STATUS,
+  // The two test leads never count on the dashboard.
+  const leads = ((leadsResult.data ?? []) as LeadRow[]).filter((lead) => !TEST_LEAD_IDS.has(lead.id));
+  const counts = Object.fromEntries(
+    [...PIPELINE, ...CLOSED].map((status) => [status, leads.filter((lead) => normalizeStatus(lead.status) === status).length]),
+  ) as Record<LeadStatus, number>;
+  const waiting = leads.filter((lead) => normalizeStatus(lead.status) === "new");
+  const unnotified = waiting.filter((lead) => !lead.notified_at);
+  const realLeads = leads.filter((lead) => normalizeStatus(lead.status) !== SPAM_STATUS);
+  const volume = weeklyVolume(
+    realLeads.map((lead) => lead.created_at),
+    now,
   );
-  const totalLeads = rows.length;
-  const newThisWeek = countCreatedWithinDays(rows, 7);
-  const openNew = rows.filter(
-    (lead) => normalizeStatus(lead.status) === "new",
-  ).length;
-  const statusCounts = LEAD_STATUSES.reduce(
-    (acc, status) => {
-      acc[status] = allRows.filter(
-        (lead) => normalizeStatus(lead.status) === status,
-      ).length;
-      return acc;
-    },
-    {} as Record<LeadStatus, number>,
+  const chartFrom = realLeads[0]
+    ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "Europe/London" }).format(
+        new Date(new Date(realLeads[0].created_at).getTime() + VOLUME_MIN_DAYS * 86_400_000),
+      )
+    : null;
+  const upcoming = upcomingOccurrences(
+    [...((oneOffResult.data ?? []) as CalendarEventRow[]), ...((recurringResult.data ?? []) as CalendarEventRow[])],
+    now,
   );
 
-  const recent = rows.slice(0, 5);
-  const unnotified = rows.filter((lead) => !lead.notified_at);
-  const chartData = placeholderLeadVolume();
-  const greeting = greetingForNow();
-  const displayName = displayNameFromClaims(
-    claims as Record<string, unknown>,
-  );
+  const firstName = firstNameFromClaims(claims);
+  const greeting = firstName ? `${greetingFor(now)}, ${firstName}` : greetingFor(now);
+  const today = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(now);
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm tracking-wide text-accent uppercase">
-            Dashboard
-          </p>
-          <h1 className="mt-2 font-serif text-3xl tracking-tight text-ink sm:text-4xl">
-            {greeting}, {displayName}
-          </h1>
-          <p className="mt-3 text-sm text-ink/65">
-            Overview of quote requests coming in from the site.
-          </p>
-        </div>
-        <Link
-          href="/admin/leads"
-          className="text-sm font-medium text-accent transition-opacity hover:opacity-80"
-        >
-          View all leads
-        </Link>
-      </div>
+    <div className="space-y-8 md:space-y-10">
+      <PageHeader
+        eyebrow={today}
+        title={greeting}
+        lede={
+          leadsResult.error
+            ? null
+            : waiting.length === 0
+              ? "Nothing is waiting for a reply."
+              : `${plural(waiting.length, "lead")} ${waiting.length === 1 ? "is" : "are"} waiting for a reply.`
+        }
+      />
 
-      {error ? (
-        <p className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
-          Unable to load dashboard data right now.
-        </p>
+      {leadsResult.error ? (
+        <Card className="px-5 py-4 text-sm">Leads couldn&apos;t be loaded just now. Refresh the page to try again.</Card>
       ) : null}
 
       {unnotified.length > 0 ? (
-        <div
-          role="alert"
-          className="mt-8 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink"
+        <section
+          aria-labelledby="unnotified-heading"
+          className="flex gap-4 rounded-xl border border-ridge-cyan/60 bg-brand/25 px-5 py-5"
         >
-          <p>
-            {unnotified.length === 1
-              ? "1 lead arrived without an email notification:"
-              : `${unnotified.length} leads arrived without an email notification:`}{" "}
-            {unnotified
-              .slice(0, 5)
-              .map((lead) => lead.name?.trim() || "Unnamed lead")
-              .join(", ")}
-            {unnotified.length > 5 ? ", ..." : ""}
-          </p>
-          <Link
-            href="/admin/leads"
-            className="mt-2 inline-block text-accent underline-offset-2 hover:underline"
-          >
-            Review in Leads
-          </Link>
-        </div>
-      ) : null}
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
-          <p className="text-xs tracking-wide text-ink/45 uppercase">
-            Total leads
-          </p>
-          <p className="mt-3 font-serif text-3xl text-ink">{totalLeads}</p>
-        </div>
-        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
-          <p className="text-xs tracking-wide text-ink/45 uppercase">
-            New this week
-          </p>
-          <p className="mt-3 font-serif text-3xl text-ink">{newThisWeek}</p>
-          <p className="mt-2 text-xs text-ink/45">Created in the last 7 days</p>
-        </div>
-        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
-          <p className="text-xs tracking-wide text-ink/45 uppercase">
-            Status: new
-          </p>
-          <p className="mt-3 font-serif text-3xl text-ink">{openNew}</p>
-          <p className="mt-2 text-xs text-ink/45">Still marked as new</p>
-        </div>
-        <div className="rounded-lg border border-ink/10 bg-panel px-5 py-4">
-          <p className="text-xs tracking-wide text-ink/45 uppercase">
-            By status
-          </p>
-          <dl className="mt-3 space-y-1.5 text-sm text-ink/75">
-            {LEAD_STATUSES.map((status) => (
-              <div key={status} className="flex items-center justify-between gap-3">
-                <dt className="capitalize text-ink/55">{status}</dt>
-                <dd className="tabular-nums text-ink">
-                  {statusCounts[status]}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <section className="rounded-lg border border-ink/10 bg-panel px-5 py-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="font-serif text-xl text-ink">Lead volume</h2>
-              <p className="mt-1 text-xs text-ink/45">
-                Last 8 weeks (placeholder trend until history builds up)
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <LeadVolumeChart data={chartData} />
-          </div>
-        </section>
-
-        <section className="rounded-lg border border-ink/10 bg-panel px-5 py-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-serif text-xl text-ink">Recent leads</h2>
-            <Link
-              href="/admin/leads"
-              className="text-xs font-medium text-accent transition-opacity hover:opacity-80"
-            >
-              Full list
-            </Link>
-          </div>
-
-          {recent.length === 0 ? (
-            <p className="mt-6 text-sm text-ink/55">No leads yet.</p>
-          ) : (
-            <ul className="mt-5 divide-y divide-ink/10">
-              {recent.map((lead) => (
-                <li key={lead.id} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm text-ink">
-                        {lead.name?.trim() || "Unnamed lead"}
-                      </p>
-                      <p className="mt-1 truncate text-xs text-ink/50">
-                        {lead.service_type?.trim() || "Service not set"} ·{" "}
-                        {formatDate(lead.created_at)}
-                      </p>
-                    </div>
-                    <span className="shrink-0 rounded border border-ink/10 px-2 py-0.5 text-[11px] capitalize text-ink/60">
-                      {normalizeStatus(lead.status)}
-                    </span>
-                  </div>
+          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
+          <div className="min-w-0">
+            <h2 id="unnotified-heading" className="text-base font-bold text-ink">
+              {unnotified.length === 1 ? "An email alert didn't send" : `${unnotified.length} email alerts didn't send`}
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-ink/85">
+              {unnotified.length === 1 ? "A new lead arrived" : "These leads arrived"} but the email telling you about{" "}
+              {unnotified.length === 1 ? "it" : "them"} failed, so {unnotified.length === 1 ? "it" : "they"} may not have
+              been seen. Open each one and get in touch, then change its status. This notice stays until none are left at
+              New.
+            </p>
+            <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+              {unnotified.map((lead) => (
+                <li key={lead.id}>
+                  <ArrowLink href={`/admin/leads/${lead.id}`}>{leadName(lead)}</ArrowLink>
                 </li>
               ))}
             </ul>
-          )}
+          </div>
+        </section>
+      ) : null}
+
+      <div className="grid gap-8 md:gap-10 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:gap-6">
+        <section aria-labelledby="reply-heading">
+          <SectionHeading
+            id="reply-heading"
+            action={waiting.length > 0 ? <ArrowLink href="/admin/leads?status=new">All new leads</ArrowLink> : null}
+          >
+            Needs a reply
+          </SectionHeading>
+          <Card className="mt-4">
+            {waiting.length === 0 ? (
+              <EmptyState illustration={<LevelIllustration />} title="You're all caught up.">
+                New leads appear here, oldest first, until their status changes.
+              </EmptyState>
+            ) : (
+              <ul className="divide-y divide-admin-line">
+                {waiting.map((lead) => {
+                  const call = telHref(lead.phone);
+                  const email = mailHref(lead.email);
+                  return (
+                    <li key={lead.id} className="px-5 py-4">
+                      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                        <Link
+                          href={`/admin/leads/${lead.id}`}
+                          className="group min-w-0 rounded-sm text-base font-bold text-ink hover:text-ridge-cyan"
+                        >
+                          <span className="break-words underline-offset-4 group-hover:underline">{leadName(lead)}</span>
+                        </Link>
+                        <span className="inline-flex items-center gap-1.5 text-sm text-ink/80">
+                          <ClockIcon className="size-4 text-peak-fleet" />
+                          <span>
+                            <span className="sr-only">Waiting </span>
+                            {waitedFor(lead.created_at, now)}
+                          </span>
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-ink/80">
+                        {serviceLabel(lead.service_type, lead.message, SERVICE_NAMES)}
+                        <span aria-hidden className="px-1.5 text-ink/60">
+                          ·
+                        </span>
+                        {leadSource(lead.service_type)}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {call ? (
+                          <a href={call} className={`${secondaryButton} min-w-0 flex-1 sm:flex-none`} aria-label={`Call ${leadName(lead)}`}>
+                            <PhoneIcon className="size-4" />
+                            Call
+                          </a>
+                        ) : null}
+                        {email ? (
+                          <a href={email} className={`${secondaryButton} min-w-0 flex-1 sm:flex-none`} aria-label={`Email ${leadName(lead)}`}>
+                            <MailIcon className="size-4" />
+                            Email
+                          </a>
+                        ) : null}
+                        <Link
+                          href={`/admin/leads/${lead.id}`}
+                          className={`${secondaryButton} min-w-0 flex-1 border-transparent sm:flex-none`}
+                          aria-label={`Open ${leadName(lead)}`}
+                        >
+                          Open
+                          <ArrowRightIcon className="size-4" />
+                        </Link>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Card>
+        </section>
+
+        <section aria-labelledby="upcoming-heading">
+          <SectionHeading id="upcoming-heading" action={<ArrowLink href="/admin/calendar">Calendar</ArrowLink>}>
+            Coming up
+          </SectionHeading>
+          <Card className="mt-4">
+            {eventsError ? (
+              <p className="px-5 py-4 text-sm">The calendar couldn&apos;t be loaded just now.</p>
+            ) : upcoming.length === 0 ? (
+              <EmptyState illustration={<PlannerIllustration />} title="Nothing booked.">
+                Site visits and other events you add to the calendar show here.
+              </EmptyState>
+            ) : (
+              <ol className="divide-y divide-admin-line">
+                {upcoming.map(({ event, occurrenceDate, isRecurring }) => (
+                  <li key={`${event.id}-${occurrenceDate}`} className="flex gap-4 px-5 py-4">
+                    <CalendarIcon className="mt-0.5 size-5 shrink-0 text-peak-fleet" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-ink">
+                        {dayLabel(occurrenceDate, now)}
+                        <span className="font-normal text-ink/80"> · {timeRange(event.start_time, event.end_time)}</span>
+                      </p>
+                      <p className="mt-0.5 break-words text-[0.9375rem] text-ink">{event.title}</p>
+                      {isRecurring ? (
+                        <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-ink/80">
+                          <RepeatIcon className="size-3.5" />
+                          {recurrenceLabel(event.recurrence)}
+                        </p>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
         </section>
       </div>
+
+      <section aria-labelledby="pipeline-heading">
+        <SectionHeading id="pipeline-heading">Pipeline</SectionHeading>
+        <div className="mt-4 flex flex-col gap-3 lg:flex-row">
+          <ol className="grid flex-1 grid-cols-2 overflow-hidden rounded-xl border border-admin-line bg-admin-surface sm:grid-cols-4">
+            {PIPELINE.map((status, index) => (
+              <li key={status} className="border-admin-line max-sm:odd:border-r max-sm:[&:nth-child(-n+2)]:border-b sm:border-l sm:first:border-l-0">
+                <Link
+                  href={`/admin/leads?status=${status}`}
+                  className="group flex h-full flex-col gap-1 px-5 py-4 transition-colors hover:bg-admin-raised"
+                >
+                  <span className="flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-peak-fleet uppercase">
+                    {STATUS_LABELS[status]}
+                    {index < PIPELINE.length - 1 ? (
+                      <ArrowRightIcon className="size-3.5 text-ink/60 max-sm:hidden" />
+                    ) : null}
+                  </span>
+                  <span className="font-serif text-[2rem] leading-none text-ink group-hover:text-ridge-cyan">
+                    <CountUp value={counts[status]} />
+                    <span className="sr-only"> {counts[status] === 1 ? "lead" : "leads"}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <ul className="flex gap-3 lg:w-40 lg:flex-col">
+            {CLOSED.map((status) => (
+              <li key={status} className="flex-1">
+                <Link
+                  href={`/admin/leads?status=${status}`}
+                  className="flex h-full min-h-11 items-center justify-between gap-3 rounded-xl border border-admin-line px-4 py-2 text-sm text-ink/80 transition-colors hover:bg-admin-raised hover:text-ink"
+                >
+                  {STATUS_LABELS[status]}
+                  <span className="font-bold text-ink tabular-nums">
+                    <CountUp value={counts[status]} />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="volume-heading">
+        <SectionHeading id="volume-heading">Lead volume</SectionHeading>
+        <Card className="mt-4">
+          {volume ? (
+            <div className="px-3 pt-5 pb-3 sm:px-5">
+              <p className="px-2 text-sm text-ink/80 sm:px-0">Leads per week, spam left out.</p>
+              <LeadVolumeChart data={volume} />
+            </div>
+          ) : (
+            <EmptyState illustration={<ChartIllustration />} title="Not enough weeks yet.">
+              {chartFrom
+                ? `The chart needs four weeks of leads to be useful. It appears here from ${chartFrom}.`
+                : "The chart appears four weeks after the first lead arrives."}
+            </EmptyState>
+          )}
+        </Card>
+      </section>
+
+      <CountUpDone />
     </div>
   );
 }

@@ -5,16 +5,9 @@ import { requireAdminPage } from "@/lib/admin-auth";
 import { toDateKey } from "@/lib/calendar-recurrence";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Calendar",
-    description: "Admin planning calendar for Blue Peak Solutions.",
-    robots: {
-      index: false,
-      follow: false,
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: "Calendar",
+};
 
 type SearchParams = Promise<{
   year?: string;
@@ -117,9 +110,8 @@ export default async function AdminCalendarPage({
   return (
     <div>
       {error ? (
-        <p className="mb-6 rounded-md border border-accent/40 bg-panel px-4 py-3 text-sm text-ink">
-          Unable to load calendar events right now. If you just created the
-          table, apply the migration and refresh.
+        <p className="mb-6 rounded-xl border border-admin-line bg-admin-surface px-5 py-4 text-sm text-ink">
+          The calendar couldn&apos;t be loaded just now. Refresh the page to try again.
         </p>
       ) : null}
       <AdminCalendar

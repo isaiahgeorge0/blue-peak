@@ -2,20 +2,32 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState, useTransition } from "react";
-import {
-  deleteCalendarEvent,
-  type CalendarEventRow,
-} from "@/app/admin/calendar/actions";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { deleteCalendarEvent, type CalendarEventRow } from "@/app/admin/calendar/actions";
+import { AdminDialog } from "@/components/admin/dialog";
+import { ChevronLeftIcon, ChevronRightIcon, PlannerIllustration, PlusIcon, RepeatIcon, TrashIcon } from "@/components/admin/icons";
+import { safeAction } from "@/components/admin/safe-action";
+import { useToast } from "@/components/admin/toast";
+import { EmptyState, PageHeader, primaryButton, secondaryButton } from "@/components/admin/ui";
 import { CalendarEventFormDialog } from "@/components/calendar-event-form-dialog";
 import {
   expandEventsForRange,
+  formatDateKey,
   groupOccurrencesByDate,
   recurrenceLabel,
+  toDateKey,
   type CalendarOccurrence,
 } from "@/lib/calendar-recurrence";
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = [
+  ["Sun", "Sunday"],
+  ["Mon", "Monday"],
+  ["Tue", "Tuesday"],
+  ["Wed", "Wednesday"],
+  ["Thu", "Thursday"],
+  ["Fri", "Friday"],
+  ["Sat", "Saturday"],
+] as const;
 
 type AdminCalendarProps = {
   year: number;
@@ -25,47 +37,30 @@ type AdminCalendarProps = {
   events: CalendarEventRow[];
 };
 
-type ViewModalState = { occurrence: CalendarOccurrence } | null;
-
-function pad2(value: number) {
-  return String(value).padStart(2, "0");
-}
-
-function toDateKey(year: number, month: number, day: number) {
-  return `${year}-${pad2(month)}-${pad2(day)}`;
-}
-
 function formatMonthLabel(year: number, month: number) {
-  return new Intl.DateTimeFormat("en-GB", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date(year, month - 1, 1));
+  return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
 }
 
-function formatDayHeading(dateKey: string) {
+function formatDay(dateKey: string, options: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" }) {
   const [y, m, d] = dateKey.split("-").map(Number);
   if (!y || !m || !d) return dateKey;
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(y, m - 1, d));
+  return new Intl.DateTimeFormat("en-GB", options).format(new Date(y, m - 1, d));
 }
 
 function formatTime(value: string | null) {
-  if (!value) return null;
-  const match = /^(\d{2}):(\d{2})/.exec(value);
-  if (!match) return value;
-  return `${match[1]}:${match[2]}`;
+  return value ? value.slice(0, 5) : null;
+}
+
+function timeLabel(event: CalendarEventRow) {
+  const start = formatTime(event.start_time);
+  const end = formatTime(event.end_time);
+  if (!start && !end) return "All day";
+  return [start ?? "–", end].filter(Boolean).join("–");
 }
 
 function adjacentMonth(year: number, month: number, delta: number) {
   const date = new Date(year, month - 1 + delta, 1);
-  return {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-  };
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }
 
 function monthHref(year: number, month: number) {
@@ -75,255 +70,221 @@ function monthHref(year: number, month: number) {
 function buildMonthCells(year: number, month: number) {
   const firstWeekday = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
-  const cells: Array<{
-    key: string;
-    day: number;
-    inMonth: boolean;
-    dateKey: string;
-  }> = [];
+  const cells: Array<{ key: string; day: number; inMonth: boolean; dateKey: string }> = [];
 
   const prev = adjacentMonth(year, month, -1);
   const daysInPrev = new Date(prev.year, prev.month, 0).getDate();
-
   for (let i = firstWeekday - 1; i >= 0; i -= 1) {
     const day = daysInPrev - i;
-    cells.push({
-      key: `prev-${day}`,
-      day,
-      inMonth: false,
-      dateKey: toDateKey(prev.year, prev.month, day),
-    });
+    cells.push({ key: `prev-${day}`, day, inMonth: false, dateKey: toDateKey(prev.year, prev.month, day) });
   }
-
   for (let day = 1; day <= daysInMonth; day += 1) {
-    cells.push({
-      key: `cur-${day}`,
-      day,
-      inMonth: true,
-      dateKey: toDateKey(year, month, day),
-    });
+    cells.push({ key: `cur-${day}`, day, inMonth: true, dateKey: toDateKey(year, month, day) });
   }
-
   const next = adjacentMonth(year, month, 1);
   let nextDay = 1;
   while (cells.length % 7 !== 0) {
-    cells.push({
-      key: `next-${nextDay}`,
-      day: nextDay,
-      inMonth: false,
-      dateKey: toDateKey(next.year, next.month, nextDay),
-    });
+    cells.push({ key: `next-${nextDay}`, day: nextDay, inMonth: false, dateKey: toDateKey(next.year, next.month, nextDay) });
     nextDay += 1;
   }
-
   return cells;
 }
 
-function RepeatIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      className="h-3 w-3 shrink-0 text-accent"
-      aria-hidden
-    >
-      <path
-        fill="currentColor"
-        d="M2.5 3.5h7.2a3.3 3.3 0 0 1 0 6.6H8.2v-1.5h1.5a1.8 1.8 0 1 0 0-3.6H2.5L4.2 6.7 3.1 7.8 0 4.7l3.1-3.1 1.1 1.1L2.5 3.5Zm11 9H6.3a3.3 3.3 0 0 1 0-6.6h1.5v1.5H6.3a1.8 1.8 0 1 0 0 3.6h7.2l-1.7-1.7 1.1-1.1L16 11.3l-3.1 3.1-1.1-1.1 1.7-1.8Z"
-      />
-    </svg>
-  );
-}
+const navButton =
+  "inline-flex size-11 items-center justify-center rounded-full border border-admin-edge text-ink transition-colors hover:border-peak-fleet hover:bg-admin-raised";
 
-export function AdminCalendar({
-  year,
-  month,
-  rangeStart,
-  rangeEnd,
-  events,
-}: AdminCalendarProps) {
+export function AdminCalendar({ year, month, rangeStart, rangeEnd, events }: AdminCalendarProps) {
   const router = useRouter();
-  const titleId = useId();
+  const toast = useToast();
   const [createDate, setCreateDate] = useState<string | null>(null);
-  const [viewModal, setViewModal] = useState<ViewModalState>(null);
+  const [viewing, setViewing] = useState<CalendarOccurrence | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const deleteButton = useRef<HTMLButtonElement>(null);
+
+  // The confirm step replaces the Delete button, so focus follows it there and back.
+  useEffect(() => {
+    (confirmingDelete ? confirmButton : deleteButton).current?.focus();
+  }, [confirmingDelete]);
 
   const prev = adjacentMonth(year, month, -1);
   const next = adjacentMonth(year, month, 1);
   const cells = useMemo(() => buildMonthCells(year, month), [year, month]);
-
-  const eventsByDate = useMemo(() => {
-    const occurrences = expandEventsForRange(events, rangeStart, rangeEnd);
-    return groupOccurrencesByDate(occurrences);
-  }, [events, rangeStart, rangeEnd]);
-
-  const todayKey = useMemo(() => {
-    const now = new Date();
-    return toDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
-  }, []);
-
-  useEffect(() => {
-    if (!viewModal) return;
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setViewModal(null);
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [viewModal]);
-
-  function openCreate(dateKey: string) {
-    setError(null);
-    setCreateDate(dateKey);
-  }
+  const eventsByDate = useMemo(() => groupOccurrencesByDate(expandEventsForRange(events, rangeStart, rangeEnd)), [events, rangeStart, rangeEnd]);
+  const todayKey = useMemo(() => formatDateKey(new Date()), []);
+  const now = new Date();
+  const isThisMonth = year === now.getFullYear() && month === now.getMonth() + 1;
+  const monthLabel = formatMonthLabel(year, month);
+  const agendaDays = cells.filter((cell) => cell.inMonth && (eventsByDate.get(cell.dateKey)?.length ?? 0) > 0);
 
   function openView(occurrence: CalendarOccurrence) {
     setError(null);
-    setViewModal({ occurrence });
+    setConfirmingDelete(false);
+    setViewing(occurrence);
   }
 
-  function closeViewModal() {
+  function closeView() {
     if (isPending) return;
-    setViewModal(null);
+    setViewing(null);
+    setConfirmingDelete(false);
     setError(null);
   }
 
   function handleDelete(eventRow: CalendarEventRow) {
-    const isRecurring = eventRow.recurrence !== "none";
-    const confirmed = window.confirm(
-      isRecurring
-        ? "Delete this entire recurring series? Individual occurrences cannot be removed separately yet."
-        : "Delete this event?",
-    );
-    if (!confirmed) return;
-
     setError(null);
     startTransition(async () => {
-      const result = await deleteCalendarEvent(eventRow.id);
+      const result = await safeAction(() => deleteCalendarEvent(eventRow.id));
       if (!result.ok) {
         setError(result.error);
+        setConfirmingDelete(false);
         return;
       }
-      setViewModal(null);
+      setViewing(null);
+      setConfirmingDelete(false);
+      toast(eventRow.recurrence !== "none" ? "Series deleted." : "Event deleted.");
       router.refresh();
     });
   }
 
+  const eventChip = (occurrence: CalendarOccurrence, compact: boolean) => {
+    const start = formatTime(occurrence.event.start_time);
+    return (
+      <button
+        type="button"
+        onClick={() => openView(occurrence)}
+        className={
+          compact
+            ? "relative z-10 flex w-full items-center gap-1 rounded-md bg-peak-fleet/15 px-1.5 py-1 text-left text-xs text-ink ring-1 ring-inset ring-peak-fleet/40 transition-colors hover:bg-peak-fleet/25"
+            : "flex min-h-14 w-full items-center gap-4 rounded-xl border border-admin-line bg-admin-surface px-4 py-3 text-left transition-colors hover:bg-admin-raised"
+        }
+      >
+        {compact ? (
+          <>
+            {occurrence.isRecurring ? <RepeatIcon className="size-3 shrink-0 text-ridge-cyan" /> : null}
+            <span className="truncate">
+              {start ? <span className="font-bold tabular-nums">{start} </span> : null}
+              {occurrence.event.title}
+            </span>
+            <span className="sr-only">, {formatDay(occurrence.occurrenceDate)}</span>
+          </>
+        ) : (
+          <>
+            <span className="w-24 shrink-0 text-sm font-bold text-peak-fleet tabular-nums">{timeLabel(occurrence.event)}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block break-words text-[0.9375rem] text-ink">{occurrence.event.title}</span>
+              {occurrence.isRecurring ? (
+                <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-ink/80">
+                  <RepeatIcon className="size-3.5" />
+                  {recurrenceLabel(occurrence.event.recurrence)}
+                </span>
+              ) : null}
+            </span>
+          </>
+        )}
+      </button>
+    );
+  };
+
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">
-            Calendar
-          </h1>
-          <p className="mt-3 text-sm text-ink/70">
-            Internal planning view. Recurring events expand across the month
-            without duplicating rows.
-          </p>
-        </div>
+      <PageHeader
+        title="Calendar"
+        lede="Site visits and anything else you need to plan. Repeating events show on every day they fall."
+        actions={
+          <button type="button" className={primaryButton} onClick={() => setCreateDate(isThisMonth ? todayKey : toDateKey(year, month, 1))}>
+            <PlusIcon className="size-4" />
+            New event
+          </button>
+        }
+      />
 
-        <div className="flex items-center gap-2">
-          <Link
-            href={monthHref(prev.year, prev.month)}
-            className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/75 transition-colors hover:border-accent hover:text-accent"
-            aria-label="Previous month"
-          >
-            Prev
+      <nav aria-label="Month" className="mt-8 flex items-center gap-2">
+        <Link href={monthHref(prev.year, prev.month)} className={navButton} aria-label={`Previous month, ${formatMonthLabel(prev.year, prev.month)}`}>
+          <ChevronLeftIcon className="size-5" />
+        </Link>
+        <Link href={monthHref(next.year, next.month)} className={navButton} aria-label={`Next month, ${formatMonthLabel(next.year, next.month)}`}>
+          <ChevronRightIcon className="size-5" />
+        </Link>
+        <h2 aria-live="polite" className="ml-2 min-w-0 flex-1 font-serif text-[1.5rem] leading-tight tracking-heading text-ink">
+          {monthLabel}
+        </h2>
+        {!isThisMonth ? (
+          <Link href="/admin/calendar" className={`${secondaryButton} px-4`}>
+            Today
           </Link>
-          <p className="min-w-40 text-center font-serif text-lg text-ink">
-            {formatMonthLabel(year, month)}
-          </p>
-          <Link
-            href={monthHref(next.year, next.month)}
-            className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/75 transition-colors hover:border-accent hover:text-accent"
-            aria-label="Next month"
-          >
-            Next
-          </Link>
-        </div>
+        ) : null}
+      </nav>
+
+      {/* Phones: an agenda of the days that have something on. */}
+      <div className="mt-5 md:hidden">
+        {agendaDays.length === 0 ? (
+          <div className="rounded-xl border border-admin-line bg-admin-surface">
+            <EmptyState illustration={<PlannerIllustration />} title={`Nothing booked in ${formatDay(toDateKey(year, month, 1), { month: "long" })}.`}>
+              Add a site visit from a lead, or use New event.
+            </EmptyState>
+          </div>
+        ) : (
+          <ol className="space-y-6">
+            {agendaDays.map((cell) => (
+              <li key={cell.key}>
+                <h3 className="flex items-baseline gap-2 text-sm font-bold text-ink">
+                  {formatDay(cell.dateKey, { weekday: "long", day: "numeric", month: "long" })}
+                  {cell.dateKey === todayKey ? <span className="admin-label text-ridge-cyan">Today</span> : null}
+                </h3>
+                <ul className="mt-2 space-y-2">
+                  {(eventsByDate.get(cell.dateKey) ?? []).map((occurrence) => (
+                    <li key={`${occurrence.event.id}-${occurrence.occurrenceDate}`}>{eventChip(occurrence, false)}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-lg border border-ink/10 bg-panel">
-        <div className="grid grid-cols-7 border-b border-ink/10">
-          {WEEKDAY_LABELS.map((label) => (
-            <div
-              key={label}
-              className="px-2 py-2 text-center text-[11px] tracking-wide text-ink/45 uppercase"
-            >
-              {label}
+      {/* Tablets and up: the month grid. */}
+      <div className="mt-5 hidden overflow-hidden rounded-xl border border-admin-line bg-admin-surface md:block">
+        <div aria-hidden className="grid grid-cols-7 border-b border-admin-line">
+          {WEEKDAYS.map(([short]) => (
+            <div key={short} className="admin-label px-2 py-2.5 text-center">
+              {short}
             </div>
           ))}
         </div>
-
         <div className="grid grid-cols-7">
-          {cells.map((cell) => {
+          {cells.map((cell, index) => {
             const dayEvents = eventsByDate.get(cell.dateKey) ?? [];
             const isToday = cell.dateKey === todayKey;
-
             return (
               <div
                 key={cell.key}
-                className={[
-                  "relative min-h-28 border-r border-b border-ink/10 p-2 last:border-r-0",
-                  cell.inMonth ? "bg-panel" : "bg-page/40",
-                ].join(" ")}
+                className={`group relative min-h-28 border-admin-line p-1.5 ${index % 7 !== 6 ? "border-r" : ""} ${
+                  index < cells.length - 7 ? "border-b" : ""
+                } ${cell.inMonth ? "" : "bg-admin-base/60"}`}
               >
                 <button
                   type="button"
-                  onClick={() => openCreate(cell.dateKey)}
-                  aria-label={`Add event on ${formatDayHeading(cell.dateKey)}`}
-                  className="absolute inset-0 z-0 transition-colors hover:bg-ink/5 focus-visible:bg-ink/5 focus-visible:outline-none"
+                  onClick={() => setCreateDate(cell.dateKey)}
+                  aria-label={`Add event on ${formatDay(cell.dateKey)}`}
+                  className="absolute inset-0 transition-colors hover:bg-admin-raised/60 focus-visible:-outline-offset-2"
                 />
-                <div className="relative z-10 pointer-events-none">
-                  <span
-                    className={[
-                      "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-xs",
-                      isToday
-                        ? "bg-accent/20 text-accent"
-                        : cell.inMonth
-                          ? "text-ink/80"
-                          : "text-ink/35",
-                    ].join(" ")}
-                  >
-                    {cell.day}
-                  </span>
-
-                  <ul className="mt-1 space-y-1">
-                    {dayEvents.map((occurrence) => {
-                      const timeLabel = formatTime(occurrence.event.start_time);
-                      return (
-                        <li
-                          key={`${occurrence.event.id}-${occurrence.occurrenceDate}`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openView(occurrence)}
-                            className={[
-                              "pointer-events-auto flex w-full items-center gap-1 truncate rounded border px-1.5 py-0.5 text-left text-[11px] text-ink/90 hover:border-accent/50",
-                              occurrence.isRecurring
-                                ? "border-accent/40 bg-accent/15"
-                                : "border-accent/25 bg-accent/10",
-                            ].join(" ")}
-                            title={
-                              occurrence.isRecurring
-                                ? `${occurrence.event.title} (recurring)`
-                                : occurrence.event.title
-                            }
-                          >
-                            {occurrence.isRecurring ? <RepeatIcon /> : null}
-                            <span className="truncate">
-                              {timeLabel ? `${timeLabel} ` : ""}
-                              {occurrence.event.title}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
+                <span
+                  className={`pointer-events-none relative inline-flex size-7 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
+                    isToday ? "bg-frost text-navy" : cell.inMonth ? "text-ink" : "text-ink/60"
+                  }`}
+                >
+                  {cell.day}
+                </span>
+                <PlusIcon className="pointer-events-none absolute top-2.5 right-2.5 size-3.5 text-peak-fleet opacity-0 transition-opacity group-hover:opacity-100" />
+                {dayEvents.length > 0 ? (
+                  <ul className="relative mt-1 space-y-1">
+                    {dayEvents.map((occurrence) => (
+                      <li key={`${occurrence.event.id}-${occurrence.occurrenceDate}`}>{eventChip(occurrence, true)}</li>
+                    ))}
                   </ul>
-                </div>
+                ) : null}
               </div>
             );
           })}
@@ -335,107 +296,90 @@ export function AdminCalendar({
         onClose={() => setCreateDate(null)}
         prefill={{ start_date: createDate ?? todayKey }}
         heading="New event"
+        onCreated={() => toast("Event added.")}
       />
 
-      {viewModal ? (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-panel/70 p-4 sm:items-center"
-          role="presentation"
-          onClick={closeViewModal}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-ink/15 bg-page p-5 shadow-xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h2
-              id={titleId}
-              className="font-serif text-xl tracking-tight text-ink"
-            >
-              {viewModal.occurrence.event.title}
-            </h2>
-            <p className="mt-1 text-sm text-ink/55">
-              {formatDayHeading(viewModal.occurrence.occurrenceDate)}
-            </p>
-
-            <dl className="mt-5 space-y-3 text-sm">
+      <AdminDialog
+        open={viewing !== null}
+        onClose={closeView}
+        title={viewing?.event.title ?? ""}
+        description={viewing ? formatDay(viewing.occurrenceDate) : null}
+        busy={isPending}
+      >
+        {viewing ? (
+          <>
+            <dl className="space-y-4 text-[0.9375rem]">
               <div>
-                <dt className="text-xs tracking-wide text-ink/45 uppercase">
-                  Time
-                </dt>
-                <dd className="mt-1 text-ink/85">
-                  {formatTime(viewModal.occurrence.event.start_time) ||
-                  formatTime(viewModal.occurrence.event.end_time)
-                    ? [
-                        formatTime(viewModal.occurrence.event.start_time) ??
-                          "-",
-                        formatTime(viewModal.occurrence.event.end_time),
-                      ]
-                        .filter(Boolean)
-                        .join(" - ")
-                    : "All day / no time set"}
-                </dd>
+                <dt className="admin-label">Time</dt>
+                <dd className="mt-1 text-ink">{timeLabel(viewing.event)}</dd>
               </div>
               <div>
-                <dt className="text-xs tracking-wide text-ink/45 uppercase">
-                  Notes
-                </dt>
-                <dd className="mt-1 whitespace-pre-wrap text-ink/85">
-                  {viewModal.occurrence.event.notes?.trim() || "-"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs tracking-wide text-ink/45 uppercase">
-                  Recurrence
-                </dt>
-                <dd className="mt-1 text-ink/85">
+                <dt className="admin-label">Repeats</dt>
+                <dd className="mt-1 text-ink">
                   <span className="inline-flex items-center gap-1.5">
-                    {viewModal.occurrence.isRecurring ? <RepeatIcon /> : null}
-                    {recurrenceLabel(viewModal.occurrence.event.recurrence)}
+                    {viewing.isRecurring ? <RepeatIcon className="size-4 text-ridge-cyan" /> : null}
+                    {recurrenceLabel(viewing.event.recurrence)}
                   </span>
-                  {viewModal.occurrence.event.recurrence_end_date ? (
-                    <span className="mt-1 block text-xs text-ink/50">
-                      Until{" "}
-                      {formatDayHeading(
-                        viewModal.occurrence.event.recurrence_end_date,
-                      )}
-                    </span>
+                  {viewing.event.recurrence_end_date ? (
+                    <span className="mt-1 block text-sm text-ink/80">Until {formatDay(viewing.event.recurrence_end_date)}</span>
                   ) : null}
                 </dd>
               </div>
+              {viewing.event.notes?.trim() ? (
+                <div>
+                  <dt className="admin-label">Notes</dt>
+                  <dd className="mt-1 break-words whitespace-pre-wrap text-ink">{viewing.event.notes.trim()}</dd>
+                </div>
+              ) : null}
+              {viewing.event.lead_id ? (
+                <div>
+                  <dt className="admin-label">Lead</dt>
+                  <dd className="mt-1">
+                    <Link href={`/admin/leads/${viewing.event.lead_id}`} className="font-bold text-peak-fleet underline-offset-4 hover:text-ridge-cyan hover:underline">
+                      Open the lead
+                    </Link>
+                  </dd>
+                </div>
+              ) : null}
             </dl>
 
             {error ? (
-              <p className="mt-4 text-sm text-accent">{error}</p>
+              <p role="alert" className="mt-4 text-sm font-bold text-ridge-cyan">
+                {error}
+              </p>
             ) : null}
 
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={closeViewModal}
-                disabled={isPending}
-                className="rounded-md border border-ink/15 px-3 py-2 text-sm text-ink/70 transition-colors hover:border-ink/30 disabled:opacity-60"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(viewModal.occurrence.event)}
-                disabled={isPending}
-                className="rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-300 transition-opacity hover:opacity-90 disabled:opacity-60"
-              >
-                {isPending
-                  ? "Deleting..."
-                  : viewModal.occurrence.isRecurring
-                    ? "Delete series"
-                    : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            {confirmingDelete ? (
+              <div role="group" aria-label="Confirm delete" className="mt-6 rounded-xl border border-admin-edge bg-admin-raised p-4">
+                <p className="text-sm text-ink">
+                  {viewing.isRecurring
+                    ? "Delete the whole series? Single days can't be removed on their own."
+                    : "Delete this event? This can't be undone."}
+                </p>
+                <div className="mt-3 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <button type="button" className={secondaryButton} disabled={isPending} onClick={() => setConfirmingDelete(false)}>
+                    Keep it
+                  </button>
+                  <button ref={confirmButton} type="button" className={primaryButton} disabled={isPending} onClick={() => handleDelete(viewing.event)}>
+                    <TrashIcon className="size-4" />
+                    {isPending ? "Deleting…" : viewing.isRecurring ? "Delete series" : "Delete event"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button type="button" className={secondaryButton} onClick={closeView}>
+                  Close
+                </button>
+                <button ref={deleteButton} type="button" className={secondaryButton} onClick={() => setConfirmingDelete(true)}>
+                  <TrashIcon className="size-4" />
+                  {viewing.isRecurring ? "Delete series" : "Delete"}
+                </button>
+              </div>
+            )}
+          </>
+        ) : null}
+      </AdminDialog>
     </div>
   );
 }
