@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BrandMark } from "@/components/brand/brand-logo";
 import { ClosingBand } from "@/components/closing-band";
 import { textLinkClassName } from "@/components/cta-styles";
+import { FounderCards } from "@/components/founder-cards";
 import { HomeHero } from "@/components/home/home-hero";
 import { HomeIntro } from "@/components/home/home-intro";
 import { HomeMotionIslands } from "@/components/home/home-motion-islands";
@@ -15,7 +15,6 @@ import { SampleTag } from "@/components/sample-tag";
 import { TrustBadges } from "@/components/trust-badges";
 import { WorkCard } from "@/components/work-card";
 import { projects } from "@/lib/content";
-import { teamMembers } from "@/lib/site";
 import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,21 +62,23 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <div className="mt-14 lg:mt-20">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
-                  See the difference
-                </h3>
-                {/* The slider's photos are placeholders, not a Blue Peak job. */}
-                <SampleTag overPhoto onFrost />
+            <div className="mt-14 lg:mt-20 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16">
+              <div className="lg:col-start-1 lg:row-start-1">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
+                    See the difference
+                  </h3>
+                  {/* The slider's photos are placeholders, not a Blue Peak job. */}
+                  <SampleTag overPhoto onFrost />
+                </div>
+                <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
+                  Drag the handle, or use the arrow keys, to compare.
+                </p>
               </div>
-              <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
-                Drag the handle, or use the arrow keys, to compare.
-              </p>
-              <div className="-mx-2 mt-8 sm:mx-0 lg:mt-10">
+              <div className="-mx-2 mt-8 sm:mx-0 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0">
                 <HomeMotionIslands />
               </div>
-              <div className="mt-8 lg:mt-10">
+              <div className="mt-8 lg:col-start-1 lg:row-start-2 lg:mt-0 lg:self-end">
                 <Link href="/work" className={textLinkClassName}>
                   See all our work
                   <ArrowIcon />
@@ -96,40 +97,22 @@ export default function HomePage() {
 
       <Reveal>
         <section className="bg-page">
-          <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16 lg:py-28">
-            <div>
-              <SectionHeading eyebrow="Who you'll deal with">
-                Led by Kyle and Steven.
-              </SectionHeading>
-              <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
-                Blue Peak brings every trade under one roof, and the two
-                founders run every job. You deal with Kyle or Steven from the
-                first visit to the final tidy-up.
-              </p>
-              <div className="mt-8">
-                <Link href="/about" className={textLinkClassName}>
-                  More about us
-                  <ArrowIcon />
-                </Link>
-              </div>
+          <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+            <SectionHeading eyebrow="Who you'll deal with">
+              Led by Kyle and Steven.
+            </SectionHeading>
+            <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
+              Blue Peak brings every trade under one roof, and the two
+              founders run every job. You deal with Kyle or Steven from the
+              first visit to the final tidy-up.
+            </p>
+            <div className="mt-8">
+              <Link href="/about" className={textLinkClassName}>
+                More about us
+                <ArrowIcon />
+              </Link>
             </div>
-            <ul className="grid grid-cols-2 gap-5 sm:gap-8 lg:grid-cols-[280px_280px]">
-              {teamMembers.map((member) => (
-                <li key={member.name}>
-                  {/* Placeholder until real headshots are supplied. */}
-                  <div className="flex aspect-[4/5] items-center justify-center rounded-lg bg-panel">
-                    <BrandMark title="" className="h-14 w-auto text-brand/15" />
-                  </div>
-                  <h3 className="mt-5 text-2xl font-semibold text-ink">{member.name}</h3>
-                  <p className="mt-1 text-sm tracking-wide text-accent">
-                    {member.role}
-                  </p>
-                  <p className="mt-3 text-base leading-relaxed text-ink/70">
-                    {member.blurb}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            <FounderCards className="mt-12 lg:mt-16" />
           </div>
         </section>
       </Reveal>

@@ -51,7 +51,7 @@ export default function RoadmapPage() {
             <article
               key={feature.slug}
               id={feature.slug}
-              className="scroll-mt-28 border-t border-ink/10 pt-10 first:border-t-0 first:pt-0"
+              className="scroll-mt-9 border-t border-ink/10 pt-10 first:border-t-0 first:pt-0"
             >
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-sm font-bold tracking-wide text-accent">

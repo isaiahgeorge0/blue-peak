@@ -333,10 +333,86 @@ export function mountIsometricEstimator(
     modelRoot.add(group);
     addonMeshes[key] = {solid:solidGroup, ghost:ghost, target:0, progress:0, rise:ADDON_RISE, materials:materials, glow:glowMats, shadowsOn:true};
   }
-  makeAddon('extension',   1,0,5,      4,2.2,2.5, 'z', 1);
-  makeAddon('side_return', -1.8,0,1,   1.8,2.4,3, 'x', -1);
-  makeAddon('loft',        1.6,3.5,1.2, 2.2,1.3,2.2, 'z', 1);
-  makeAddon('garden_room', 8,0,1,      3,2.2,3, 'x', 1);
+  // The single-storey add-ons share one height below the eaves. The side return
+  // and rear extension wrap the back corner together; the garden room stands
+  // apart, smaller and lower. The loft is a box dormer on the front slope's left
+  // half (makeDormer below), so the solar array keeps the right half.
+  var SINGLE_STOREY_H = 2.3;
+  makeAddon('extension',   0,0,5,      4.4,SINGLE_STOREY_H,2.3, 'z', 1);
+  makeAddon('side_return', -1.5,0,2.55, 1.5,SINGLE_STOREY_H,2.45, 'x', -1);
+  makeAddon('garden_room', 8.2,0,0.8,  2.6,2.1,2.4, 'z', -1);
+
+  // Box dormer on the front slope: a vertical front wall set back from the
+  // eaves, side cheeks that taper into the slope, and a flat roof that meets
+  // the main roof below the ridge. Everything is built in (z, y) profile and
+  // extruded along X; the body runs on below the roof surface, so it never
+  // shows a gap or fights the roof plane where they meet.
+  function makeDormer(key, x0, w, frontZ, flatRoofY){
+    var eaveZ = -roofOv;
+    var slope = roofRidgeH / (wallD/2 + roofOv);                 // rise per unit of z on the front slope
+    function roofY(z){ return wallH + (z - eaveZ) * slope; }      // height of the front slope at z
+    function roofZ(y){ return eaveZ + (y - wallH) / slope; }      // where the front slope reaches height y
+    var CAP = 0.08, BURY = 0.2;
+    var frontBaseY = roofY(frontZ);
+    var backZ = roofZ(flatRoofY);                                 // flat roof meets the slope here
+
+    // front wall down to yBase, flat top back to z1, then a line parallel to the slope, `sink` below it
+    function profile(z0, yBase, z1, yTop, sink){
+      var shape = new THREE.Shape();
+      shape.moveTo(z0, yBase - sink);
+      shape.lineTo(z0, yTop);
+      shape.lineTo(z1, yTop);
+      shape.lineTo(z1, yTop - sink);
+      shape.closePath();
+      return shape;
+    }
+    // Extrude runs along local +Z; turned -90° about Y it runs along world -X, so start at x0 + w.
+    function alongX(geo, xStart){
+      var mesh = new THREE.Mesh(geo);
+      mesh.rotation.y = -Math.PI/2;
+      mesh.position.x = xStart;
+      return mesh;
+    }
+
+    var group = new THREE.Group();
+    var solidGroup = new THREE.Group();
+    var bodyMat = addonMat();
+    var glassMat = addonGlassMat();
+
+    var body = alongX(new THREE.ExtrudeGeometry(profile(frontZ, frontBaseY, backZ, flatRoofY, BURY), {depth:w, bevelEnabled:false}), x0 + w);
+    body.material = bodyMat;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    solidGroup.add(body);
+
+    // flat roof: a thin slab with a small overhang, running back until its top meets the slope
+    var capBackZ = roofZ(flatRoofY + CAP);
+    solidGroup.add(boxMesh(x0 - 0.06, flatRoofY, frontZ - 0.06, w + 0.12, CAP, capBackZ - (frontZ - 0.06), bodyMat));
+
+    // glazing on the front wall, with a transom bar like the other add-ons
+    var gw = w * 0.62, frontH = flatRoofY - frontBaseY;
+    var glassH = frontH * 0.6, glassY = frontBaseY + frontH * 0.18, gx0 = x0 + (w - gw)/2;
+    solidGroup.add(boxMesh(gx0, glassY, frontZ - 0.015, gw, glassH, 0.03, glassMat));
+    solidGroup.add(boxMesh(gx0 - 0.02, glassY + glassH/2 - 0.03, frontZ - 0.03, gw + 0.04, 0.06, 0.06, bodyMat));
+
+    // ghost: the visible outline only (front wall, cheeks, flat roof), lifted a hair off the roof
+    var ghostShape = new THREE.Shape();
+    ghostShape.moveTo(frontZ, frontBaseY + 0.02);
+    ghostShape.lineTo(frontZ, flatRoofY + CAP);
+    ghostShape.lineTo(capBackZ - 0.03, flatRoofY + CAP);
+    ghostShape.closePath();
+    var ghostGeo = new THREE.EdgesGeometry(new THREE.ExtrudeGeometry(ghostShape, {depth:w, bevelEnabled:false}));
+    var ghost = new THREE.LineSegments(ghostGeo, ghostMat());
+    ghost.rotation.y = -Math.PI/2;
+    ghost.position.x = x0 + w;
+    ghost.computeLineDistances();
+
+    group.add(ghost);
+    group.add(solidGroup);
+    modelRoot.add(group);
+    addonMeshes[key] = {solid:solidGroup, ghost:ghost, target:0, progress:0, rise:ADDON_RISE, materials:[bodyMat, glassMat], glow:[glassMat], shadowsOn:true};
+  }
+  makeDormer('loft', 0.5, 2, 0.55, 4.5);
 
   function ghostMat(){
     return new THREE.LineDashedMaterial({color:NAVY, dashSize:0.14, gapSize:0.1, transparent:true, opacity:GHOST_OPACITY});
@@ -367,23 +443,26 @@ export function mountIsometricEstimator(
 
     var solidGroup = new THREE.Group();
     var ghostGroup = new THREE.Group();
-    var panelW = 1.6, panelD = 1.35, slopeZ = 1.5, outward = 0.045;
+    // two by two on the right half of the slope, below the chimney and clear of the loft dormer
+    var panelW = 1.3, panelD = 0.82, outward = 0.045;
     var panelMat = addonMat();
     var frameMat = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
-    [0.3,2.2,4.1].forEach(function(sx){
-      var cx = sx + panelW/2;
-      var panel = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.04,panelD), panelMat);
-      panel.position.set(cx, outward, slopeZ);
-      panel.castShadow = true;
-      solidGroup.add(panel);
-      // slim frame edge + a center mullion so it reads as cells, not a slab
-      var frame = new THREE.Mesh(new THREE.BoxGeometry(panelW+0.04,0.03,panelD+0.04), frameMat);
-      frame.position.set(cx, outward-0.015, slopeZ);
-      solidGroup.add(frame);
-      var muln = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.045,0.025), frameMat);
-      muln.position.set(cx, outward+0.006, slopeZ);
-      solidGroup.add(muln);
-      ghostGroup.add(centeredGhost(cx, outward, slopeZ, panelW, 0.08, panelD));
+    [3.05, 4.5].forEach(function(sx){
+      [0.81, 1.75].forEach(function(slopeZ){
+        var cx = sx + panelW/2;
+        var panel = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.04,panelD), panelMat);
+        panel.position.set(cx, outward, slopeZ);
+        panel.castShadow = true;
+        solidGroup.add(panel);
+        // slim frame edge + a center mullion so it reads as cells, not a slab
+        var frame = new THREE.Mesh(new THREE.BoxGeometry(panelW+0.04,0.03,panelD+0.04), frameMat);
+        frame.position.set(cx, outward-0.015, slopeZ);
+        solidGroup.add(frame);
+        var muln = new THREE.Mesh(new THREE.BoxGeometry(panelW,0.045,0.025), frameMat);
+        muln.position.set(cx, outward+0.006, slopeZ);
+        solidGroup.add(muln);
+        ghostGroup.add(centeredGhost(cx, outward, slopeZ, panelW, 0.08, panelD));
+      });
     });
     mount.add(ghostGroup);
     mount.add(solidGroup);

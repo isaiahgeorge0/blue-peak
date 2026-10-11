@@ -10,11 +10,11 @@ import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 function EstimatorUnavailable() {
   return (
     <div className="flex min-h-[60vh] max-w-2xl flex-col justify-center py-8">
-      <p className="text-sm font-bold tracking-wide text-accent uppercase">
+      <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
         Build your estimate
       </p>
-      <h1 className="mt-3 text-3xl tracking-heading text-ink sm:text-4xl">
-        The 3D calculator can&apos;t run on this device
+      <h1 className="mt-4 text-3xl tracking-heading text-ink sm:text-4xl">
+        The 3D calculator can&apos;t run on this device.
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-ink/75">
         Tell us what you have in mind and we&apos;ll give you a proper written
@@ -26,7 +26,7 @@ function EstimatorUnavailable() {
         </Link>
         <a
           href={`tel:${sitePhoneTel}`}
-          className="text-sm text-ink/75 transition-colors hover:text-accent"
+          className="link-draw tap-target text-sm text-ink/75 transition-colors duration-200 hover:text-accent"
         >
           Or call {sitePhoneDisplay}
         </a>

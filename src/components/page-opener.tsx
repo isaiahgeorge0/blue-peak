@@ -182,7 +182,8 @@ export function PageOpener({
           src={image.src}
           alt={image.alt}
           fill
-          preload
+          loading="eager"
+          fetchPriority="high"
           sizes={sizes}
           className="object-cover"
         />
@@ -233,7 +234,7 @@ export function PageOpener({
           />
           {lede ? (
             <p
-              className="page-opener-item mt-5 max-w-2xl text-lg leading-relaxed text-white/90 lg:text-xl [@media(max-height:31.2499rem)]:mt-3 [@media(max-height:31.2499rem)]:text-base"
+              className="page-opener-item page-opener-lede mt-5 max-w-2xl text-lg leading-relaxed text-white/90 lg:text-xl [@media(max-height:31.2499rem)]:mt-3 [@media(max-height:31.2499rem)]:text-base"
               style={item(200)}
             >
               {lede}

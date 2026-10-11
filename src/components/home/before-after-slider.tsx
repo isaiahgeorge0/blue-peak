@@ -248,7 +248,8 @@ export function BeforeAfterSlider({
   };
 
   // Below sm the 16:10 photos fill a 4:5 frame, so they are drawn twice the frame's width.
-  const sizes = `${containerWide(1104)}, (max-width: 639px) calc(200vw - 64px), (max-width: 1152px) calc(100vw - 48px), 1104px`;
+  // From lg the slider takes two thirds of the container, beside its heading.
+  const sizes = `${containerWide(693)}, (max-width: 639px) calc(200vw - 64px), (max-width: 1023px) calc(100vw - 48px), (max-width: 1152px) calc(66.67vw - 75px), 693px`;
 
   return (
     <div

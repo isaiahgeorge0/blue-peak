@@ -1,13 +1,8 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { BrandMark } from "@/components/brand/brand-logo";
 import { SampleTag } from "@/components/sample-tag";
 import { containerWide } from "@/lib/image-sizes";
-
-const MotionLink = motion.create(Link);
 
 type WorkCardProps = {
   href: string;
@@ -33,20 +28,18 @@ export function WorkCard({
   sizes = `${containerWide(370)}, (max-width: 768px) 100vw, (max-width: 1152px) 33vw, 370px`,
 }: WorkCardProps) {
   return (
-    <MotionLink
+    <Link
       href={href}
-      className="group block"
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className="group block rounded-xl transition-transform duration-300 ease-out hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-reduce:transition-none"
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-ink/10">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-ink/10">
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={imageAlt}
             fill
             sizes={sizes}
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-panel">
@@ -61,6 +54,6 @@ export function WorkCard({
         {title}
       </p>
       <p className="mt-1.5 text-sm text-ink/70">{description.replace(/\.$/, "")}</p>
-    </MotionLink>
+    </Link>
   );
 }

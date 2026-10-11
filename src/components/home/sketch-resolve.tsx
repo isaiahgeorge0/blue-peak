@@ -175,7 +175,7 @@ export function SketchResolve() {
       ref={wrapperRef}
       id="how-we-work"
       aria-labelledby="how-heading"
-      className="theme-brand relative bg-page pinnable:h-[220vh] pinnable:lg:h-[240vh]"
+      className="theme-brand relative scroll-mt-[calc(-1*var(--site-header-height))] bg-page pinnable:h-[185vh] pinnable:lg:h-[200vh]"
     >
       <div className="mx-auto flex max-w-6xl flex-col px-6 py-20 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-12 lg:py-28 xl:gap-16 pinnable:sticky pinnable:top-0 pinnable:h-[100dvh] pinnable:overflow-hidden pinnable:pt-20 pinnable:pb-6 pinnable:lg:content-center pinnable:lg:pt-20 pinnable:lg:pb-12">
         <div className="max-lg:contents">

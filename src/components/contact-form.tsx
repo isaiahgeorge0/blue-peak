@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type FocusEvent,
   type FormEvent,
   type ReactNode,
 } from "react";
@@ -57,6 +58,21 @@ const labelClassName = "block font-serif text-xl leading-tight text-ink";
 
 const quoteButtonClassName =
   "group inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-on-accent transition-[background-color,opacity] duration-200 hover:bg-traverse focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent";
+
+/* Safari scrolls a focused field into view only when it is wholly off screen,
+   and misplaces it against the page's scroll padding, so a tall field can stop
+   half below the fold. Before the next paint, bring any field left short of
+   the padded edges the rest of the way. */
+function keepFocusClear(event: FocusEvent<HTMLFormElement>) {
+  const field = event.target;
+  requestAnimationFrame(() => {
+    const rect = field.getBoundingClientRect();
+    const root = getComputedStyle(document.documentElement);
+    const top = parseFloat(root.scrollPaddingTop) || 0;
+    const bottom = window.innerHeight - (parseFloat(root.scrollPaddingBottom) || 0);
+    if (rect.top < top || rect.bottom > bottom) field.scrollIntoView({ block: "nearest" });
+  });
+}
 
 export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
   const [form, setForm] = useState<FormState>({
@@ -198,7 +214,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
 
   function renderForm() {
     return (
-      <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+      <form onSubmit={handleSubmit} onFocus={keepFocusClear} className="space-y-8" noValidate>
         <LeadHoneypot id="contact-company" value={honeypot} onChange={setHoneypot} />
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
@@ -387,7 +403,7 @@ function Confirmation({ nextSteps }: { nextSteps?: ReactNode }) {
   return (
     <div
       ref={panelRef}
-      className="contact-confirmation scroll-mt-[calc(var(--site-header-height)+1.5rem)]"
+      className="contact-confirmation scroll-mt-6"
     >
       <BrandMark pieces title="" className="contact-mark h-14 w-auto text-accent" />
       <h2
