@@ -9,7 +9,7 @@ import { useToast } from "@/components/admin/toast";
 import { Card, primaryButton, secondaryButton } from "@/components/admin/ui";
 import { houseImageFor, previewImageSources } from "@/lib/email-house-image";
 import { estimateFromLead } from "@/lib/estimate-summary";
-import { renderFollowUpEmail, templateProblems } from "@/lib/follow-up-email";
+import { renderFollowUpEmail, templateParts, templateProblems } from "@/lib/follow-up-email";
 import { SAMPLE_LEADS, type SampleKind } from "@/lib/follow-up-sample";
 import { STEP_LABELS, type DelayUnit, type FollowUpSetting, type FollowUpStep } from "@/lib/follow-up-schedule";
 import { jobCardFor, STEP_STAGE } from "@/lib/job-card";
@@ -46,6 +46,8 @@ type StepCardProps = {
   adminEmail: string;
   /** Settings that must be set before a test can be sent. */
   testBlockers: string[];
+  /** Whether follow-ups as a whole are switched on. */
+  followUpsOn: boolean;
 };
 
 function ToggleGroup<T extends string | boolean>({
@@ -78,27 +80,53 @@ function ToggleGroup<T extends string | boolean>({
   );
 }
 
-function Switch({ checked, labelledBy, disabled, onChange }: { checked: boolean; labelledBy: string; disabled: boolean; onChange: () => void }) {
+/** Waiting: switched on, but follow-ups as a whole aren't, so nothing goes out yet. */
+function Switch({
+  checked,
+  waiting,
+  labelledBy,
+  disabled,
+  onChange,
+}: {
+  checked: boolean;
+  waiting: boolean;
+  labelledBy: string;
+  disabled: boolean;
+  onChange: () => void;
+}) {
+  const stateId = useId();
+  const paused = checked && waiting;
   return (
     <span className="inline-flex items-center gap-3">
-      <span aria-hidden className="text-sm font-bold text-ink/80">
-        {checked ? "On" : "Off"}
-      </span>
+      {paused ? (
+        <span id={stateId} className="max-w-[11rem] text-sm leading-snug text-ink/80 sm:text-right">
+          On, waiting for <span className="whitespace-nowrap">follow-ups</span> to start
+        </span>
+      ) : (
+        <span aria-hidden className="text-sm font-bold text-ink/80">
+          {checked ? "On" : "Off"}
+        </span>
+      )}
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         aria-labelledby={labelledBy}
+        aria-describedby={paused ? stateId : undefined}
         disabled={disabled}
         onClick={onChange}
         className={`relative inline-flex h-11 w-[4.25rem] shrink-0 items-center rounded-full border transition-colors duration-200 disabled:cursor-wait disabled:opacity-70 ${
-          checked ? "border-transparent bg-brand ring-1 ring-inset ring-white/15" : "border-admin-edge bg-admin-base"
+          paused
+            ? "border-dashed border-admin-edge bg-admin-base"
+            : checked
+              ? "border-transparent bg-brand ring-1 ring-inset ring-white/15"
+              : "border-admin-edge bg-admin-base"
         }`}
       >
         <span
           aria-hidden
           className={`absolute left-1.5 size-8 rounded-full shadow transition-transform duration-200 ease-out motion-reduce:transition-none ${
-            checked ? "translate-x-[1.5rem] bg-frost" : "translate-x-0 bg-admin-edge"
+            paused ? "translate-x-[1.5rem] bg-frost/45" : checked ? "translate-x-[1.5rem] bg-frost" : "translate-x-0 bg-admin-edge"
           }`}
         />
       </button>
@@ -106,7 +134,22 @@ function Switch({ checked, labelledBy, disabled, onChange }: { checked: boolean;
   );
 }
 
-function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProps) {
+function SubjectSummary({ subject }: { subject: string }) {
+  return templateParts(subject).map((part, index) =>
+    "placeholder" in part ? (
+      <span
+        key={index}
+        className="mx-0.5 inline-block rounded-full border border-admin-edge bg-admin-raised px-2 align-[0.0625rem] text-xs leading-5 font-bold text-ink"
+      >
+        {part.placeholder}
+      </span>
+    ) : (
+      part.text
+    ),
+  );
+}
+
+function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }: StepCardProps) {
   const canSend = testBlockers.length === 0;
   const router = useRouter();
   const toast = useToast();
@@ -200,7 +243,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
         toast(`Couldn't save. ${label} is still ${next ? "off" : "on"}.`);
         return;
       }
-      toast(`${label} turned ${next ? "on" : "off"}.`);
+      toast(next && !followUpsOn ? `${label} turned on. It starts when follow-ups are switched on.` : `${label} turned ${next ? "on" : "off"}.`);
       router.refresh();
     });
   }
@@ -244,7 +287,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
   return (
     <Card>
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 px-5 py-5">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[min(100%,14rem)] flex-1">
           <h3 id={ids.title} className="font-serif text-[1.375rem] leading-tight font-normal tracking-heading text-ink">
             {label}
           </h3>
@@ -254,10 +297,10 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
           </p>
           <p className="mt-1 text-sm break-words text-ink">
             <span className="text-ink/80">Subject: </span>
-            {saved.subject}
+            <SubjectSummary subject={saved.subject} />
           </p>
         </div>
-        <Switch checked={enabled} labelledBy={ids.title} disabled={switchPending} onChange={toggle} />
+        <Switch checked={enabled} waiting={!followUpsOn} labelledBy={ids.title} disabled={switchPending} onChange={toggle} />
       </div>
 
       <div className="border-t border-admin-line">
@@ -379,7 +422,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
             <p className="text-sm text-ink/80">
               {canSend
                 ? `Tests go to ${adminEmail} only, using what's in the boxes above.`
-                : `Tests can't be sent until ${testBlockers.join(" and ")} ${testBlockers.length === 1 ? "is" : "are"} set.`}
+                : "Tests can't be sent until your web developer finishes the setup."}
             </p>
             {message ? (
               <p role={message.tone === "error" ? "alert" : "status"} className={`text-sm font-bold ${message.tone === "error" ? "text-ridge-cyan" : "text-ink"}`}>
@@ -419,7 +462,9 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers }: StepCardProp
               <span className="text-ink">{preview.subject}</span>
             </p>
             {isReview && !reviewUrl ? (
-              <p className="mt-2 text-sm text-ink/80">GOOGLE_REVIEW_URL isn&apos;t set, so the button goes nowhere here and review requests are skipped.</p>
+              <p className="mt-2 text-sm text-ink/80">
+                The Google review link hasn&apos;t been added yet, so the button goes nowhere here and review requests are skipped.
+              </p>
             ) : null}
             <iframe
               ref={frame}
@@ -443,17 +488,19 @@ export function FollowUpEditor({
   reviewUrl,
   adminEmail,
   testBlockers,
+  followUpsOn,
 }: {
   settings: FollowUpSetting[];
   reviewUrl: string | null;
   adminEmail: string;
   testBlockers: string[];
+  followUpsOn: boolean;
 }) {
   return (
     <ol className="space-y-4">
       {settings.map((setting) => (
         <li key={setting.step}>
-          <StepCard setting={setting} reviewUrl={reviewUrl} adminEmail={adminEmail} testBlockers={testBlockers} />
+          <StepCard setting={setting} reviewUrl={reviewUrl} adminEmail={adminEmail} testBlockers={testBlockers} followUpsOn={followUpsOn} />
         </li>
       ))}
     </ol>

@@ -114,7 +114,7 @@ export async function sendFollowUpTest(
   if (!to) return { ok: false, error: "Your account has no email address." };
 
   const missing = testSendBlockers(missingSendSettings());
-  if (missing.length > 0) return { ok: false, error: `Can't send: ${missing.join(", ")} ${missing.length === 1 ? "isn't" : "aren't"} set.` };
+  if (missing.length > 0) return { ok: false, error: "Tests can't be sent until your web developer finishes the setup." };
 
   const lead = SAMPLE_LEADS[sample];
   const estimate = step === "acknowledgement" ? estimateFromLead(lead.serviceType, lead.message) : null;

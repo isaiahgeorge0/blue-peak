@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AlertMailIcon, FollowUpsIcon } from "@/components/admin/icons";
+import { AlertMailIcon, ChevronDownIcon, FollowUpsIcon } from "@/components/admin/icons";
 import { FollowUpEditor } from "@/components/admin/follow-up-editor";
 import { Card, PageHeader, SectionHeading } from "@/components/admin/ui";
 import { requireAdminPage } from "@/lib/admin-auth";
@@ -49,13 +49,9 @@ export default async function FollowUpsPage() {
           <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
           <div className="min-w-0">
             <h2 id="off-heading" className="font-sans text-base font-bold text-ink">
-              Follow-ups are off
+              Follow-ups aren&apos;t switched on yet.
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-ink/85">
-              No follow-up emails are being sent, because FOLLOW_UPS_ENABLED isn&apos;t set to true. Anything that falls due while
-              they&apos;re off is logged as skipped and won&apos;t be sent later. You can still edit the emails below and send yourself a
-              test.
-            </p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/85">You can still edit the emails and send yourself a test.</p>
           </div>
         </section>
       ) : null}
@@ -65,16 +61,9 @@ export default async function FollowUpsPage() {
           <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
           <div className="min-w-0">
             <h2 id="blocked-heading" className="font-sans text-base font-bold text-ink">
-              Follow-ups are on but can&apos;t send
+              Follow-ups are switched on but can&apos;t send yet.
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-ink/85">
-              {missing.join(" and ")} {missing.length === 1 ? "isn't" : "aren't"} set
-              {missing.includes("FOLLOW_UP_LINK_SECRET") && linkSecret === "too-short"
-                ? ` (FOLLOW_UP_LINK_SECRET must be at least ${MIN_LINK_SECRET_LENGTH} characters)`
-                : ""}
-              , so nothing is being sent until {missing.length === 1 ? "it is" : "they are"}. Due emails wait and go out once it&apos;s
-              fixed, unless they&apos;re too late by then (more than a day for acknowledgements, 3 days for the rest).
-            </p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/85">Ask your web developer to finish the setup.</p>
           </div>
         </section>
       ) : null}
@@ -95,18 +84,47 @@ export default async function FollowUpsPage() {
 
       <section aria-labelledby="emails-heading">
         <SectionHeading id="emails-heading">Emails</SectionHeading>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/80">
+          Who gets them: leads with an email address that aren&apos;t spam or paused. Pause a lead from its page, or the customer can stop
+          them with the link at the bottom of every email.
+        </p>
         <div className="mt-4">
           {error || settings.length === 0 ? (
             <Card className="px-5 py-4 text-sm">The follow-up emails couldn&apos;t be loaded just now. Refresh the page to try again.</Card>
           ) : (
-            <FollowUpEditor settings={settings} reviewUrl={config.reviewUrl} adminEmail={adminEmail} testBlockers={testSendBlockers(missing)} />
+            <FollowUpEditor
+              settings={settings}
+              reviewUrl={config.reviewUrl}
+              adminEmail={adminEmail}
+              testBlockers={testSendBlockers(missing)}
+              followUpsOn={config.enabled}
+            />
           )}
         </div>
       </section>
 
-      <section aria-labelledby="setup-heading">
-        <SectionHeading id="setup-heading">Setup</SectionHeading>
-        <Card className="mt-4 px-5 py-5">
+      <details className="group rounded-xl border border-admin-line bg-admin-surface">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-4 transition-colors hover:bg-admin-raised/60 [&::-webkit-details-marker]:hidden">
+          <h2 className="font-serif text-[1.375rem] leading-tight tracking-heading text-ink">Technical setup (for your web developer)</h2>
+          <ChevronDownIcon className="size-5 shrink-0 text-peak-fleet transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+        </summary>
+        <div className="border-t border-admin-line px-5 py-5">
+          {config.enabled && missing.length > 0 ? (
+            <p className="mb-4 text-sm leading-relaxed text-ink/85">
+              Nothing is sent until {new Intl.ListFormat("en-GB").format(missing)} {missing.length === 1 ? "is" : "are"} set
+              {missing.includes("FOLLOW_UP_LINK_SECRET") && linkSecret === "too-short"
+                ? ` (FOLLOW_UP_LINK_SECRET must be at least ${MIN_LINK_SECRET_LENGTH} characters)`
+                : ""}
+              . Due emails wait and go out once it&apos;s fixed, unless they&apos;re too late by then (more than a day for
+              acknowledgements, 3 days for the rest).
+            </p>
+          ) : null}
+          {!config.enabled ? (
+            <p className="mb-4 text-sm leading-relaxed text-ink/85">
+              Sending starts when FOLLOW_UPS_ENABLED is true. Anything that falls due before then is logged as skipped and isn&apos;t
+              sent later.
+            </p>
+          ) : null}
           <dl className="divide-y divide-admin-line">
             <SetupRow label="Sending" name="FOLLOW_UPS_ENABLED">
               {config.enabled ? "On" : "Off"}
@@ -132,15 +150,11 @@ export default async function FollowUpsPage() {
               )}
             </SetupRow>
             <SetupRow label="Test address" name="FOLLOW_UP_TEST_RECIPIENT">
-              {config.testRecipient ?? "Not set: emails go to customers"}
+              {config.testRecipient ?? "Not set (emails go to customers once sending is on)"}
             </SetupRow>
           </dl>
-          <p className="mt-4 text-sm leading-relaxed text-ink/80">
-            Who gets them: leads with an email address that aren&apos;t spam or paused. Pause a lead from its page, or the customer can
-            stop them with the link at the bottom of every email.
-          </p>
-        </Card>
-      </section>
+        </div>
+      </details>
     </div>
   );
 }

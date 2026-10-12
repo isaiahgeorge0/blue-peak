@@ -8,6 +8,7 @@ import {
   renderFollowUpEmail,
   servicePhrase,
   STOP_LINK_TEXT,
+  templateParts,
   templateProblems,
   type FollowUpEmailInput,
 } from "./follow-up-email.ts";
@@ -155,6 +156,23 @@ const SEEDED = (() => {
   });
   return templates;
 })();
+
+describe("template parts for the admin's summary rows", () => {
+  test("placeholders are named in words, the text around them kept", () => {
+    assert.deepEqual(templateParts("Your {service} quote, {first_name}"), [
+      { text: "Your " },
+      { placeholder: "service" },
+      { text: " quote, " },
+      { placeholder: "first name" },
+    ]);
+  });
+
+  test("leading, adjacent and absent placeholders", () => {
+    assert.deepEqual(templateParts("{first_name}{phone}!"), [{ placeholder: "first name" }, { placeholder: "phone" }, { text: "!" }]);
+    assert.deepEqual(templateParts("Thanks for getting in touch"), [{ text: "Thanks for getting in touch" }]);
+    assert.deepEqual(templateParts(""), []);
+  });
+});
 
 const ESTIMATE_ROWS = [
   { label: "Work", value: "Rear extension" },

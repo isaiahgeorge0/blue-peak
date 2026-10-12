@@ -91,6 +91,21 @@ export function templateProblems(step: FollowUpStep, subject: string, body: stri
   return [...new Set(problems)];
 }
 
+export type TemplatePart = { text: string } | { placeholder: string };
+
+/** A template split into plain text and placeholders, each placeholder named in words ({first_name} is "first name"). */
+export function templateParts(template: string): TemplatePart[] {
+  const parts: TemplatePart[] = [];
+  let last = 0;
+  for (const match of template.matchAll(/\{([a-z_]+)\}/g)) {
+    if (match.index > last) parts.push({ text: template.slice(last, match.index) });
+    parts.push({ placeholder: match[1].replaceAll("_", " ") });
+    last = match.index + match[0].length;
+  }
+  if (last < template.length) parts.push({ text: template.slice(last) });
+  return parts;
+}
+
 type Values = { firstName: string | null; service: string; phone: string };
 
 /**
