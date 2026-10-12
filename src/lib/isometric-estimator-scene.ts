@@ -293,7 +293,10 @@ export function mountIsometricEstimator(
   // add-on groups (flat-roofed volumes with a glazed face, fascia cap and plinth), all in Peak Fleet
   var addonMeshes = {};
   var ADDON_RISE = 0.9;
-  var GHOST_OPACITY = 0.32; // assigned before makeAddon runs: ghostMat() reads it at construction
+  // Assigned before makeAddon runs: ghostMat() reads it at construction. ?ghosts=off hides the dashed
+  // outlines of unchosen add-ons for the email house pictures (scripts/render-email-images.mjs); the
+  // outlines still set the framing, so the camera is the same either way.
+  var GHOST_OPACITY = /(?:^|[?&])ghosts=off(?:&|$)/.test(window.location.search) ? 0 : 0.32;
   function makeAddon(key, x0,hBase,dBase, w,h,d, glassAxis, glassSign){
     var group = new THREE.Group();
     var solidGroup = new THREE.Group();

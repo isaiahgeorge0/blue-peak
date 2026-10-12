@@ -89,7 +89,8 @@ async function renderHouses(browser, base) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, reducedMotion: "reduce" });
   await ctx.addInitScript(() => sessionStorage.setItem("bp-intro-seen", "1"));
   const page = await ctx.newPage();
-  await page.goto(`${base}/quote`, { waitUntil: "load" });
+  // Email pictures show only what was chosen: no dashed outlines for the other add-ons.
+  await page.goto(`${base}/quote?ghosts=off`, { waitUntil: "load" });
   await page.waitForSelector(".ie-stage-loading", { state: "detached", timeout: 30000 });
   await page.addStyleTag({ content: ".ie-stage-hint{display:none!important}" });
   await page.waitForTimeout(800);
