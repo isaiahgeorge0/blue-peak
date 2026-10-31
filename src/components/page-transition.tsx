@@ -60,7 +60,7 @@ function focusNewPage() {
 
 /**
  * Page transitions between public pages. An internal link click is held while
- * a Blue Solution panel, its leading edge cut at the 31 degree roof pitch,
+ * a Cortex Blue panel, its leading edge cut at the 31 degree roof pitch,
  * sweeps up over the page; then the route is pushed. Once the new route has
  * rendered (or after HOLD_MAX_MS regardless) the panel carries on off the top
  * while the new page rises in. Back/forward and reduced motion get a plain
@@ -279,7 +279,7 @@ export function PageTransition() {
         className="pointer-events-none fixed inset-0 z-[71] place-items-center opacity-0"
         style={{ display: "none" }}
       >
-        <BrandMark title="" className="h-14 w-auto text-peak-white" />
+        <BrandMark title="" className="h-14 w-auto text-white" />
       </div>
     </>
   );

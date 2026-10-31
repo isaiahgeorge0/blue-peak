@@ -10,7 +10,7 @@ import { sitePhoneDisplay, sitePhoneTel } from "@/lib/site";
 function EstimatorUnavailable() {
   return (
     <div className="flex min-h-[60vh] max-w-2xl flex-col justify-center py-8">
-      <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
+      <p className="text-xs font-bold tracking-[0.2em] text-accent-ink uppercase">
         Build your estimate
       </p>
       <h1 className="mt-4 text-3xl tracking-heading text-ink sm:text-4xl">
@@ -26,7 +26,7 @@ function EstimatorUnavailable() {
         </Link>
         <a
           href={`tel:${sitePhoneTel}`}
-          className="link-draw tap-target text-sm text-ink/75 transition-colors duration-200 hover:text-accent"
+          className="link-draw tap-target text-sm text-ink/75 transition-colors duration-200 hover:text-accent-ink"
         >
           Or call {sitePhoneDisplay}
         </a>

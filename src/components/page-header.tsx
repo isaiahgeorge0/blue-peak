@@ -16,7 +16,7 @@ type PageHeaderProps = {
 };
 
 /**
- * Frost White band that opens an inner page without a photo opener. It runs
+ * Plaster band that opens an inner page without a photo opener. It runs
  * up behind the floating header, so its top padding includes the header's
  * clearance; the h1 matches the photo openers' size.
  * Not wrapped in Reveal: it is above the fold and must paint without waiting
@@ -39,7 +39,7 @@ export function PageHeader({
               <li>
                 <Link
                   href={breadcrumb.href}
-                  className="link-draw tap-target text-accent"
+                  className="link-draw tap-target text-accent-ink"
                 >
                   {eyebrow}
                 </Link>
@@ -55,7 +55,7 @@ export function PageHeader({
             </ol>
           </nav>
         ) : (
-          <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
+          <p className="text-xs font-bold tracking-[0.2em] text-accent-ink uppercase">
             {eyebrow}
           </p>
         )}

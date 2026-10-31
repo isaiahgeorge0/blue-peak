@@ -33,7 +33,7 @@ export default async function StopEmailsPage({ searchParams }: PageProps<"/stop-
               ? "This link came from a test email, so nothing has been changed."
               : "This link doesn't work. It may not have been copied in full."}{" "}
             To ask us to stop emailing you, reply to any of our emails or call us on{" "}
-            <a href={`tel:${sitePhoneTel}`} className="font-bold whitespace-nowrap text-accent underline underline-offset-4">
+            <a href={`tel:${sitePhoneTel}`} className="font-bold whitespace-nowrap text-accent-ink underline underline-offset-4">
               {sitePhoneDisplay}
             </a>
             .

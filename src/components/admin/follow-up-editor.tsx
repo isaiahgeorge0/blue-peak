@@ -70,7 +70,7 @@ function ToggleGroup<T extends string | boolean>({
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={`min-h-9 rounded-full px-4 text-sm font-bold transition-colors ${
-            value === option.value ? "bg-frost text-navy" : "text-ink/80 hover:text-ink"
+            value === option.value ? "bg-plaster text-navy" : "text-ink/80 hover:text-ink"
           }`}
         >
           {option.text}
@@ -126,7 +126,7 @@ function Switch({
         <span
           aria-hidden
           className={`absolute left-1.5 size-8 rounded-full shadow transition-transform duration-200 ease-out motion-reduce:transition-none ${
-            paused ? "translate-x-[1.5rem] bg-frost/45" : checked ? "translate-x-[1.5rem] bg-frost" : "translate-x-0 bg-admin-edge"
+            paused ? "translate-x-[1.5rem] bg-plaster/45" : checked ? "translate-x-[1.5rem] bg-plaster" : "translate-x-0 bg-admin-edge"
           }`}
         />
       </button>
@@ -282,7 +282,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }:
   }
 
   const fieldClass =
-    "block w-full rounded-lg border border-admin-edge bg-admin-base px-4 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-peak-fleet";
+    "block w-full rounded-lg border border-admin-edge bg-admin-base px-4 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-sky";
 
   return (
     <Card>
@@ -292,7 +292,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }:
             {label}
           </h3>
           <p className="mt-1 flex items-start gap-1.5 text-sm text-ink/80">
-            <ClockIcon className="mt-0.5 size-4 text-peak-fleet" />
+            <ClockIcon className="mt-0.5 size-4 text-sky" />
             <span>{scheduleSentence(setting.step, saved.delay_amount, saved.delay_unit)}</span>
           </p>
           <p className="mt-1 text-sm break-words text-ink">
@@ -309,7 +309,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }:
           aria-expanded={open}
           aria-controls={ids.panel}
           onClick={() => setOpen((value) => !value)}
-          className="flex min-h-12 w-full items-center justify-between gap-3 px-5 text-left text-sm font-bold text-peak-fleet transition-colors hover:bg-admin-raised/60 hover:text-ridge-cyan"
+          className="flex min-h-12 w-full items-center justify-between gap-3 px-5 text-left text-sm font-bold text-sky transition-colors hover:bg-admin-raised/60 hover:text-glow"
         >
           <span>
             {open ? "Hide email" : "Edit email"}
@@ -403,7 +403,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }:
             </div>
 
             {problems.length > 0 ? (
-              <ul role="alert" className="space-y-1 text-sm font-bold text-ridge-cyan">
+              <ul role="alert" className="space-y-1 text-sm font-bold text-glow">
                 {problems.map((problem) => (
                   <li key={problem}>{problem}</li>
                 ))}
@@ -425,7 +425,7 @@ function StepCard({ setting, reviewUrl, adminEmail, testBlockers, followUpsOn }:
                 : "Tests can't be sent until your web developer finishes the setup."}
             </p>
             {message ? (
-              <p role={message.tone === "error" ? "alert" : "status"} className={`text-sm font-bold ${message.tone === "error" ? "text-ridge-cyan" : "text-ink"}`}>
+              <p role={message.tone === "error" ? "alert" : "status"} className={`text-sm font-bold ${message.tone === "error" ? "text-glow" : "text-ink"}`}>
                 {message.text}
               </p>
             ) : null}

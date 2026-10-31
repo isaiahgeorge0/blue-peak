@@ -51,14 +51,14 @@ type FormState = {
 };
 
 /* Hairline fields: the border holds 3:1 against the page, and focus turns it
-   Blue Solution with a second ring inside. */
+   Cortex Blue with a second ring inside. */
 const fieldClassName =
   "mt-3 block min-h-13 w-full rounded-md border border-ink/48 bg-page px-4 py-3 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink/45 focus:border-accent focus:ring-1 focus:ring-accent";
 
 const labelClassName = "block font-serif text-xl leading-tight text-ink";
 
 const quoteButtonClassName =
-  "group inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-on-accent transition-[background-color,opacity] duration-200 hover:bg-traverse focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent";
+  "group inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-on-accent transition-[background-color,opacity] duration-200 hover:bg-blue-shade focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-accent";
 
 /* Safari scrolls a focused field into view only when it is wholly off screen,
    and misplaces it against the page's scroll padding, so a tall field can stop
@@ -224,7 +224,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
             <label htmlFor="name" className={labelClassName}>
-              Name <span className="text-accent">*</span>
+              Name <span className="text-accent-ink">*</span>
             </label>
             <input
               id="name"
@@ -239,7 +239,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
               aria-describedby={fieldErrors.name ? "name-error" : undefined}
             />
             {fieldErrors.name ? (
-              <p id="name-error" className="mt-2 text-sm text-accent">
+              <p id="name-error" className="mt-2 text-sm text-accent-ink">
                 {fieldErrors.name}
               </p>
             ) : null}
@@ -247,7 +247,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
 
           <div>
             <label htmlFor="phone" className={labelClassName}>
-              Phone <span className="text-accent">*</span>
+              Phone <span className="text-accent-ink">*</span>
             </label>
             <input
               id="phone"
@@ -262,7 +262,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
               aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
             />
             {fieldErrors.phone ? (
-              <p id="phone-error" className="mt-2 text-sm text-accent">
+              <p id="phone-error" className="mt-2 text-sm text-accent-ink">
                 {fieldErrors.phone}
               </p>
             ) : null}
@@ -287,7 +287,7 @@ export function ContactForm({ services, title, nextSteps }: ContactFormProps) {
               aria-describedby={fieldErrors.email ? "email-error" : undefined}
             />
             {fieldErrors.email ? (
-              <p id="email-error" className="mt-2 text-sm text-accent">
+              <p id="email-error" className="mt-2 text-sm text-accent-ink">
                 {fieldErrors.email}
               </p>
             ) : null}
@@ -417,7 +417,7 @@ function Confirmation({ nextSteps }: { nextSteps?: ReactNode }) {
       ref={panelRef}
       className="contact-confirmation scroll-mt-6"
     >
-      <BrandMark pieces title="" className="contact-mark h-14 w-auto text-accent" />
+      <BrandMark pieces title="" className="contact-mark h-14 w-auto text-accent-ink" />
       <h2
         ref={headingRef}
         tabIndex={-1}

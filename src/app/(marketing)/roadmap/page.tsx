@@ -22,7 +22,7 @@ export default function RoadmapPage() {
     <>
       <section className="bg-panel">
         <div className="mx-auto max-w-6xl px-6 pt-34 pb-16 lg:pt-42 lg:pb-24">
-          <p className="text-sm font-bold tracking-wide text-accent uppercase">
+          <p className="text-sm font-bold tracking-wide text-accent-ink uppercase">
             Roadmap
           </p>
           <h1 className="mt-3 max-w-3xl text-4xl leading-display tracking-heading text-ink sm:text-5xl sm:tracking-display lg:text-6xl">
@@ -54,10 +54,10 @@ export default function RoadmapPage() {
               className="scroll-mt-9 border-t border-ink/10 pt-10 first:border-t-0 first:pt-0"
             >
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm font-bold tracking-wide text-accent">
+                <p className="text-sm font-bold tracking-wide text-accent-ink">
                   {String(index + 1).padStart(2, "0")}
                 </p>
-                <span className="rounded-full border border-accent/40 px-3 py-1 text-xs font-bold tracking-wide text-accent uppercase">
+                <span className="rounded-full border border-accent/40 px-3 py-1 text-xs font-bold tracking-wide text-accent-ink uppercase">
                   {feature.label}
                 </span>
               </div>
@@ -67,7 +67,7 @@ export default function RoadmapPage() {
               <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink/80">
                 {feature.summary}
               </p>
-              <h3 className="mt-8 text-sm font-bold tracking-wide text-accent uppercase">
+              <h3 className="mt-8 text-sm font-bold tracking-wide text-accent-ink uppercase">
                 Why it matters
               </h3>
               {feature.whyItMatters.map((paragraph) => (

@@ -101,7 +101,7 @@ export default async function ServiceDetailPage({
                 <li>
                   <Link
                     href="/services"
-                    className="link-draw tap-target text-accent"
+                    className="link-draw tap-target text-accent-ink"
                   >
                     Services
                   </Link>
@@ -190,7 +190,7 @@ export default async function ServiceDetailPage({
             {howWeWorkSteps.map((step, stepIndex) => (
               <li key={step.title} className="border-t border-white/20 pt-6">
                 <h3 className="flex items-baseline gap-3 text-2xl leading-tight font-semibold text-ink">
-                  <span className="text-sm font-bold tracking-[0.2em] text-accent">
+                  <span className="text-sm font-bold tracking-[0.2em] text-accent-ink">
                     {String(stepIndex + 1).padStart(2, "0")}
                   </span>
                   {step.title}
@@ -274,10 +274,10 @@ export default async function ServiceDetailPage({
                     )}
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
-                    <h3 className="text-xl leading-tight font-semibold text-ink transition-colors duration-200 group-hover:text-accent">
+                    <h3 className="text-xl leading-tight font-semibold text-ink transition-colors duration-200 group-hover:text-accent-ink">
                       {other.name}
                     </h3>
-                    <ArrowIcon className="mt-1 shrink-0 text-accent" />
+                    <ArrowIcon className="mt-1 shrink-0 text-accent-ink" />
                   </div>
                 </Link>
               </li>

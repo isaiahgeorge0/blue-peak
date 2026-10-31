@@ -164,7 +164,7 @@ export function EstimatorBooking({
   function renderStep() {
     if (step === "sent") {
       return (
-        <p role="status" className="text-sm text-accent">
+        <p role="status" className="text-sm text-accent-ink">
           Noted - we&apos;ll follow up to arrange a visit.
         </p>
       );
@@ -200,7 +200,7 @@ export function EstimatorBooking({
               htmlFor="estimator-name"
               className="block text-xs font-medium text-ink/85"
             >
-              Name <span className="text-accent">*</span>
+              Name <span className="text-accent-ink">*</span>
             </label>
             <input
               ref={nameRef}
@@ -220,7 +220,7 @@ export function EstimatorBooking({
             {fieldErrors.name ? (
               <p
                 id="estimator-name-error"
-                className="mt-1.5 text-xs text-accent"
+                className="mt-1.5 text-xs text-accent-ink"
               >
                 {fieldErrors.name}
               </p>
@@ -231,7 +231,7 @@ export function EstimatorBooking({
               htmlFor="estimator-phone"
               className="block text-xs font-medium text-ink/85"
             >
-              Phone <span className="text-accent">*</span>
+              Phone <span className="text-accent-ink">*</span>
             </label>
             <input
               id="estimator-phone"
@@ -250,7 +250,7 @@ export function EstimatorBooking({
             {fieldErrors.phone ? (
               <p
                 id="estimator-phone-error"
-                className="mt-1.5 text-xs text-accent"
+                className="mt-1.5 text-xs text-accent-ink"
               >
                 {fieldErrors.phone}
               </p>
@@ -282,7 +282,7 @@ export function EstimatorBooking({
             {fieldErrors.email ? (
               <p
                 id="estimator-email-error"
-                className="mt-1.5 text-xs text-accent"
+                className="mt-1.5 text-xs text-accent-ink"
               >
                 {fieldErrors.email}
               </p>

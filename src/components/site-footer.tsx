@@ -26,7 +26,7 @@ const columns = [
   },
 ];
 
-const headingClassName = "font-sans text-xs font-bold tracking-[0.2em] text-accent uppercase";
+const headingClassName = "font-sans text-xs font-bold tracking-[0.2em] text-accent-ink uppercase";
 
 const listClassName = "mt-5 space-y-3 pointer-coarse:space-y-5";
 

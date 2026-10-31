@@ -1,7 +1,7 @@
 import { BrandMark } from "@/components/brand/brand-logo";
 import { teamMembers } from "@/lib/site";
 
-/** Kyle and Steven as Blue Solution panels, two up from sm. */
+/** Kyle and Steven as Cortex Blue panels, two up from sm. */
 export function FounderCards({ className = "" }: { className?: string }) {
   return (
     <ul className={`grid max-w-4xl gap-6 sm:grid-cols-2 sm:gap-8 lg:max-w-none ${className}`}>

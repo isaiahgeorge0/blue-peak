@@ -20,13 +20,13 @@ import { LEAD_STATUSES, type LeadStatus } from "@/lib/lead-status";
 /*
   Statuses in brand blues and greys only, each with its own mark and label:
   New is the bright highlight (it needs a reply), Contacted and Quoted step
-  through the blues, Won is solid Frost White, Lost and Spam recede.
+  through the blues, Won is solid Plaster, Lost and Spam recede.
 */
 const STATUS_STYLES: Record<LeadStatus, { className: string; Icon: ComponentType<{ className?: string }> }> = {
-  new: { className: "bg-ridge-cyan/15 text-ridge-cyan ring-1 ring-inset ring-ridge-cyan/40", Icon: StatusNewIcon },
-  contacted: { className: "bg-peak-fleet/10 text-peak-fleet ring-1 ring-inset ring-peak-fleet/40", Icon: StatusContactedIcon },
-  quoted: { className: "bg-traverse text-frost ring-1 ring-inset ring-frost/20", Icon: StatusQuotedIcon },
-  won: { className: "bg-frost text-navy", Icon: StatusWonIcon },
+  new: { className: "bg-glow/15 text-glow ring-1 ring-inset ring-glow/40", Icon: StatusNewIcon },
+  contacted: { className: "bg-sky/10 text-sky ring-1 ring-inset ring-sky/40", Icon: StatusContactedIcon },
+  quoted: { className: "bg-blue-shade text-plaster ring-1 ring-inset ring-plaster/20", Icon: StatusQuotedIcon },
+  won: { className: "bg-plaster text-navy", Icon: StatusWonIcon },
   lost: { className: "text-ink/80 ring-1 ring-inset ring-ink/35", Icon: StatusLostIcon },
   spam: { className: "text-ink/70 ring-1 ring-inset ring-ink/25", Icon: StatusSpamIcon },
 };

@@ -3,7 +3,7 @@ export function CheckIcon() {
   return (
     <svg
       viewBox="0 0 16 16"
-      className="mt-1 h-4 w-4 shrink-0 text-accent"
+      className="mt-1 h-4 w-4 shrink-0 text-accent-ink"
       aria-hidden
     >
       <path

@@ -72,6 +72,6 @@ export function AdminDialog({
 }
 
 export const fieldClass =
-  "mt-1.5 block h-11 w-full rounded-lg border border-admin-edge bg-admin-base px-3.5 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-peak-fleet disabled:opacity-60";
+  "mt-1.5 block h-11 w-full rounded-lg border border-admin-edge bg-admin-base px-3.5 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-sky disabled:opacity-60";
 
 export const fieldLabelClass = "text-sm font-bold text-ink";

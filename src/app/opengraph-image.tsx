@@ -23,7 +23,7 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           position: "relative",
-          backgroundColor: "#1800ad",
+          backgroundColor: "#0E1A30",
         }}
       >
         <img

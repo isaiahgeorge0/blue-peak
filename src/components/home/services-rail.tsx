@@ -234,7 +234,7 @@ export function ServicesRail() {
                         <h3 className="text-2xl leading-tight font-semibold text-ink max-sm:motion-reduce:text-lg">
                           {service.name}
                         </h3>
-                        <ArrowIcon className="mt-2 shrink-0 text-accent max-sm:motion-reduce:mt-1" />
+                        <ArrowIcon className="mt-2 shrink-0 text-accent-ink max-sm:motion-reduce:mt-1" />
                       </div>
                       <p className="mt-2 text-base leading-relaxed text-ink/70">
                         {service.shortDescription}

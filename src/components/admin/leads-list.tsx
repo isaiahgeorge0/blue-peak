@@ -83,7 +83,7 @@ function compare(sort: Sort) {
 
 const plural = (count: number) => `${count} lead${count === 1 ? "" : "s"}`;
 
-const checkboxClass = "size-5 cursor-pointer rounded accent-peak-fleet";
+const checkboxClass = "size-5 cursor-pointer rounded accent-sky";
 
 function Extras({ lead }: { lead: LeadListRow }) {
   if (!lead.notes && !lead.visit) return null;
@@ -91,13 +91,13 @@ function Extras({ lead }: { lead: LeadListRow }) {
     <span className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/80">
       {lead.visit ? (
         <span className="inline-flex items-center gap-1">
-          <CalendarIcon className="size-3.5 text-peak-fleet" />
+          <CalendarIcon className="size-3.5 text-sky" />
           {lead.visit}
         </span>
       ) : null}
       {lead.notes ? (
         <span className="inline-flex items-center gap-1">
-          <NoteIcon className="size-3.5 text-peak-fleet" />
+          <NoteIcon className="size-3.5 text-sky" />
           {lead.notes === 1 ? "1 note" : `${lead.notes} notes`}
         </span>
       ) : null}
@@ -199,7 +199,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Name, phone, email, postcode, BP-0001"
-            className="h-11 w-full rounded-full border border-admin-edge bg-admin-surface pr-4 pl-10 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-peak-fleet"
+            className="h-11 w-full rounded-full border border-admin-edge bg-admin-surface pr-4 pl-10 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-sky"
           />
         </div>
         <div className="relative sm:ml-auto">
@@ -210,7 +210,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
             id="leads-sort"
             value={sort}
             onChange={(event) => setSort(event.target.value as Sort)}
-            className="h-11 w-full cursor-pointer appearance-none rounded-full border border-admin-edge bg-admin-surface pr-10 pl-4 text-sm font-bold text-ink hover:border-peak-fleet sm:w-auto"
+            className="h-11 w-full cursor-pointer appearance-none rounded-full border border-admin-edge bg-admin-surface pr-10 pl-4 text-sm font-bold text-ink hover:border-sky sm:w-auto"
           >
             {SORTS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -233,8 +233,8 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
               onClick={() => chooseStatus(chip)}
               className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors md:h-9 ${
                 active
-                  ? "border-frost bg-frost text-navy"
-                  : "border-admin-line bg-admin-surface text-ink hover:border-peak-fleet"
+                  ? "border-plaster bg-plaster text-navy"
+                  : "border-admin-line bg-admin-surface text-ink hover:border-sky"
               }`}
             >
               {chip === "all" ? "All" : STATUS_LABELS[chip]}
@@ -289,7 +289,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
             )}
             <button
               type="button"
-              className="min-h-11 rounded-full px-3 text-sm font-bold text-peak-fleet hover:text-ridge-cyan"
+              className="min-h-11 rounded-full px-3 text-sm font-bold text-sky hover:text-glow"
               onClick={() => setAllVisibleSelected(false)}
             >
               Clear
@@ -298,7 +298,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
         ) : null}
       </div>
 
-      <p role="status" className="text-sm font-bold text-ridge-cyan empty:hidden">
+      <p role="status" className="text-sm font-bold text-glow empty:hidden">
         {bulkMessage}
       </p>
 
@@ -339,7 +339,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
                     />
                   </label>
                   <div className="min-w-0 flex-1">
-                    <Link href={`/admin/leads/${lead.id}`} className="-my-2.5 block rounded-sm py-2.5 text-base font-bold break-words text-ink hover:text-ridge-cyan">
+                    <Link href={`/admin/leads/${lead.id}`} className="-my-2.5 block rounded-sm py-2.5 text-base font-bold break-words text-ink hover:text-glow">
                       {nameOf(lead)}
                     </Link>
                     <p className="mt-0.5 text-sm text-ink/80">
@@ -393,7 +393,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
                       />
                     </td>
                     <td className="px-4 py-4">
-                      <Link href={`/admin/leads/${lead.id}`} className="rounded-sm text-[0.9375rem] font-bold break-words text-ink hover:text-ridge-cyan hover:underline underline-offset-4">
+                      <Link href={`/admin/leads/${lead.id}`} className="rounded-sm text-[0.9375rem] font-bold break-words text-ink hover:text-glow hover:underline underline-offset-4">
                         {nameOf(lead)}
                       </Link>
                       <p className="mt-0.5 text-ink/80">

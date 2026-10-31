@@ -125,7 +125,7 @@ export function ServicesIndex({ services }: { services: IndexService[] }) {
                 )}
               </div>
               <div className="mt-6 flex gap-5 lg:mt-0 lg:gap-8">
-                <p className="pt-1.5 text-sm font-bold tracking-[0.2em] text-accent lg:pt-4">
+                <p className="pt-1.5 text-sm font-bold tracking-[0.2em] text-accent-ink lg:pt-4">
                   {String(index + 1).padStart(2, "0")}
                 </p>
                 <div className="min-w-0 flex-1">
@@ -135,7 +135,7 @@ export function ServicesIndex({ services }: { services: IndexService[] }) {
                     </h2>
                     <span
                       aria-hidden
-                      className="hidden -translate-x-2 text-accent opacity-0 [&>svg]:size-6 transition-[opacity,transform] duration-[250ms] ease-out motion-reduce:transition-none lg:block lg:group-data-[active=true]:translate-x-0 lg:group-data-[active=true]:opacity-100"
+                      className="hidden -translate-x-2 text-accent-ink opacity-0 [&>svg]:size-6 transition-[opacity,transform] duration-[250ms] ease-out motion-reduce:transition-none lg:block lg:group-data-[active=true]:translate-x-0 lg:group-data-[active=true]:opacity-100"
                     >
                       <ArrowIcon />
                     </span>
@@ -143,7 +143,7 @@ export function ServicesIndex({ services }: { services: IndexService[] }) {
                   <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70 lg:text-lg">
                     {service.shortDescription}
                   </p>
-                  <span className="link-arrow mt-4 inline-flex items-center gap-2 text-sm font-bold text-accent lg:hidden">
+                  <span className="link-arrow mt-4 inline-flex items-center gap-2 text-sm font-bold text-accent-ink lg:hidden">
                     Learn more
                     <ArrowIcon />
                   </span>

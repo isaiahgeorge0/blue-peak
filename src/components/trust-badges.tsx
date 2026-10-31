@@ -61,7 +61,7 @@ export function TrustBadges() {
             key={badge.label}
             className="flex min-w-0 items-center gap-2 text-ink/75 lg:shrink-0"
           >
-            <span className="shrink-0 text-accent">{badge.icon}</span>
+            <span className="shrink-0 text-accent-ink">{badge.icon}</span>
             <span className="text-xs font-medium text-ink sm:text-sm lg:whitespace-nowrap">
               {badge.label}
             </span>

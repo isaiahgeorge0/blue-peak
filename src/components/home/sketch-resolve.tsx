@@ -209,7 +209,7 @@ export function SketchResolve() {
                   className="group transition-opacity duration-500 ease-out pinnable:max-lg:[grid-area:1/1] pinnable:max-lg:opacity-0 pinnable:max-lg:data-[active=true]:opacity-100 pinnable:lg:opacity-70 pinnable:lg:data-[active=true]:opacity-100 max-lg:unpinnable:mt-8 max-lg:unpinnable:first:mt-0"
                 >
                   <h3 className="flex items-baseline gap-3 text-2xl leading-tight font-semibold text-ink">
-                    <span className="text-sm font-bold tracking-[0.2em] text-accent pinnable:lg:text-ink pinnable:lg:group-data-[active=true]:text-accent">
+                    <span className="text-sm font-bold tracking-[0.2em] text-accent-ink pinnable:lg:text-ink pinnable:lg:group-data-[active=true]:text-accent-ink">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     {stage.title}
@@ -220,7 +220,7 @@ export function SketchResolve() {
                         {stage.body}
                       </p>
                       {stage.caption ? (
-                        <p className="pt-3 font-serif text-xl text-accent italic">
+                        <p className="pt-3 font-serif text-xl text-accent-ink italic">
                           {stage.caption}
                         </p>
                       ) : null}

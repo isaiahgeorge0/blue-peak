@@ -246,7 +246,7 @@ export function CalendarEventForm({ event, prefill, leads, onCancel, onSaved, on
                   aria-pressed={selected}
                   aria-label={WEEKDAY_NAMES[day]}
                   className={`h-11 rounded-lg border text-xs font-bold transition-colors ${
-                    selected ? "border-frost bg-frost text-navy" : "border-admin-edge text-ink hover:border-peak-fleet"
+                    selected ? "border-plaster bg-plaster text-navy" : "border-admin-edge text-ink hover:border-sky"
                   }`}
                 >
                   {WEEKDAY_LABELS[day]}
@@ -280,7 +280,7 @@ export function CalendarEventForm({ event, prefill, leads, onCancel, onSaved, on
       ) : null}
 
       {error ? (
-        <p role="alert" className="text-sm font-bold text-ridge-cyan">
+        <p role="alert" className="text-sm font-bold text-glow">
           {error}
         </p>
       ) : null}
