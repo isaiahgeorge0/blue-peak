@@ -135,7 +135,7 @@ describe("placeholders", () => {
   });
 });
 
-/** The seeded templates as they now stand: the original text with the P.S. line the later migration appends. */
+/** The seeded templates as they now stand: original + P.S. + Cortex wording migrations. */
 const SEEDED = (() => {
   const migration = (name: string) => readFileSync(new URL(`../../supabase/migrations/${name}`, import.meta.url), "utf8");
   const psLines = new Map(
@@ -154,7 +154,28 @@ const SEEDED = (() => {
     assert.equal(ps?.seeded, match[3], `P.S. migration matches the seeded ${match[1]} text`);
     return { step: match[1] as FollowUpStep, subject: match[2].replaceAll("''", "'"), body: `${match[3]}\n\n${ps!.line}`, ps: ps!.line };
   });
-  return templates;
+  const cortex = new Map(
+    [
+      ...migration("20261031120000_cortex_follow_up_wording.sql").matchAll(
+        /'(acknowledgement|quote_chaser_1|quote_chaser_2|review_request)',\s*'((?:[^']|'')*)',\s*\$body\$([\s\S]*?)\$body\$,\s*'((?:[^']|'')*)',\s*\$body\$([\s\S]*?)\$body\$/g,
+      ),
+    ].map((match) => [
+      match[1],
+      {
+        oldSubject: match[2].replaceAll("''", "'"),
+        oldBody: match[3],
+        subject: match[4].replaceAll("''", "'"),
+        body: match[5],
+      },
+    ]),
+  );
+  return templates.map((template) => {
+    const update = cortex.get(template.step);
+    if (!update) return template;
+    assert.equal(update.oldSubject, template.subject, `Cortex migration old subject matches seeded ${template.step}`);
+    assert.equal(update.oldBody, template.body, `Cortex migration old body matches seeded ${template.step}`);
+    return { ...template, subject: update.subject, body: update.body };
+  });
 })();
 
 describe("template parts for the admin's summary rows", () => {
@@ -327,11 +348,26 @@ describe("rendered email", () => {
   test("the frame: logo and gable with alt text, tagline and phone in the footer", () => {
     const email = renderFollowUpEmail(base);
     assert.match(email.html, /<img src="cid:bp-logo"[^>]*alt="Cortex Building"/);
+    assert.match(email.html, /width="206" height="41"/);
+    assert.match(email.html, /#1F6BFF/);
+    assert.match(email.html, /#8DB6FF/);
+    assert.match(email.html, /#EEF1F4/);
+    assert.match(email.html, /#0E1A30/);
+    assert.match(email.html, /#1449C4/);
     assert.match(email.html, /<img src="cid:bp-gable"[^>]*alt=""/);
     for (const img of email.html.match(/<img\b[^>]*>/g) ?? []) assert.match(img, /\balt="/, img);
     assert.match(email.html, /font-style: italic[^>]*>Everything under one roof\.<\/p>/);
     assert.ok(email.html.indexOf("Everything under one roof.") < email.html.lastIndexOf("tel:+441234567890"));
     assert.match(email.text, /--\nEverything under one roof\.\nCortex Building\. Call 01234 567890/);
+  });
+
+  test("acknowledgement seeded body names Kyle, not both of us", () => {
+    const ack = SEEDED.find((template) => template.step === "acknowledgement")!;
+    assert.doesNotMatch(ack.body, /both of us/);
+    assert.match(ack.body, /come through to Kyle, and he'll be in touch soon/);
+    const email = renderFollowUpEmail({ ...base, ...ack });
+    assert.doesNotMatch(email.text, /both of us/);
+    assert.match(email.text, /come through to Kyle, and he'll be in touch soon/);
   });
 
   test("job card: reference, what it's about, the date and the stage, in HTML and text", () => {

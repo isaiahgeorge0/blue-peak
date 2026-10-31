@@ -9,19 +9,30 @@ import { JOB_STAGES, stageSummary, type JobCard } from "./job-card.ts";
   preview. Pure, so the sender and the preview render the same thing.
 */
 
-export const NAVY = "#0e2240";
-export const BLUE_SOLUTION = "#1800ad";
-export const PEAK_FLEET = "#43b7d4";
-export const FROST = "#e9f7f7";
-export const MUTED = "#4a5d73";
-export const LINE = "#cfe3e6";
-const LATER = "#d5dee6";
-const FOOTER_TEXT = "#b9c9d6";
+export const NAVY = "#0E1A30";
+export const CORTEX_BLUE = "#1F6BFF";
+/** Body links on white — darker than the button blue so small text passes 4.5:1. */
+export const BLUE_SHADE = "#1449C4";
+export const SKY = "#8DB6FF";
+export const PLASTER = "#EEF1F4";
+export const MUTED = "#5B636D";
+export const LINE = "#D5DBE1";
+const LATER = "#DDE2E8";
+const FOOTER_TEXT = "#C9D0D8";
+/** Display size of public/email/logo.png (wordmark-white alone on navy). */
+export const LOGO_WIDTH = 206;
+export const LOGO_HEIGHT = 41;
 export const SERIF = "'Times New Roman', Times, serif";
 export const SANS = "'Nunito Sans', Helvetica, Arial, sans-serif";
 export const TAGLINE = "Everything under one roof.";
 export const ESTIMATE_HEADING = "Your estimate";
 const CONTENT_WIDTH = 520;
+
+const DARK_PAGE = "#060C17";
+const DARK_BODY = "#16274A";
+const DARK_BORDER = "#213A66";
+const DARK_ESTIMATE = "#122140";
+const DARK_LATER = "#2A3A58";
 
 export type EmailImageSources = { logo: string; gable: string; house?: string | null };
 
@@ -34,7 +45,7 @@ export function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-/** A Blue Solution pill button. Outlook on Windows gets a VML version so it keeps its shape and colour. */
+/** A Cortex Blue pill button. Outlook on Windows gets a VML version so it keeps its shape and colour. */
 export function buttonHtml(href: string, label: string, { fullWidth = false }: { fullWidth?: boolean } = {}) {
   const h = escapeHtml(href);
   const l = escapeHtml(label);
@@ -42,8 +53,8 @@ export function buttonHtml(href: string, label: string, { fullWidth = false }: {
   return `
               <table role="presentation" cellpadding="0" cellspacing="0" border="0"${fullWidth ? ' width="100%"' : ""} style="margin: 4px 0 16px;">
                 <tr>
-                  <td align="center" bgcolor="${BLUE_SOLUTION}" class="bp-button" style="border-radius: 999px; background-color: ${BLUE_SOLUTION};">
-                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${h}" style="height:52px;v-text-anchor:middle;width:${vmlWidth}px;" arcsize="50%" stroke="f" fillcolor="${BLUE_SOLUTION}"><w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">${l}</center></v:roundrect><![endif]-->
+                  <td align="center" bgcolor="${CORTEX_BLUE}" class="bp-button" style="border-radius: 999px; background-color: ${CORTEX_BLUE};">
+                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${h}" style="height:52px;v-text-anchor:middle;width:${vmlWidth}px;" arcsize="50%" stroke="f" fillcolor="${CORTEX_BLUE}"><w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">${l}</center></v:roundrect><![endif]-->
                     <!--[if !mso]><!--><a href="${h}" style="display: ${fullWidth ? "block" : "inline-block"}; padding: 16px 32px; font-family: ${SANS}; font-size: 16px; font-weight: bold; line-height: 20px; color: #ffffff; text-align: center; text-decoration: none; border-radius: 999px;">${l}</a><!--<![endif]-->
                   </td>
                 </tr>
@@ -55,7 +66,7 @@ export function jobCardHtml(card: JobCard, label = "Your job") {
   const cells = JOB_STAGES.map((label, index) => {
     const number = index + 1;
     const state = number < card.stage ? "done" : number === card.stage ? "current" : "later";
-    const bar = state === "done" ? BLUE_SOLUTION : state === "current" ? PEAK_FLEET : LATER;
+    const bar = state === "done" ? CORTEX_BLUE : state === "current" ? SKY : LATER;
     return `
                       <td width="20%" valign="top" style="width: 20%; padding: 0 ${index < JOB_STAGES.length - 1 ? 4 : 0}px 0 0;">
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -112,7 +123,7 @@ export function estimateBoxHtml(rows: EstimateRow[], houseSrc: string | null | u
                     <img src="${escapeHtml(houseSrc)}" width="478" alt="${escapeHtml(houseAlt(rows))}" style="display: block; width: 100%; max-width: 478px; height: auto; margin: 4px 0 10px; border: 0; border-radius: 8px; font-family: ${SANS}; font-size: 13px; line-height: 18px; color: ${MUTED};" />`
     : "";
   return `
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-box" bgcolor="${FROST}" style="margin: 4px 0 24px; background-color: ${FROST}; border: 1px solid ${LINE}; border-radius: 12px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-box" bgcolor="${PLASTER}" style="margin: 4px 0 24px; background-color: ${PLASTER}; border: 1px solid ${LINE}; border-radius: 12px;">
                 <tr>
                   <td style="padding: 18px 20px 4px;">
                     <p class="bp-text bp-serif" style="margin: 0 0 8px; font-family: ${SERIF}; font-size: 20px; line-height: 26px; color: ${NAVY};">${ESTIMATE_HEADING}</p>${picture}
@@ -165,7 +176,7 @@ export function renderEmailDocument(doc: EmailDocument) {
   const banner = doc.bannerHtml
     ? `
           <tr>
-            <td class="bp-banner" style="padding: 12px 20px; background-color: ${FROST}; border: 2px dashed ${BLUE_SOLUTION}; border-radius: 12px; font-family: ${SANS}; font-size: 14px; line-height: 20px; color: ${NAVY};">${doc.bannerHtml}</td>
+            <td class="bp-banner" style="padding: 12px 20px; background-color: ${PLASTER}; border: 2px dashed ${CORTEX_BLUE}; border-radius: 12px; font-family: ${SANS}; font-size: 14px; line-height: 20px; color: ${NAVY};">${doc.bannerHtml}</td>
           </tr>
           <tr><td style="height: 16px; line-height: 16px; font-size: 16px;">&nbsp;</td></tr>`
     : "";
@@ -186,39 +197,40 @@ export function renderEmailDocument(doc: EmailDocument) {
     body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; }
+    .bp-link { color: ${BLUE_SHADE}; }
     @media (max-width: 620px) {
       .bp-pad { padding-left: 20px !important; padding-right: 20px !important; }
       .bp-heading { font-size: 26px !important; line-height: 32px !important; }
     }
     @media (prefers-color-scheme: dark) {
-      .bp-page { background-color: #050d1a !important; }
-      .bp-body, .bp-job { background-color: #183a63 !important; }
-      .bp-job { border-color: #2f5688 !important; }
-      .bp-text, .bp-heading { color: ${FROST} !important; }
+      .bp-page { background-color: ${DARK_PAGE} !important; }
+      .bp-body, .bp-job { background-color: ${DARK_BODY} !important; }
+      .bp-job { border-color: ${DARK_BORDER} !important; }
+      .bp-text, .bp-heading { color: ${PLASTER} !important; }
       .bp-muted { color: ${FOOTER_TEXT} !important; }
-      .bp-link { color: ${PEAK_FLEET} !important; }
-      .bp-box { background-color: #12305a !important; border-color: #2f5688 !important; }
-      .bp-rule { border-color: #2f5688 !important; }
-      .bp-track-done { background-color: ${FROST} !important; }
-      .bp-track-later { background-color: #2c4a73 !important; }
-      .bp-button { border: 1px solid ${PEAK_FLEET} !important; }
-      .bp-banner { background-color: #122c54 !important; color: ${FROST} !important; border-color: ${PEAK_FLEET} !important; }
+      .bp-link { color: ${SKY} !important; }
+      .bp-box { background-color: ${DARK_ESTIMATE} !important; border-color: ${DARK_BORDER} !important; }
+      .bp-rule { border-color: ${DARK_BORDER} !important; }
+      .bp-track-done { background-color: ${PLASTER} !important; }
+      .bp-track-later { background-color: ${DARK_LATER} !important; }
+      .bp-button { border: 1px solid ${SKY} !important; }
+      .bp-banner { background-color: ${DARK_ESTIMATE} !important; color: ${PLASTER} !important; border-color: ${SKY} !important; }
     }
-    [data-ogsc] .bp-text, [data-ogsc] .bp-heading { color: ${FROST} !important; }
+    [data-ogsc] .bp-text, [data-ogsc] .bp-heading { color: ${PLASTER} !important; }
     [data-ogsc] .bp-muted { color: ${FOOTER_TEXT} !important; }
-    [data-ogsc] .bp-link { color: ${PEAK_FLEET} !important; }
+    [data-ogsc] .bp-link { color: ${SKY} !important; }
   </style>
 </head>
-<body class="bp-page" style="margin: 0; padding: 0; background-color: ${FROST};">
+<body class="bp-page" style="margin: 0; padding: 0; background-color: ${PLASTER};">
   <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; mso-hide: all;">${escapeHtml(doc.preheader)}${PREHEADER_FILLER}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-page" bgcolor="${FROST}" style="background-color: ${FROST};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-page" bgcolor="${PLASTER}" style="background-color: ${PLASTER};">
     <tr>
       <td align="center" style="padding: 24px 12px 32px;">
         <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px;">${banner}
           <tr>
             <td align="center" bgcolor="${NAVY}" class="bp-head" style="padding: 30px 32px 14px; background-color: ${NAVY};">
-              <img src="${escapeHtml(doc.images.logo)}" width="181" height="40" alt="Cortex Building" style="display: block; width: 181px; height: 40px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: 40px; color: ${FROST}; text-align: center;" />
+              <img src="${escapeHtml(doc.images.logo)}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="Cortex Building" style="display: block; width: ${LOGO_WIDTH}px; height: ${LOGO_HEIGHT}px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: ${LOGO_HEIGHT}px; color: ${PLASTER}; text-align: center;" />
             </td>
           </tr>
           <tr>
@@ -233,8 +245,8 @@ export function renderEmailDocument(doc: EmailDocument) {
           </tr>
           <tr>
             <td bgcolor="${NAVY}" class="bp-pad" style="padding: 32px 40px 36px; background-color: ${NAVY};">
-              <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${FROST};">${TAGLINE}</p>
-              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${FROST};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${PEAK_FLEET}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
+              <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${PLASTER};">${TAGLINE}</p>
+              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${SKY}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
               <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
             </td>
           </tr>
