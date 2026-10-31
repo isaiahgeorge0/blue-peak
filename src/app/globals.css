@@ -296,9 +296,10 @@ body {
   --pill-ms: 350ms;
 }
 
+/* Compact width sized for mark + CORTEX + menu toggle, not the old longer wordmark. */
 @media (min-width: 40rem) {
   .site-header {
-    --pill-c: 13.75rem;
+    --pill-c: 12.5rem;
   }
 }
 
@@ -368,25 +369,6 @@ body {
   translate: var(--pill-d) 0;
 }
 
-/* Contracted pill (and phones): mark alone — the full wordmark's house is too small to read. */
-.pill-wordmark-full {
-  display: none;
-}
-
-.pill-wordmark-mark {
-  display: block;
-}
-
-@media (min-width: 72rem) {
-  .site-header[data-top="true"] .pill-wordmark-full {
-    display: block;
-  }
-
-  .site-header[data-top="true"] .pill-wordmark-mark {
-    display: none;
-  }
-}
-
 .pill-wordmark[data-open="true"] {
   translate: calc(var(--pill-d) + (var(--pill-c) - var(--panel-w)) / 2 + 0.5rem) 0;
 }
@@ -405,8 +387,9 @@ body {
     visibility 0s 150ms;
 }
 
+/* Matches the content row's px-3 so the compact pill has even side padding. */
 .pill-toggle {
-  right: calc(var(--pill-d) + 0.125rem);
+  right: calc(var(--pill-d) + 0.75rem);
   transition:
     translate var(--pill-ms) var(--ease-out),
     opacity 150ms var(--ease-out) 150ms,

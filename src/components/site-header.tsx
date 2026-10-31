@@ -13,7 +13,7 @@ import {
   useSyncExternalStore,
   type CSSProperties,
 } from "react";
-import { BrandMark, BrandWordmark } from "@/components/brand/brand-logo";
+import { BrandWordmark } from "@/components/brand/brand-logo";
 import { primaryCtaClassName } from "@/components/cta-styles";
 import { SampleTag } from "@/components/sample-tag";
 import { projects } from "@/lib/content";
@@ -466,7 +466,7 @@ export function SiteHeader() {
               </div>
             </div>
 
-            <div className="pointer-events-none absolute inset-0 flex items-center pr-1.5 pl-4">
+            <div className="pointer-events-none absolute inset-0 flex items-center px-3">
               <Link
                 href="/"
                 onClick={() => closeMenu()}
@@ -474,8 +474,12 @@ export function SiteHeader() {
                 data-open={menuOpen ? "true" : "false"}
                 className="pill-wordmark tap-target pointer-events-auto relative flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-blue-shade"
               >
-                <BrandWordmark tone="colour" title="" className="pill-wordmark-full h-4 w-auto sm:h-5" />
-                <BrandMark tone="colour" title="" className="pill-wordmark-mark h-5 w-auto" />
+                {/* Mark + CORTEX at every width; sized by height so the letters stay ≥11px. */}
+                <BrandWordmark
+                  tone="colour"
+                  title=""
+                  className="h-[1.375rem] w-auto lg:h-6"
+                />
               </Link>
 
               <div ref={linksRef} className="pill-links ml-4 flex h-full min-w-0 flex-1 items-center overflow-hidden">
