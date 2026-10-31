@@ -4,6 +4,7 @@ import { houseImageFor } from "@/lib/email-house-image";
 import { emailImages } from "@/lib/email-images";
 import { estimateFromLead } from "@/lib/estimate-summary";
 import { jobCardFor } from "@/lib/job-card";
+import { leadAlertFrom } from "@/lib/lead-alert-from";
 import { leadAlertRecipients } from "@/lib/lead-alert-recipients";
 import { renderNewLeadEmail } from "@/lib/new-lead-email";
 import { serviceLabel } from "@/lib/send-lead-push";
@@ -59,8 +60,13 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload, stored: St
     console.error("new-lead email: LEAD_ALERT_TO entries that aren't addresses were ignored:", recipients.ignored.join(", "));
   }
 
+  const sender = leadAlertFrom(process.env.LEAD_ALERT_FROM);
+  if (sender.invalid) {
+    console.error("new-lead email: LEAD_ALERT_FROM isn't a usable from address; using the default.");
+  }
+
   const { error } = await new Resend(apiKey).emails.send({
-    from: "Cortex Notifications <notifications@skapa.uk>",
+    from: sender.from,
     to: recipients.to,
     subject,
     text,

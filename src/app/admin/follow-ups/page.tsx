@@ -5,6 +5,7 @@ import { Card, PageHeader, SectionHeading } from "@/components/admin/ui";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { FOLLOW_UP_STEPS, readFollowUpConfig, type FollowUpSetting } from "@/lib/follow-up-schedule";
 import { linkSecretStatus, MIN_LINK_SECRET_LENGTH, missingSendSettings, testSendBlockers } from "@/lib/follow-ups";
+import { leadAlertFrom } from "@/lib/lead-alert-from";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ export default async function FollowUpsPage() {
   const config = readFollowUpConfig(process.env);
   const missing = missingSendSettings();
   const linkSecret = linkSecretStatus();
+  const leadAlertSender = leadAlertFrom(process.env.LEAD_ALERT_FROM).from;
   const adminEmail = typeof claims.email === "string" ? claims.email : "";
 
   return (
@@ -131,6 +133,9 @@ export default async function FollowUpsPage() {
             </SetupRow>
             <SetupRow label="Sent from" name="FOLLOW_UP_FROM">
               {config.from ?? "Not set, so nothing can be sent"}
+            </SetupRow>
+            <SetupRow label="Lead alerts from" name="LEAD_ALERT_FROM">
+              {leadAlertSender}
             </SetupRow>
             <SetupRow label="Replies go to" name="FOLLOW_UP_REPLY_TO">
               {config.replyTo ?? "Not set, so nothing can be sent"}
