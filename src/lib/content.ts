@@ -190,7 +190,7 @@ export const services: Service[] = [
 
 /*
  * Every entry with sample: true is a placeholder. Before launch, replace each
- * one with a real Blue Peak job, with the customer's permission to show it.
+ * one with a real Cortex job, with the customer's permission to show it.
  */
 export const projects: Project[] = [
   {
@@ -397,7 +397,7 @@ export function getServiceAreaBySlug(slug: string): ServiceArea | undefined {
  *   page is noindex and robots.txt disallows everything.
  */
 export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://blue-peak-omega.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://cortexbuilding.co.uk"
 ).replace(/\/$/, "");
 
 /** Search engines may index the site only when this is exactly "true". */

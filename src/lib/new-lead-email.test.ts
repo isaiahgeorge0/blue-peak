@@ -10,7 +10,7 @@ const base: NewLeadEmailInput = {
   serviceLabel: "Kitchen renovations",
   message: "New kitchen, roughly in spring.\nSemi-detached.",
   estimate: null,
-  jobCard: { reference: "BP-0007", about: "Kitchen renovations", enquiryDate: "11 October 2026", stage: 1 },
+  jobCard: { reference: "CX-0007", about: "Kitchen renovations", enquiryDate: "11 October 2026", stage: 1 },
   adminUrl: "https://example.com/admin/leads/abc",
   phoneDisplay: "01234 567890",
   phoneHref: "tel:+441234567890",
@@ -19,12 +19,12 @@ const base: NewLeadEmailInput = {
 
 describe("new-lead alert", () => {
   test("subject with the reference, name and service", () => {
-    assert.equal(renderNewLeadEmail(base).subject, "New lead BP-0007: Jo Bloggs, Kitchen renovations");
+    assert.equal(renderNewLeadEmail(base).subject, "New lead CX-0007: Jo Bloggs, Kitchen renovations");
   });
 
   test("job card, tap-to-call, mailto, message and both buttons", () => {
     const { html, text } = renderNewLeadEmail(base);
-    assert.match(html, />BP-0007</);
+    assert.match(html, />CX-0007</);
     assert.match(html, />New lead</);
     assert.match(html, /Stage 1 of 5:<\/strong> Enquiry received/);
     assert.match(html, /<a href="tel:07700900123"[^>]*>07700 900123<\/a>/);
@@ -33,7 +33,7 @@ describe("new-lead alert", () => {
     assert.match(html, /href="tel:07700900123"[^>]*>Call Jo<\/a>/);
     assert.match(html, /href="https:\/\/example.com\/admin\/leads\/abc"[^>]*>Open in admin<\/a>/);
     assert.match(html, /v:roundrect[^>]*href="tel:07700900123"/);
-    assert.match(text, /^New lead: BP-0007\nKitchen renovations, enquired 11 October 2026\nStage 1 of 5: Enquiry received\n/);
+    assert.match(text, /^New lead: CX-0007\nKitchen renovations, enquired 11 October 2026\nStage 1 of 5: Enquiry received\n/);
     assert.match(text, /Call Jo: 07700 900123\nOpen in admin: https:\/\/example.com\/admin\/leads\/abc/);
   });
 

@@ -77,5 +77,5 @@ export function telHref(phone: string | null | undefined) {
 
 export function mailHref(email: string | null | undefined) {
   const address = email?.trim();
-  return address ? `mailto:${address}?subject=${encodeURIComponent("Your Blue Peak Solutions enquiry")}` : null;
+  return address ? `mailto:${address}?subject=${encodeURIComponent("Your Cortex Building enquiry")}` : null;
 }

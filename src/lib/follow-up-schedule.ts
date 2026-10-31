@@ -30,7 +30,7 @@ export type FollowUpSetting = {
 export type FollowUpLead = {
   id: string;
   created_at: string;
-  /** Shown as BP-0001 on the job card. */
+  /** Shown as CX-0001 on the job card. */
   reference_number?: number | null;
   name: string | null;
   email: string | null;

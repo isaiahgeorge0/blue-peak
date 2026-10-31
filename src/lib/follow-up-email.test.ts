@@ -35,7 +35,7 @@ const base: FollowUpEmailInput = {
   reviewUrl: null,
   stopUrl: "https://example.com/stop-emails?t=abc",
   intendedRecipient: null,
-  jobCard: { reference: "BP-0042", about: "Your kitchen renovation", enquiryDate: "5 October 2026", stage: 1 },
+  jobCard: { reference: "CX-0042", about: "Your kitchen renovation", enquiryDate: "5 October 2026", stage: 1 },
   images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null },
 };
 
@@ -218,8 +218,8 @@ describe("seeded templates, every combination of name and service", () => {
             assert.match(afterJobCard(email.text), firstName ? new RegExp(`^Hi ${firstName},`) : /^Hi there,/, label);
             assert.equal(email.text.includes("Your estimate"), template.step === "acknowledgement" && estimate !== null, label);
             assert.doesNotMatch(email.html, /\{(first_name|service|phone|review_link|estimate)\}/, label);
-            assert.ok(email.text.indexOf("Kyle and Steven, Blue Peak\n\nP.S.") > 0, label);
-            assert.ok(email.html.indexOf("Kyle and Steven, Blue Peak") < email.html.indexOf(">P.S. "), label);
+            assert.ok(email.text.indexOf("Kyle Rice, Cortex Building\n\nP.S.") > 0, label);
+            assert.ok(email.html.indexOf("Kyle Rice, Cortex Building") < email.html.indexOf(">P.S. "), label);
           }
         }
       }
@@ -313,51 +313,51 @@ describe("rendered email", () => {
     const email = renderFollowUpEmail(base);
     assert.equal(email.subject, "Thanks for your enquiry, Jo");
     assert.match(email.html, /<a href="tel:\+441234567890"[^>]*>01234 567890<\/a>/);
-    assert.match(email.html, /Kyle and Steven, Blue Peak/);
+    assert.match(email.html, /Kyle Rice, Cortex Building/);
     assert.match(email.html, />1<\/div>[\s\S]*>2<\/div>/);
     assert.ok(email.html.includes(STOP_LINK_TEXT.replace("'", "&#39;")));
     assert.match(email.html, /href="https:\/\/example.com\/stop-emails\?t=abc"/);
     assert.match(afterJobCard(email.text), /^Hi Jo,\n\nThanks for getting in touch about your kitchen renovation\./);
     assert.match(email.text, /1\. We read through what you've sent\.\n2\. We visit the property\./);
-    assert.match(email.text, /Kyle and Steven, Blue Peak/);
+    assert.match(email.text, /Kyle Rice, Cortex Building/);
     assert.match(email.text, /Stop them here: https:\/\/example.com\/stop-emails\?t=abc$/);
     assert.doesNotMatch(email.html, /Test email/);
   });
 
   test("the frame: logo and gable with alt text, tagline and phone in the footer", () => {
     const email = renderFollowUpEmail(base);
-    assert.match(email.html, /<img src="cid:bp-logo"[^>]*alt="Blue Peak"/);
+    assert.match(email.html, /<img src="cid:bp-logo"[^>]*alt="Cortex Building"/);
     assert.match(email.html, /<img src="cid:bp-gable"[^>]*alt=""/);
     for (const img of email.html.match(/<img\b[^>]*>/g) ?? []) assert.match(img, /\balt="/, img);
     assert.match(email.html, /font-style: italic[^>]*>Everything under one roof\.<\/p>/);
     assert.ok(email.html.indexOf("Everything under one roof.") < email.html.lastIndexOf("tel:+441234567890"));
-    assert.match(email.text, /--\nEverything under one roof\.\nBlue Peak\. Call 01234 567890/);
+    assert.match(email.text, /--\nEverything under one roof\.\nCortex Building\. Call 01234 567890/);
   });
 
   test("job card: reference, what it's about, the date and the stage, in HTML and text", () => {
     const email = renderFollowUpEmail({ ...base, jobCard: { ...base.jobCard, stage: 3 } });
-    assert.match(email.text, /^Your job: BP-0042\nYour kitchen renovation, enquired 5 October 2026\nStage 3 of 5: Quote sent\n\n/);
-    assert.match(email.html, />BP-0042</);
+    assert.match(email.text, /^Your job: CX-0042\nYour kitchen renovation, enquired 5 October 2026\nStage 3 of 5: Quote sent\n\n/);
+    assert.match(email.html, />CX-0042</);
     assert.match(email.html, /Stage 3 of 5:<\/strong> Quote sent/);
     assert.equal(email.html.match(/class="bp-track-done"/g)?.length, 2);
     assert.equal(email.html.match(/class="bp-track-current"/g)?.length, 1);
     assert.equal(email.html.match(/class="bp-track-later"/g)?.length, 2);
     const content = email.html.slice(email.html.indexOf("<h1"));
-    assert.ok(content.indexOf("BP-0042") < content.indexOf("Thanks for getting in touch"));
+    assert.ok(content.indexOf("CX-0042") < content.indexOf("Thanks for getting in touch"));
   });
 
   test("a closing P.S. goes after the sign-off; one on its own stays put", () => {
     const email = renderFollowUpEmail({ ...base, body: `${ACK_BODY}\n\nP.S. Every job starts on paper.` });
-    assert.match(email.text, /Kyle and Steven, Blue Peak\n\nP\.S\. Every job starts on paper\.\n\n--/);
-    assert.ok(email.html.indexOf("Kyle and Steven") < email.html.indexOf("P.S. Every job"));
+    assert.match(email.text, /Kyle Rice, Cortex Building\n\nP\.S\. Every job starts on paper\.\n\n--/);
+    assert.ok(email.html.indexOf("Kyle Rice") < email.html.indexOf("P.S. Every job"));
     const only = renderFollowUpEmail({ ...base, body: "PS hello" });
-    assert.ok(only.text.indexOf("PS hello") < only.text.indexOf("Kyle and Steven"));
+    assert.ok(only.text.indexOf("PS hello") < only.text.indexOf("Kyle Rice"));
   });
 
   test("redirected to the test address: the intended recipient is shown at the top", () => {
     const email = renderFollowUpEmail({ ...base, intendedRecipient: "jo@example.com" });
     assert.match(email.text, /^TEST EMAIL\. In normal use this would have gone to jo@example\.com\./);
-    assert.ok(email.html.indexOf("jo@example.com") < email.html.indexOf('alt="Blue Peak"'));
+    assert.ok(email.html.indexOf("jo@example.com") < email.html.indexOf('alt="Cortex Building"'));
   });
 
   test("review request: button to the review link, added if the template leaves it out", () => {

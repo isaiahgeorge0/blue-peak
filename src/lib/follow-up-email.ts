@@ -21,8 +21,8 @@ import type { JobCard } from "./job-card.ts";
 import { servicePhrase } from "./service-phrase.ts";
 
 /*
-  Follow-up emails: the editable template filled in and wrapped in the Blue
-  Peak frame, as HTML and plain text. Pure, so the admin's live preview and
+  Follow-up emails: the editable template filled in and wrapped in the Cortex
+  frame, as HTML and plain text. Pure, so the admin's live preview and
   the sender render exactly the same thing.
 
   Template rules: {first_name}, {service} and {phone} anywhere; {review_link}
@@ -38,9 +38,9 @@ export { ESTIMATE_HEADING } from "./email-frame.ts";
 export const PLACEHOLDERS = ["first_name", "service", "phone"] as const;
 export const REVIEW_LINK = "{review_link}";
 export const ESTIMATE = "{estimate}";
-export const SIGN_OFF = "Kyle and Steven, Blue Peak";
+export const SIGN_OFF = "Kyle Rice, Cortex Building";
 export const STOP_LINK_TEXT = "Don't want these emails? Stop them here";
-export const WHY_YOU_GET_THIS = "You're getting this because you contacted Blue Peak about building work.";
+export const WHY_YOU_GET_THIS = "You're getting this because you contacted Cortex Building about building work.";
 
 const TITLES = new Set(["mr", "mrs", "ms", "miss", "mx", "dr", "sir", "madam", "prof", "rev"]);
 
@@ -214,7 +214,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     service: servicePhrase(input.serviceType),
     phone: input.phoneDisplay,
   };
-  const subject = fillPlaceholders(input.subject, values).replace(/\s+/g, " ").trim() || "Blue Peak";
+  const subject = fillPlaceholders(input.subject, values).replace(/\s+/g, " ").trim() || "Cortex Building";
   const isReview = input.step === "review_request";
   const reviewHref = input.reviewUrl ?? "#";
   const estimate = input.step === "acknowledgement" && input.estimate?.rows.length ? input.estimate : null;

@@ -33,7 +33,7 @@ const CONFIG: FollowUpConfig = {
   enabled: true,
   testRecipient: null,
   reviewUrl: "https://g.page/r/example/review",
-  from: "Blue Peak <hello@example.com>",
+  from: "Cortex Building <hello@example.com>",
   replyTo: "hello@example.com",
 };
 

@@ -69,7 +69,7 @@ describe("admin lead helpers", () => {
 
   test("first name comes from the profile only", () => {
     assert.equal(firstNameFromClaims({ user_metadata: { first_name: " Kyle " } }), "Kyle");
-    assert.equal(firstNameFromClaims({ email: "steven@example.com", user_metadata: {} }), null);
+    assert.equal(firstNameFromClaims({ email: "alex@example.com", user_metadata: {} }), null);
     assert.equal(firstNameFromClaims(undefined), null);
   });
 

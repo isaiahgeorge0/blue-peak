@@ -11,32 +11,38 @@ import {
 } from "./job-card.ts";
 
 describe("reference", () => {
-  test("BP- and four digits, longer past 9999", () => {
-    assert.equal(formatLeadReference(1), "BP-0001");
-    assert.equal(formatLeadReference(42), "BP-0042");
-    assert.equal(formatLeadReference(9999), "BP-9999");
-    assert.equal(formatLeadReference(12345), "BP-12345");
+  test("CX- and four digits, longer past 9999", () => {
+    assert.equal(formatLeadReference(1), "CX-0001");
+    assert.equal(formatLeadReference(42), "CX-0042");
+    assert.equal(formatLeadReference(9999), "CX-9999");
+    assert.equal(formatLeadReference(12345), "CX-12345");
   });
 
   test("searches that mean a reference", () => {
-    for (const query of ["BP-0007", "bp-0007", "BP0007", "bp 7", "BP-7", "0007", "7", " bp-07 "]) {
+    for (const query of ["CX-0007", "cx-0007", "CX0007", "cx 7", "CX-7", "cx7", "0007", "7", " cx-07 "]) {
       assert.equal(referenceNumberFromQuery(query), 7, query);
     }
-    for (const query of ["", "bp", "BP-", "0", "BP-0000", "Smith", "7a", "bp-7-1", "07700 900123"]) {
+    for (const query of ["BP-0007", "bp-0007", "BP0007", "bp 7", "BP-7", " bp-07 "]) {
+      assert.equal(referenceNumberFromQuery(query), 7, query);
+    }
+    for (const query of ["", "cx", "CX-", "bp", "BP-", "0", "CX-0000", "Smith", "7a", "cx-7-1", "07700 900123"]) {
       assert.equal(referenceNumberFromQuery(query), null, query);
     }
   });
 
   test("matching a lead", () => {
+    assert.ok(referenceMatches("CX-0007", 7));
     assert.ok(referenceMatches("BP-0007", 7));
     assert.ok(referenceMatches("7", 7));
-    assert.ok(!referenceMatches("BP-0007", 70));
+    assert.ok(!referenceMatches("CX-0007", 70));
     assert.ok(!referenceMatches("17", 7));
+    assert.ok(referenceMatches("cx-", 7));
     assert.ok(referenceMatches("bp-", 7));
+    assert.ok(referenceMatches("CX-00", 7));
     assert.ok(referenceMatches("BP-00", 7));
     assert.ok(!referenceMatches("Smith", 7));
     assert.ok(!referenceMatches("", 7));
-    assert.ok(!referenceMatches("BP-0007", null));
+    assert.ok(!referenceMatches("CX-0007", null));
   });
 });
 
@@ -70,7 +76,7 @@ describe("stage", () => {
 describe("job card", () => {
   test("reference, service, and the enquiry date in UK time", () => {
     assert.deepEqual(jobCardFor({ reference_number: 3, service_type: "loft-conversions", created_at: "2026-10-04T23:30:00Z", stage: 1 }), {
-      reference: "BP-0003",
+      reference: "CX-0003",
       about: "Your loft conversion",
       enquiryDate: "5 October 2026",
       stage: 1,

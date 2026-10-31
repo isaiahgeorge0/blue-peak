@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ...pageMetadata({
       title: "Roadmap",
       description:
-        "What Blue Peak is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
+        "What Cortex Building is building next: subcontractor CRM, quotes and invoices, referrals, and ongoing local SEO for Ipswich and Suffolk.",
       path: "/roadmap",
     }),
     robots: { index: false, follow: false },
@@ -29,7 +29,7 @@ export default function RoadmapPage() {
             What we are building next
           </h1>
           <p className="mt-6 max-w-2xl text-xl leading-relaxed text-ink/75">
-            Blue Peak already runs on clear quotes and tidy sites. These are the
+            Cortex already runs on clear quotes and tidy sites. These are the
             next steps so the business behind the build stays as organised as
             the work on site, and so local homeowners can find us when they
             search.

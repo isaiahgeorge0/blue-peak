@@ -1,6 +1,6 @@
 /**
  * Only process facts the site already commits to elsewhere. Credentials
- * (insurance, guarantees, DBS, review scores) stay off until Blue Peak
+ * (insurance, guarantees, DBS, review scores) stay off until Cortex
  * confirms them.
  */
 const trustBadges = [

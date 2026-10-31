@@ -41,7 +41,7 @@ export default async function FollowUpsPage() {
       <PageHeader
         eyebrow="Automatic emails"
         title="Follow-ups"
-        lede="Emails sent for you after someone enquires, after they're quoted and after their job is finished, signed from Kyle and Steven. Replies come straight to you."
+        lede="Emails sent for you after someone enquires, after they're quoted and after their job is finished, signed from Kyle. Replies come straight to you."
       />
 
       {!config.enabled ? (

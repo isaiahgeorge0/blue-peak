@@ -99,7 +99,7 @@ async function emailNewLead(stored: StoredLead, lead: LeadNotificationPayload) {
   try {
     const alerted = await sendLeadAlert(
       [
-        "Blue Peak: a new website lead arrived but the notification email failed.",
+        "Cortex: a new website lead arrived but the notification email failed.",
         `Name: ${lead.name}`,
         `Phone: ${lead.phone}`,
         `Reason: ${reason}`,

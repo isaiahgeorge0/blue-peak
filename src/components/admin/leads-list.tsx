@@ -198,7 +198,7 @@ export function LeadsList({ leads, initialStatus }: { leads: LeadListRow[]; init
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Name, phone, email, postcode, BP-0001"
+            placeholder="Name, phone, email, postcode, CX-0001"
             className="h-11 w-full rounded-full border border-admin-edge bg-admin-surface pr-4 pl-10 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-sky"
           />
         </div>

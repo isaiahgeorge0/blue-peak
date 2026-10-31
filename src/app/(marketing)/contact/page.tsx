@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "Contact",
     description:
-      "Request a written quote for kitchen, bathroom, extension, or renovation work from Blue Peak.",
+      "Request a written quote for kitchen, bathroom, extension, or renovation work from Cortex Building.",
     path: "/contact",
   });
 }

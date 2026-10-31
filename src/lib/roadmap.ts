@@ -48,7 +48,7 @@ export const roadmapFeatures: RoadmapFeature[] = [
     name: "Local SEO & Search Growth",
     label: "Ongoing",
     summary:
-      "Ongoing management of Google Business Profile, reviews, citations, and local search visibility so Blue Peak ranks for the services and areas we actually cover.",
+      "Ongoing management of Google Business Profile, reviews, citations, and local search visibility so Cortex ranks for the services and areas we actually cover.",
     whyItMatters: [
       "Local search ranking is driven mostly by an active, complete Google Business Profile and a steady flow of recent reviews, not just having a website.",
       "Most local competitors neglect this. Categories drift, photos go stale, and review requests stop the moment a job is finished.",

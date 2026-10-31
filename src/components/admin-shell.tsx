@@ -101,9 +101,9 @@ function NavContents({
   return (
     <>
       <div className={`flex h-16 shrink-0 items-center gap-3 px-3 ${railOnly ? "justify-center xl:justify-start" : ""}`}>
-        <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-lg px-1 text-ink" aria-label="Blue Peak admin, Dashboard">
+        <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-lg px-1 text-ink" aria-label="Cortex admin, Dashboard">
           <BrandMark tone="on-dark" title="" className="h-7 w-auto shrink-0" />
-          <span className={`font-serif text-xl leading-none tracking-heading ${railOnly ? "hidden xl:inline" : ""}`}>Blue Peak</span>
+          <span className={`font-serif text-xl leading-none tracking-heading ${railOnly ? "hidden xl:inline" : ""}`}>Cortex</span>
         </Link>
       </div>
       {railOnly && onExpand ? (

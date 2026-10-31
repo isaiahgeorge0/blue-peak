@@ -5,7 +5,7 @@ import { BrandMark, BrandWordmark } from "@/components/brand/brand-logo";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to the Blue Peak Solutions admin.",
+  description: "Sign in to the Cortex admin.",
 };
 
 export default function AdminLoginPage() {
@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
         </div>
         <div className="mt-8 rounded-2xl border border-admin-line bg-admin-surface px-6 py-7 sm:px-8">
           <h1 className="font-serif text-[2rem] leading-tight tracking-heading text-ink">Sign in</h1>
-          <p className="mt-1.5 text-sm text-ink/80">Use your Blue Peak admin account.</p>
+          <p className="mt-1.5 text-sm text-ink/80">Use your Cortex admin account.</p>
           <div className="mt-6">
             <Suspense fallback={<p className="text-sm text-ink/80">Loading…</p>}>
               <AdminLoginForm />

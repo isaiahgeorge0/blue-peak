@@ -19,7 +19,7 @@ import { pageMetadata } from "@/lib/page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
-    title: "Blue Peak | Building and renovation in Ipswich",
+    title: "Cortex Building | Building and renovation in Ipswich",
     absoluteTitle: true,
     description:
       "Kitchens, extensions, bathrooms, and refurbs across Ipswich and Suffolk. Written quotes before we start.",
@@ -68,7 +68,7 @@ export default function HomePage() {
                   <h3 className="text-2xl font-semibold text-ink lg:text-3xl">
                     See the difference
                   </h3>
-                  {/* The slider's photos are placeholders, not a Blue Peak job. */}
+                  {/* The slider's photos are placeholders, not a Cortex job. */}
                   <SampleTag overPhoto onPlaster />
                 </div>
                 <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
@@ -99,12 +99,12 @@ export default function HomePage() {
         <section className="bg-page">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
             <SectionHeading eyebrow="Who you'll deal with">
-              Led by Kyle and Steven.
+              Run by Kyle.
             </SectionHeading>
             <p className="mt-5 max-w-xl text-xl leading-relaxed text-ink/70">
-              Blue Peak brings every trade under one roof, and the two
-              founders run every job. You deal with Kyle or Steven from the
-              first visit to the final tidy-up.
+              Cortex brings every trade under one roof, and Kyle runs every
+              job himself. You deal with him from the first visit to the
+              final tidy-up.
             </p>
             <div className="mt-8">
               <Link href="/about" className={textLinkClassName}>

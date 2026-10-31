@@ -21,7 +21,7 @@ export type LeadNotificationPayload = {
 /** The stored lead the alert is about: its id for the admin link, and its reference and date for the job card. */
 export type StoredLead = { id: string; referenceNumber: number | null; createdAt: string };
 
-const FALLBACK_SITE_URL = "https://blue-peak-omega.vercel.app";
+const FALLBACK_SITE_URL = "https://cortexbuilding.co.uk";
 
 function appBaseUrl() {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -60,7 +60,7 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload, stored: St
   }
 
   const { error } = await new Resend(apiKey).emails.send({
-    from: "Blue Peak Notifications <notifications@skapa.uk>",
+    from: "Cortex Notifications <notifications@skapa.uk>",
     to: recipients.to,
     subject,
     text,

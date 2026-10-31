@@ -2,7 +2,7 @@ import { ESTIMATE_CAVEAT, type EstimateRow } from "./estimate-summary.ts";
 import { JOB_STAGES, stageSummary, type JobCard } from "./job-card.ts";
 
 /*
-  The Blue Peak frame every email shares: a 600px table layout (with an
+  The Cortex frame every email shares: a 600px table layout (with an
   Outlook ghost table so it holds its width there), a navy header with the
   lockup and the 31° gable strip, a white body, and a navy footer. Images
   are passed in as sources: cid: references when sent, URLs in the admin
@@ -218,7 +218,7 @@ export function renderEmailDocument(doc: EmailDocument) {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px;">${banner}
           <tr>
             <td align="center" bgcolor="${NAVY}" class="bp-head" style="padding: 30px 32px 14px; background-color: ${NAVY};">
-              <img src="${escapeHtml(doc.images.logo)}" width="181" height="40" alt="Blue Peak" style="display: block; width: 181px; height: 40px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: 40px; color: ${FROST}; text-align: center;" />
+              <img src="${escapeHtml(doc.images.logo)}" width="181" height="40" alt="Cortex Building" style="display: block; width: 181px; height: 40px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: 40px; color: ${FROST}; text-align: center;" />
             </td>
           </tr>
           <tr>
@@ -249,5 +249,5 @@ export function renderEmailDocument(doc: EmailDocument) {
 
 /** Footer small print in the text version, matching the HTML footer. */
 export function footerText(phoneDisplay: string, notes: string[]) {
-  return ["--", TAGLINE, `Blue Peak. Call ${phoneDisplay}`, ...notes].join("\n");
+  return ["--", TAGLINE, `Cortex Building. Call ${phoneDisplay}`, ...notes].join("\n");
 }
