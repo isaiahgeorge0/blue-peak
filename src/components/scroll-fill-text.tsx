@@ -46,7 +46,7 @@ export function ScrollFillText({
       <span aria-hidden className="text-ink/48">
         {text}
       </span>
-      <span aria-hidden className="absolute inset-0 text-accent-ink">
+      <span aria-hidden className="absolute inset-0 text-accent">
         {words.map((word, index) => (
           <Fragment key={index}>
             {index > 0 ? " " : null}
