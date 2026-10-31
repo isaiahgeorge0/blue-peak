@@ -5,8 +5,8 @@ import { DEFAULT_LEAD_ALERT_FROM, leadAlertFrom, looksLikeFromAddress } from "./
 describe("looksLikeFromAddress", () => {
   test("bare addresses and display-name forms pass", () => {
     for (const value of [
-      "notifications@cortexbuilding.co.uk",
-      "Cortex Notifications <notifications@cortexbuilding.co.uk>",
+      "admin@cortexbuilding.co.uk",
+      "Cortex Notifications <admin@cortexbuilding.co.uk>",
       "Kyle <kyle@example.co.uk>",
       "  Jo Bloggs <jo@example.com> ",
     ]) {
@@ -19,10 +19,10 @@ describe("looksLikeFromAddress", () => {
       "",
       "   ",
       "Cortex Notifications",
-      "<notifications@cortexbuilding.co.uk>",
+      "<admin@cortexbuilding.co.uk>",
       "Cortex Notifications <>",
       "Cortex Notifications <not-an-email>",
-      "notifications@",
+      "admin@",
       "Name <a@b>",
     ]) {
       assert.ok(!looksLikeFromAddress(value), value);

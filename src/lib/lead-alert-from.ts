@@ -1,7 +1,7 @@
 import { looksLikeEmail } from "./email-format.ts";
 
 /** Default lead-alert sender once cortexbuilding.co.uk is verified in Resend. */
-export const DEFAULT_LEAD_ALERT_FROM = "Cortex Notifications <notifications@cortexbuilding.co.uk>";
+export const DEFAULT_LEAD_ALERT_FROM = "Cortex Notifications <admin@cortexbuilding.co.uk>";
 
 /**
  * A usable Resend `from`: either a bare address, or `Display Name <address>`.
