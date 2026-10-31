@@ -389,9 +389,9 @@ export function getServiceAreaBySlug(slug: string): ServiceArea | undefined {
  *   It is inlined at build time, so redeploy after changing it.
  * - The public email address. None is shown yet; the footer and contact page
  *   link to the contact form, and the privacy policy contact is still TBC.
- * - The Resend sending domain. Lead notifications send from
- *   notifications@skapa.uk in src/lib/send-new-lead-email.ts; verify the new
- *   domain in Resend before switching the from address.
+ * - Lead-alert sender: LEAD_ALERT_FROM (default
+ *   Cortex Notifications <admin@cortexbuilding.co.uk>). cortexbuilding.co.uk
+ *   is verified in Resend; set the Cortex RESEND_API_KEY in Vercel.
  * - NEXT_PUBLIC_SITE_LIVE=true in Vercel Production, once the placeholder
  *   photos, sample reviews and contact details are replaced. Until then every
  *   page is noindex and robots.txt disallows everything.
