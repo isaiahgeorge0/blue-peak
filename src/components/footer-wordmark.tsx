@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BrandWordmark } from "@/components/brand/brand-logo";
+import { BrandName } from "@/components/brand/brand-logo";
 
 /**
  * The name set across the foot of the page, tone on tone. The first time it
@@ -33,11 +33,7 @@ export function FooterWordmark() {
 
   return (
     <div ref={ref} aria-hidden className="footer-wordmark">
-      <BrandWordmark
-        title=""
-        peakClassName="text-current"
-        className="block h-auto w-full text-panel"
-      />
+      <BrandName title="" className="block h-auto w-full text-white" />
     </div>
   );
 }

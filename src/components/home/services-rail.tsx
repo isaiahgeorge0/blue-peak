@@ -224,6 +224,7 @@ export function ServicesRail() {
                         ) : (
                           <div className="flex h-full items-center justify-center">
                             <BrandMark
+                              tone="current"
                               title=""
                               className="h-14 w-auto text-brand/15"
                             />

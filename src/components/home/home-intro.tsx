@@ -30,7 +30,7 @@ export function HomeIntro() {
       className="home-intro pointer-events-none fixed inset-0 z-[60] place-items-center"
       aria-hidden
     >
-      <BrandLogo pieces title="" className="h-auto w-[120px] text-brand lg:w-[160px]" />
+      <BrandLogo pieces tone="colour" title="" className="h-auto w-[140px] lg:w-[180px]" />
     </div>
   );
 }

@@ -44,3 +44,8 @@ next-env.d.ts
 # local tool state and scratch screenshots
 supabase/.temp/
 .tmp-screenshots/
+
+# Client brand packs (not site files)
+Cortex-Logo-Pack/
+Cortex_Brand_Guidelines.pdf
+Cortex_Social_Media_Guidelines.pdf

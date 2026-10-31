@@ -368,6 +368,25 @@ body {
   translate: var(--pill-d) 0;
 }
 
+/* Contracted pill (and phones): mark alone — the full wordmark's house is too small to read. */
+.pill-wordmark-full {
+  display: none;
+}
+
+.pill-wordmark-mark {
+  display: block;
+}
+
+@media (min-width: 72rem) {
+  .site-header[data-top="true"] .pill-wordmark-full {
+    display: block;
+  }
+
+  .site-header[data-top="true"] .pill-wordmark-mark {
+    display: none;
+  }
+}
+
 .pill-wordmark[data-open="true"] {
   translate: calc(var(--pill-d) + (var(--pill-c) - var(--panel-w)) / 2 + 0.5rem) 0;
 }
@@ -738,9 +757,10 @@ h1[tabindex="-1"]:focus {
   Homepage intro, first visit of a session only. The inline script in the root
   layout sets html[data-intro="play"]; nothing below applies without it, so the
   page is never left hidden if that script does not run. Timeline (ms):
-    0-600 the mark assembles: its four shapes slide up the 31 degree pitch
-      into place, 80ms apart, each from further out than the last (360ms
-      each, ease-out); BLUE and PEAK fade in under them by 600.
+    0-600 the house-C assembles (360ms each, ease-out, staggered): front
+      draws up from the floor, floor-side slides in from the right, both
+      roofs drop along the 31° pitch, chimney rises, panes light up together;
+      CORTEX and BUILDING SOLUTIONS fade in under them by 600.
     600-1200 the finished logo holds; 1200-1500 it lifts 40px and fades out
       (below 15% opacity by ~1366).
     1350-1600 photo fades in, small (scaled to --intro-scale) and still, so it
@@ -797,19 +817,46 @@ h1[tabindex="-1"]:focus {
     animation: home-intro-logo 1500ms linear backwards;
   }
 
-  /* Each shape travels 14, 20, 26 then 32 viewBox units (about 16 to 37px at
-     160px wide) along the pitch: cos 31deg = 0.85717, sin 31deg = 0.51504. */
+  /* Piece order: front 0, floor-side 1, roof-left 2, roof-right 3, chimney 4, panes 5. */
   html[data-intro="play"] .home-intro .logo-piece {
-    --piece-run: calc(14px + var(--piece) * 6px);
     animation:
-      home-intro-piece var(--intro-piece-ms) var(--ease-out)
+      home-intro-piece-front var(--intro-piece-ms) var(--ease-out)
         calc(var(--piece) * 80ms) backwards,
       home-intro-fade calc(var(--intro-piece-ms) * 0.6) var(--ease-out)
         calc(var(--piece) * 80ms) backwards;
   }
 
+  html[data-intro="play"] .home-intro .logo-piece--front {
+    animation-name: home-intro-piece-front, home-intro-fade;
+  }
+
+  html[data-intro="play"] .home-intro .logo-piece--floor-side {
+    animation-name: home-intro-piece-floor-side, home-intro-fade;
+  }
+
+  html[data-intro="play"] .home-intro .logo-piece--roof-left {
+    animation-name: home-intro-piece-roof-left, home-intro-fade;
+  }
+
+  html[data-intro="play"] .home-intro .logo-piece--roof-right {
+    animation-name: home-intro-piece-roof-right, home-intro-fade;
+  }
+
+  html[data-intro="play"] .home-intro .logo-piece--chimney {
+    animation-name: home-intro-piece-chimney, home-intro-fade;
+  }
+
+  html[data-intro="play"] .home-intro .logo-piece--pane-1,
+  html[data-intro="play"] .home-intro .logo-piece--pane-2,
+  html[data-intro="play"] .home-intro .logo-piece--pane-3,
+  html[data-intro="play"] .home-intro .logo-piece--pane-4 {
+    animation-name: home-intro-fade;
+    animation-duration: calc(var(--intro-piece-ms) * 0.7);
+    transform: none;
+  }
+
   html[data-intro="play"] .home-intro .logo-letters {
-    animation: home-intro-fade var(--intro-piece-ms) var(--ease-out) 240ms
+    animation: home-intro-fade var(--intro-piece-ms) var(--ease-out) 400ms
       backwards;
   }
 
@@ -1009,13 +1056,34 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* From down the pitch (left and below), up into place. */
-@keyframes home-intro-piece {
+/* House-C intro pieces. cos 31° = 0.85717, sin 31° = 0.51504. */
+@keyframes home-intro-piece-front {
   from {
-    transform: translate(
-      calc(var(--piece-run) * -0.85717),
-      calc(var(--piece-run) * 0.51504)
-    );
+    transform: translateY(28px);
+  }
+}
+
+@keyframes home-intro-piece-floor-side {
+  from {
+    transform: translateX(32px);
+  }
+}
+
+@keyframes home-intro-piece-roof-left {
+  from {
+    transform: translate(calc(-18px * 0.85717), calc(-18px * 0.51504));
+  }
+}
+
+@keyframes home-intro-piece-roof-right {
+  from {
+    transform: translate(calc(18px * 0.85717), calc(-18px * 0.51504));
+  }
+}
+
+@keyframes home-intro-piece-chimney {
+  from {
+    transform: translateY(20px);
   }
 }
 
@@ -1433,12 +1501,29 @@ h1[tabindex="-1"]:focus {
   }
 
   .contact-mark .logo-piece {
-    --piece-run: calc(14px + var(--piece) * 6px);
     animation:
-      home-intro-piece 360ms var(--ease-out) calc(var(--piece) * 80ms)
-        backwards,
-      home-intro-fade 216ms var(--ease-out) calc(var(--piece) * 80ms)
+      home-intro-fade 360ms var(--ease-out) calc(var(--piece) * 80ms)
         backwards;
+  }
+
+  .contact-mark .logo-piece--front {
+    animation-name: home-intro-piece-front, home-intro-fade;
+  }
+
+  .contact-mark .logo-piece--floor-side {
+    animation-name: home-intro-piece-floor-side, home-intro-fade;
+  }
+
+  .contact-mark .logo-piece--roof-left {
+    animation-name: home-intro-piece-roof-left, home-intro-fade;
+  }
+
+  .contact-mark .logo-piece--roof-right {
+    animation-name: home-intro-piece-roof-right, home-intro-fade;
+  }
+
+  .contact-mark .logo-piece--chimney {
+    animation-name: home-intro-piece-chimney, home-intro-fade;
   }
 }
 

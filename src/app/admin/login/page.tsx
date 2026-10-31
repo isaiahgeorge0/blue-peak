@@ -13,8 +13,8 @@ export default function AdminLoginPage() {
     <main className="flex flex-1 items-center justify-center px-4 pt-[max(2.5rem,env(safe-area-inset-top))] pb-[max(2.5rem,env(safe-area-inset-bottom))]">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center text-center">
-          <BrandMark title="" className="size-14 text-plaster" />
-          <BrandWordmark className="mt-5 h-5 w-auto text-plaster" />
+          <BrandMark tone="colour" title="" className="size-14" />
+          <BrandWordmark tone="colour" className="mt-5 h-5 w-auto" />
           <p className="admin-label mt-3">Admin</p>
         </div>
         <div className="mt-8 rounded-2xl border border-admin-line bg-admin-surface px-6 py-7 sm:px-8">

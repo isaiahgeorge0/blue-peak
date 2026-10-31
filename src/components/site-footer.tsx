@@ -89,7 +89,7 @@ export function SiteFooter() {
         <div className="mt-8 flex items-center justify-between gap-6 border-t border-ink/15 pt-6 lg:mt-10">
           {/* At launch, add the registered company name and number here. */}
           <p className="text-sm text-ink/70">© 2026 Blue Peak</p>
-          <BrandMark title="" className="h-7 w-auto text-ink/70" />
+          <BrandMark tone="current" title="" className="h-7 w-auto text-ink/70" />
         </div>
       </div>
       <div className="mx-auto mt-8 box-content h-[7rem] max-w-[calc(var(--container-6xl)-3rem)] px-6 pb-10 min-[22.5rem]:h-[5.75rem] sm:h-[4.5rem] lg:h-[3.25rem] [@media(scripting:none)]:hidden">

@@ -18,6 +18,7 @@ export function FounderCards({ className = "" }: { className?: string }) {
               needs the room. When the photos arrive, restore the portrait
               card by changing before:aspect-[4/3] to before:aspect-[4/5]. */}
           <BrandMark
+            tone="current"
             title=""
             className="founder-mark pointer-events-none absolute top-6 right-6 -z-10 h-32 w-auto sm:top-8 sm:right-8 sm:h-40 text-white/10 transition-transform duration-500 ease-out group-hover:translate-x-2 group-hover:-translate-y-2 motion-reduce:transition-none"
           />

@@ -279,7 +279,7 @@ export function PageTransition() {
         className="pointer-events-none fixed inset-0 z-[71] place-items-center opacity-0"
         style={{ display: "none" }}
       >
-        <BrandMark title="" className="h-14 w-auto text-white" />
+        <BrandMark tone="current" title="" className="h-14 w-auto text-white" />
       </div>
     </>
   );
