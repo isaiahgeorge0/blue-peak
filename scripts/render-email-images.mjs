@@ -6,7 +6,7 @@
 //
 // "houses" needs the site running (npm run build && npx next start), default http://localhost:3000. It frames the
 // house exactly like the closing band picture (1440 wide, reduced motion, 4:3 crop of the stage) at Standard size
-// and Quality finish, on the stage's Frost White, saved as 1200x900 JPEGs under 80KB.
+// and Quality finish, on the stage's Plaster, saved as 1200x900 JPEGs under 80KB.
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
@@ -16,10 +16,16 @@ import { houseImageName } from "../src/lib/email-house-image.ts";
 const ROOT = path.resolve(import.meta.dirname, "..");
 const OUT = path.join(ROOT, "public/email");
 const HOUSES = path.join(OUT, "houses");
-const NAVY = "#0e2240";
-const FROST = "#e9f7f7";
+const NAVY = "#0E1A30";
+const PLASTER = "#EEF1F4";
 const PITCH_DEGREES = 31;
 const MAX_HOUSE_BYTES = 80 * 1024;
+/** Display height so the CORTEX letters in wordmark-white.svg are about 18px tall. */
+const LOCKUP_LETTER_PX = 18;
+const WORDMARK_VIEWBOX_H = 182;
+const WORDMARK_VIEWBOX_W = 907.818;
+/** Approx letter height within the wordmark viewBox (y 20.55..100). */
+const WORDMARK_LETTER_VIEWBOX_H = 79.44;
 
 const [part, arg] = process.argv.slice(2);
 
@@ -36,15 +42,15 @@ function dataUrlToBuffer(url) {
   return Buffer.from(url.slice(url.indexOf(",") + 1), "base64");
 }
 
-/** White mark and wordmark side by side on navy, 2x. Navy is baked in so a client's colour inversion can't wash it out. */
+/** White horizontal lockup (mark + CORTEX) alone on navy, 2x. Navy is baked in so a client's colour inversion can't wash it out. */
 async function renderLockup(browser) {
-  const mark = fs.readFileSync(path.join(ROOT, "public/brand/mark-white.svg"), "utf8");
   const wordmark = fs.readFileSync(path.join(ROOT, "public/brand/wordmark-white.svg"), "utf8");
-  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 400, height: 200 } });
+  const displayHeight = LOCKUP_LETTER_PX / (WORDMARK_LETTER_VIEWBOX_H / WORDMARK_VIEWBOX_H);
+  const displayWidth = displayHeight * (WORDMARK_VIEWBOX_W / WORDMARK_VIEWBOX_H);
+  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 500, height: 200 } });
   await page.setContent(`<!doctype html><html><body style="margin:0;background:${NAVY}">
-    <div id="lockup" style="display:inline-flex;align-items:center;gap:12px;padding:0;background:${NAVY}">
-      <div style="height:40px;width:${(40 * 131) / 135}px">${mark.replace("<svg ", '<svg width="100%" height="100%" ')}</div>
-      <div style="height:19px;width:${(19 * 218.65) / 32}px">${wordmark.replace("<svg ", '<svg width="100%" height="100%" ')}</div>
+    <div id="lockup" style="display:inline-block;padding:0;background:${NAVY};height:${displayHeight}px;width:${displayWidth}px">
+      ${wordmark.replace("<svg ", '<svg width="100%" height="100%" ')}
     </div></body></html>`);
   const box = await page.locator("#lockup").boundingBox();
   await page.locator("#lockup").screenshot({ path: path.join(OUT, "logo.png") });
@@ -134,7 +140,7 @@ async function renderHouses(browser, base) {
         }
         throw new Error("could not get under the size limit");
       },
-      { src: `data:image/png;base64,${png.toString("base64")}`, maxBytes: MAX_HOUSE_BYTES - 2048, background: FROST },
+      { src: `data:image/png;base64,${png.toString("base64")}`, maxBytes: MAX_HOUSE_BYTES - 2048, background: PLASTER },
     );
     const file = path.join(HOUSES, houseImageName(keys));
     const bytes = dataUrlToBuffer(jpeg.url);
@@ -157,7 +163,7 @@ async function renderSheet(browser, out) {
   const page = await browser.newPage({ viewport: { width: 2000, height: 800 } });
   await page.setContent(`<!doctype html><html><body style="margin:0;padding:24px;background:#fff;font:13px Helvetica,Arial,sans-serif;color:${NAVY}">
     <h1 style="font:26px 'Times New Roman',serif;margin:0 0 16px">Cortex email house images: ${names.length} combinations</h1>
-    <style>main{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}figure{margin:0}img{width:100%;display:block;border:1px solid #cfe3e6}figcaption{padding:4px 0;word-break:break-all}</style>
+    <style>main{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}figure{margin:0}img{width:100%;display:block;border:1px solid #D5DBE1}figcaption{padding:4px 0;word-break:break-all}</style>
     <main>${cells}</main></body></html>`);
   await page.waitForLoadState("load");
   await page.screenshot({ path: out, fullPage: true });

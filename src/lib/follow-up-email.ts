@@ -1,6 +1,7 @@
 import {
-  BLUE_SOLUTION,
+  BLUE_SHADE,
   buttonHtml,
+  CORTEX_BLUE,
   escapeHtml,
   estimateBoxHtml,
   estimateText,
@@ -9,10 +10,10 @@ import {
   jobCardText,
   NAVY,
   paragraphHtml,
-  PEAK_FLEET,
   renderEmailDocument,
   SANS,
   signOffHtml,
+  SKY,
   type EmailImageSources,
 } from "./email-frame.ts";
 import type { Estimate, EstimateRow } from "./estimate-summary.ts";
@@ -224,11 +225,11 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     escapeHtml(line)
       .replaceAll(
         escapeHtml(input.phoneDisplay),
-        `<a href="${escapeHtml(input.phoneHref)}" class="bp-link" style="color: ${BLUE_SOLUTION}; font-weight: bold; text-decoration: underline; white-space: nowrap;">${escapeHtml(input.phoneDisplay)}</a>`,
+        `<a href="${escapeHtml(input.phoneHref)}" class="bp-link" style="color: ${BLUE_SHADE}; font-weight: bold; text-decoration: underline; white-space: nowrap;">${escapeHtml(input.phoneDisplay)}</a>`,
       )
       .replaceAll(
         REVIEW_LINK,
-        `<a href="${escapeHtml(reviewHref)}" class="bp-link" style="color: ${BLUE_SOLUTION}; font-weight: bold; text-decoration: underline;">${REVIEW_BUTTON_TEXT}</a>`,
+        `<a href="${escapeHtml(reviewHref)}" class="bp-link" style="color: ${BLUE_SHADE}; font-weight: bold; text-decoration: underline;">${REVIEW_BUTTON_TEXT}</a>`,
       );
 
   const blockHtml = blocks
@@ -241,7 +242,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
             (item, index) => `
                 <tr>
                   <td valign="top" style="width: 40px; padding: 0 0 14px;">
-                    <div class="bp-number" style="width: 28px; height: 28px; border-radius: 14px; background-color: ${BLUE_SOLUTION}; color: #ffffff; font-family: ${SANS}; font-size: 14px; font-weight: bold; line-height: 28px; text-align: center;">${index + 1}</div>
+                    <div class="bp-number" style="width: 28px; height: 28px; border-radius: 14px; background-color: ${CORTEX_BLUE}; color: #ffffff; font-family: ${SANS}; font-size: 14px; font-weight: bold; line-height: 28px; text-align: center;">${index + 1}</div>
                   </td>
                   <td valign="top" class="bp-text" style="padding: 3px 0 14px; font-family: ${SANS}; font-size: 16px; line-height: 24px; color: ${NAVY};">${inlineHtml(item)}</td>
                 </tr>`,
@@ -272,7 +273,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     ].join(""),
     phoneDisplay: input.phoneDisplay,
     phoneHref: input.phoneHref,
-    footerNotesHtml: `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${PEAK_FLEET}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
+    footerNotesHtml: `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${SKY}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
     images: input.images,
     webFont: input.webFont,
   });

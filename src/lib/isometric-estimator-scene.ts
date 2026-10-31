@@ -709,12 +709,12 @@ export function mountIsometricEstimator(
   }
 
   function setShadows(obj, on){
-    obj.blue-shade(function(child){ if (child.isMesh) child.castShadow = on; });
+    obj.traverse(function(child){ if (child.isMesh) child.castShadow = on; });
   }
 
   function setGhostOpacity(ghost, opacity){
     ghost.visible = opacity > 0.005;
-    ghost.blue-shade(function(child){
+    ghost.traverse(function(child){
       if (child.material) child.material.opacity = opacity;
     });
   }
@@ -855,7 +855,7 @@ export function mountIsometricEstimator(
   canvas.addEventListener('wheel', onWheel, {passive:false});
 
   function disposeObject3D(obj){
-    obj.blue-shade(function(child){
+    obj.traverse(function(child){
       if (child.geometry) child.geometry.dispose();
       var mat = child.material;
       if (!mat) return;

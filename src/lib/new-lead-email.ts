@@ -1,5 +1,5 @@
 import {
-  BLUE_SOLUTION,
+  BLUE_SHADE,
   buttonHtml,
   escapeHtml,
   estimateBoxHtml,
@@ -58,7 +58,7 @@ function looksLikeEmail(value: string) {
   return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>".]+$/.test(value);
 }
 
-const linkStyle = `color: ${BLUE_SOLUTION}; font-weight: bold; text-decoration: underline;`;
+const linkStyle = `color: ${BLUE_SHADE}; font-weight: bold; text-decoration: underline;`;
 
 export function renderNewLeadEmail(input: NewLeadEmailInput): RenderedEmail {
   const name = input.name.trim() || "Someone";
