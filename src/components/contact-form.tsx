@@ -417,7 +417,7 @@ function Confirmation({ nextSteps }: { nextSteps?: ReactNode }) {
       ref={panelRef}
       className="contact-confirmation scroll-mt-6"
     >
-      <BrandMark pieces title="" className="contact-mark h-14 w-auto text-accent-ink" />
+      <BrandMark pieces tone="current" title="" className="contact-mark h-14 w-auto text-accent-ink" />
       <h2
         ref={headingRef}
         tabIndex={-1}

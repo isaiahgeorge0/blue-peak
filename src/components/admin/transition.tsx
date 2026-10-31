@@ -14,17 +14,17 @@ const HOLD_MAX_MS = 3000;
 const FOCUS_WAIT_MS = 15000;
 
 /*
-  The A of the BLUE PEAK wordmark, 24.87 x 23.44 units: its two legs with the
-  small peak inside, and its solid outline. Growing, the solid fills in so the
-  A covers the screen without a gap through its middle.
+  The Cortex house-C roof from mark-pieces.svg: both halves together, and a
+  solid fill that covers the gap between them so the cover has no hole as it
+  grows. ViewBox is the roof bounds (eaves at the bottom).
 */
-const A_WIDTH = 24.87;
-const A_HEIGHT = 23.44;
-const A_LEGS = "M0 23.44 9.93 0h5l9.94 23.44h-4.94L12.43 5.74 4.93 23.44Z";
-const A_PEAK = "M8.03 23.44 12.43 13.04 16.83 23.44Z";
-const A_SOLID = "M0 23.44 9.93 0h5l9.94 23.44Z";
-/** Height of the A when it first rises into view. */
-const A_START_PX = 72;
+const ROOF_WIDTH = 147.849;
+const ROOF_HEIGHT = 70.874;
+const ROOF_LEFT = "M0 42.598 L0 70.874 L70.895 28.276 L70.895 0 Z";
+const ROOF_RIGHT = "M147.849 42.598 L76.954 0 L76.954 28.276 L147.849 70.874 Z";
+const ROOF_SOLID = "M0 70.874 L0 42.598 L70.895 0 L76.954 0 L147.849 42.598 L147.849 70.874 Z";
+/** Height of the roof when it first rises into view. */
+const ROOF_START_PX = 72;
 
 /** Fired on window once the new page is revealed, for anything that waits to be seen (the dashboard count-up). */
 export const ADMIN_REVEALED_EVENT = "admin:revealed";
@@ -91,10 +91,10 @@ function focusWhenReady() {
 
 /**
  * Admin page transitions. A link to another admin page is held while the
- * peak A rises from the bottom in Cortex Blue and grows to cover the
+ * house-C roof rises from the bottom in Cortex Blue and grows to cover the
  * screen; then the route is pushed. As soon as the new page's shell has
  * rendered (usually its loading skeleton, with the data still streaming in)
- * the A carries on up and the page settles in with a short fade and rise.
+ * the roof carries on up and the page settles in with a short fade and rise.
  * Only if the shell itself is slow is the cover held, for up to HOLD_MAX_MS. Back and forward
  * get a plain fade, as does everything under reduced motion. Filters, sorts
  * and calendar months stay on the same path and are left alone. Any failure
@@ -178,12 +178,12 @@ export function AdminTransition() {
     const start = (url: URL) => {
       const width = window.innerWidth;
       const viewport = Math.max(window.innerHeight, document.documentElement.clientHeight);
-      // Units per pixel at which the A, standing on the bottom edge, covers the top corners.
-      const legSlope = (A_WIDTH / 2 - 2.5) / A_HEIGHT;
-      const unit = ((width / 2 + legSlope * viewport) / (A_WIDTH / 2)) * 1.04;
-      const coverWidth = A_WIDTH * unit;
-      const coverHeight = A_HEIGHT * unit;
-      const startScale = A_START_PX / coverHeight;
+      // Units per pixel at which the roof, standing on the bottom edge, covers the top corners.
+      const roofSlope = (ROOF_WIDTH / 2 - 3) / ROOF_HEIGHT;
+      const unit = ((width / 2 + roofSlope * viewport) / (ROOF_WIDTH / 2)) * 1.04;
+      const coverWidth = ROOF_WIDTH * unit;
+      const coverHeight = ROOF_HEIGHT * unit;
+      const startScale = ROOF_START_PX / coverHeight;
 
       state.phase = "covering";
       state.arrived = false;
@@ -204,7 +204,7 @@ export function AdminTransition() {
 
       const rise = cover.animate(
         [
-          { transform: `translateY(${A_START_PX + 8}px) scale(${startScale})`, easing: EASE_OUT },
+          { transform: `translateY(${ROOF_START_PX + 8}px) scale(${startScale})`, easing: EASE_OUT },
           { transform: `translateY(0) scale(${startScale})`, offset: 0.3, easing: EASE_IN_OUT },
           { transform: "translateY(0) scale(1)" },
         ],
@@ -286,13 +286,13 @@ export function AdminTransition() {
       className="pointer-events-auto fixed z-[70] origin-bottom will-change-transform"
       style={{ display: "none" }}
     >
-      <svg viewBox={`0 0 ${A_WIDTH} ${A_HEIGHT}`} className="absolute inset-0 size-full text-brand" fill="currentColor">
-        <path d={A_LEGS} />
-        <path d={A_PEAK} className="text-sky" />
+      <svg viewBox={`0 0 ${ROOF_WIDTH} ${ROOF_HEIGHT}`} className="absolute inset-0 size-full text-brand" fill="currentColor">
+        <path d={ROOF_LEFT} />
+        <path d={ROOF_RIGHT} />
       </svg>
       <div ref={solidRef} className="absolute inset-0 opacity-0 will-change-[opacity]">
-        <svg viewBox={`0 0 ${A_WIDTH} ${A_HEIGHT}`} className="size-full text-brand" fill="currentColor">
-          <path d={A_SOLID} />
+        <svg viewBox={`0 0 ${ROOF_WIDTH} ${ROOF_HEIGHT}`} className="size-full text-brand" fill="currentColor">
+          <path d={ROOF_SOLID} />
         </svg>
       </div>
     </div>

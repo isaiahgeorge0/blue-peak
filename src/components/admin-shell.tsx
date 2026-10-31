@@ -102,7 +102,7 @@ function NavContents({
     <>
       <div className={`flex h-16 shrink-0 items-center gap-3 px-3 ${railOnly ? "justify-center xl:justify-start" : ""}`}>
         <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-lg px-1 text-ink" aria-label="Blue Peak admin, Dashboard">
-          <BrandMark title="" className="h-7 w-auto shrink-0 text-plaster" />
+          <BrandMark tone="on-dark" title="" className="h-7 w-auto shrink-0" />
           <span className={`font-serif text-xl leading-none tracking-heading ${railOnly ? "hidden xl:inline" : ""}`}>Blue Peak</span>
         </Link>
       </div>
@@ -287,7 +287,7 @@ export function AdminShell({ user, children }: { user: AdminUser | null; childre
 
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-admin-line bg-admin-surface/95 px-4 backdrop-blur md:hidden">
           <Link href="/admin" aria-label="Dashboard" className="grid size-11 place-items-center rounded-lg">
-            <BrandMark title="" className="h-6 w-auto text-plaster" />
+            <BrandMark tone="on-dark" title="" className="h-6 w-auto" />
           </Link>
           <p className="font-serif text-xl tracking-heading text-ink">{pageTitleFor(pathname)}</p>
         </header>

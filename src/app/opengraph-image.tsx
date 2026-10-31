@@ -11,7 +11,7 @@ const [tinos, nunitoSans, hero, wordmark] = await Promise.all([
   readFile(join(process.cwd(), "assets/og/tinos-latin-400-normal.woff")),
   readFile(join(process.cwd(), "assets/og/nunito-sans-latin-600-normal.woff")),
   readFile(join(process.cwd(), "public/home/hero.jpg"), "base64"),
-  readFile(join(process.cwd(), "public/brand/wordmark-white.svg"), "base64"),
+  readFile(join(process.cwd(), "public/brand/logo-white.svg"), "base64"),
 ]);
 
 export default function OpengraphImage() {
@@ -42,7 +42,7 @@ export default function OpengraphImage() {
             height: "100%",
             display: "flex",
             backgroundImage:
-              "linear-gradient(90deg, rgba(24,0,173,0.97) 0%, rgba(24,0,173,0.92) 52%, rgba(24,0,173,0.35) 100%)",
+              "linear-gradient(90deg, rgba(14,26,48,0.97) 0%, rgba(14,26,48,0.92) 52%, rgba(14,26,48,0.35) 100%)",
           }}
         />
         <div
@@ -58,8 +58,8 @@ export default function OpengraphImage() {
           <img
             src={`data:image/svg+xml;base64,${wordmark}`}
             alt=""
-            width={300}
-            height={46}
+            width={360}
+            height={72}
           />
           <div
             style={{

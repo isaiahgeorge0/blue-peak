@@ -23,7 +23,7 @@ export default async function StopEmailsPage({ searchParams }: PageProps<"/stop-
   return (
     <main className="flex flex-1 items-center justify-center px-5 py-16">
       <div className="w-full max-w-md text-center">
-        <BrandMark title="Blue Peak" className="mx-auto h-12 w-auto text-brand" />
+        <BrandMark tone="colour" title="Blue Peak" className="mx-auto h-12 w-auto" />
         <h1 className="mt-8 font-serif text-[2rem] leading-tight tracking-heading text-ink">Stop follow-up emails</h1>
         {valid ? (
           <StopEmailsForm token={token} />

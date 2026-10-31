@@ -43,7 +43,7 @@ export function WorkCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-panel">
-            <BrandMark title="" className="h-14 w-auto text-brand/15" />
+            <BrandMark tone="current" title="" className="h-14 w-auto text-brand/15" />
           </div>
         )}
         {sample ? (

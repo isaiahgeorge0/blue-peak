@@ -146,7 +146,7 @@ export default async function ServiceDetailPage({
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <BrandMark title="" className="h-14 w-auto text-brand/15" />
+                  <BrandMark tone="current" title="" className="h-14 w-auto text-brand/15" />
                 </div>
               )}
             </div>
@@ -269,7 +269,7 @@ export default async function ServiceDetailPage({
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
-                        <BrandMark title="" className="h-14 w-auto text-brand/15" />
+                        <BrandMark tone="current" title="" className="h-14 w-auto text-brand/15" />
                       </div>
                     )}
                   </div>
