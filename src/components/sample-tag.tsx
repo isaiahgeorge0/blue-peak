@@ -1,6 +1,6 @@
 type SampleTagProps = {
-  /** Use on Frost White bands, where the default pill would disappear. */
-  onFrost?: boolean;
+  /** Use on Plaster bands, where the default pill would disappear. */
+  onPlaster?: boolean;
   /**
    * Short "Sample" pill for card photos, smaller below lg so it stays within
    * about a third of the photo's width in a 3-column grid at 768px.
@@ -11,7 +11,7 @@ type SampleTagProps = {
 
 /** Sample pill, in the same style as the Sample tag on review cards. */
 export function SampleTag({
-  onFrost = false,
+  onPlaster = false,
   overPhoto = false,
   className = "",
 }: SampleTagProps) {
@@ -21,7 +21,7 @@ export function SampleTag({
 
   return (
     <span
-      className={`inline-block rounded-full font-bold text-navy uppercase ${size} ${onFrost ? "bg-page" : "bg-frost"} ${className}`}
+      className={`inline-block rounded-full font-bold text-navy uppercase ${size} ${onPlaster ? "bg-page" : "bg-plaster"} ${className}`}
     >
       {overPhoto ? "Sample" : "Sample project"}
     </span>

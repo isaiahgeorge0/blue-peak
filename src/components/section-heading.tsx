@@ -21,7 +21,7 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <div className={className}>
-      <p className="text-xs font-bold tracking-[0.2em] text-accent uppercase">
+      <p className="text-xs font-bold tracking-[0.2em] text-accent-ink uppercase">
         {eyebrow}
       </p>
       <h2 id={id} className={`mt-4 ${sectionTitleClassName}`}>

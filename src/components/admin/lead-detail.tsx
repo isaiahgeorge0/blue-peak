@@ -105,7 +105,7 @@ export function LeadActivity({ leadId, items }: { leadId: string; items: Timelin
           onChange={(event) => setDraft(event.target.value)}
           rows={3}
           placeholder="Called back, left a message…"
-          className="block w-full resize-y rounded-lg border border-admin-edge bg-admin-base px-4 py-3 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-peak-fleet"
+          className="block w-full resize-y rounded-lg border border-admin-edge bg-admin-base px-4 py-3 text-[0.9375rem] text-ink placeholder:text-ink/60 hover:border-sky"
         />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-ink/80">Notes can&apos;t be edited or removed once saved.</p>
@@ -115,7 +115,7 @@ export function LeadActivity({ leadId, items }: { leadId: string; items: Timelin
           </button>
         </div>
         {error ? (
-          <p role="alert" className="text-sm font-bold text-ridge-cyan">
+          <p role="alert" className="text-sm font-bold text-glow">
             {error}
           </p>
         ) : null}
@@ -132,10 +132,10 @@ export function LeadActivity({ leadId, items }: { leadId: string; items: Timelin
               <span
                 className={`flex size-9 shrink-0 items-center justify-center rounded-full border bg-admin-raised ${
                   item.kind === "failed"
-                    ? "border-ridge-cyan text-ridge-cyan"
+                    ? "border-glow text-glow"
                     : item.kind === "scheduled"
-                      ? "border-dashed border-admin-edge text-peak-fleet"
-                      : "border-admin-line text-peak-fleet"
+                      ? "border-dashed border-admin-edge text-sky"
+                      : "border-admin-line text-sky"
                 }`}
               >
                 <Icon className="size-4" />

@@ -58,13 +58,13 @@ export function Card({ className = "", ...props }: ComponentProps<"div">) {
 const buttonBase =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition-[background-color,border-color,color,transform] duration-200 ease-out active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-not-allowed disabled:opacity-60";
 
-/** Blue Solution: the one primary action in a view. */
-export const primaryButton = `${buttonBase} bg-brand text-white ring-1 ring-inset ring-white/15 hover:bg-traverse`;
+/** Cortex Blue: the one primary action in a view. */
+export const primaryButton = `${buttonBase} bg-brand text-white ring-1 ring-inset ring-white/15 hover:bg-blue-shade`;
 /** Outlined: secondary actions, Call and Email. */
-export const secondaryButton = `${buttonBase} border border-admin-edge text-ink hover:border-peak-fleet hover:bg-admin-raised`;
-/** Text link in Peak Fleet. */
+export const secondaryButton = `${buttonBase} border border-admin-edge text-ink hover:border-sky hover:bg-admin-raised`;
+/** Text link in Sky. */
 export const textLink =
-  "rounded-sm text-sm font-bold text-peak-fleet underline-offset-4 transition-colors hover:text-ridge-cyan hover:underline";
+  "rounded-sm text-sm font-bold text-sky underline-offset-4 transition-colors hover:text-glow hover:underline";
 
 export function ArrowLink({ href, children }: { href: string; children: ReactNode }) {
   return (
@@ -93,7 +93,7 @@ export function EmptyState({
 }) {
   return (
     <div className={`flex flex-col items-center px-6 py-10 text-center ${className}`}>
-      <div className="text-peak-fleet">{illustration}</div>
+      <div className="text-sky">{illustration}</div>
       <p className="mt-4 font-serif text-xl text-ink">{title}</p>
       {children ? <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink/80">{children}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}

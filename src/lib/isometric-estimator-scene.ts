@@ -7,12 +7,12 @@ import type {
   EstimatorSelection,
 } from "@/lib/isometric-estimator-config";
 
-// Brand colours: Peak White, Navy and Peak Fleet. three.js materials cannot
-// read CSS tokens, so these mirror --peak-white, --navy and --peak-fleet in
+// Brand colours: White, Navy and Cortex Blue. three.js materials cannot
+// read CSS tokens, so these mirror --white, --navy and --cortex-blue in
 // globals.css. Every other colour in the scene is mixed from these three.
-const PEAK_WHITE = 0xfefefe;
-const NAVY = 0x0e2240;
-const PEAK_FLEET = 0x43b7d4;
+const WHITE = 0xffffff;
+const NAVY = 0x0e1a30;
+const ADDON = 0x1f6bff;
 
 /** Mix two colours in sRGB, so the result matches what the eye expects. */
 function mixColor(a, b, t) {
@@ -94,7 +94,7 @@ export function mountIsometricEstimator(
   canvas.className = 'ie-stage-canvas';
   canvas.setAttribute('aria-label', 'Interactive house estimate');
   stageHost.appendChild(canvas);
-  // Transparent background: the Frost White stage panel shows through.
+  // Transparent background: the Plaster stage panel shows through.
   var scene = new THREE.Scene();
 
   var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
@@ -126,10 +126,10 @@ export function mountIsometricEstimator(
   if (resizeObserver) resizeObserver.observe(canvas);
 
   // lighting: one soft neutral key light and a hemisphere fill
-  var hemi = new THREE.HemisphereLight(PEAK_WHITE, mixColor(PEAK_WHITE, NAVY, 0.25), 2.3);
+  var hemi = new THREE.HemisphereLight(WHITE, mixColor(WHITE, NAVY, 0.25), 2.3);
   scene.add(hemi);
   // key light on the camera's starting side, so the front walls read white and the shadow falls behind
-  var sun = new THREE.DirectionalLight(PEAK_WHITE, 1.6);
+  var sun = new THREE.DirectionalLight(WHITE, 1.6);
   sun.position.set(-9, 14, -8);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048,2048);
@@ -149,7 +149,7 @@ export function mountIsometricEstimator(
   // The disc is unlit so it holds its colour exactly; a shadow-only disc on top
   // of it carries the soft shadow from the house.
   var GROUND_CENTER_X = 4.6, GROUND_CENTER_Z = 2.0, GROUND_RADIUS = 7.4;
-  var groundMat = new THREE.MeshBasicMaterial({color: mixColor(mixColor(PEAK_WHITE, PEAK_FLEET, 0.2), NAVY, 0.05)});
+  var groundMat = new THREE.MeshBasicMaterial({color: mixColor(mixColor(WHITE, ADDON, 0.2), NAVY, 0.05)});
   var ground = new THREE.Mesh(new THREE.CircleGeometry(GROUND_RADIUS, 96), groundMat);
   ground.rotation.x = -Math.PI/2;
   ground.position.set(GROUND_CENTER_X, -0.002, GROUND_CENTER_Z);
@@ -165,7 +165,7 @@ export function mountIsometricEstimator(
   modelRoot.add(shadowCatcher);
 
   // the doorstep spans local x[2.3,3.6] z[-0.42,0]; the path runs out from its front edge
-  var pathMat = new THREE.MeshBasicMaterial({color: mixColor(PEAK_WHITE, PEAK_FLEET, 0.07)});
+  var pathMat = new THREE.MeshBasicMaterial({color: mixColor(WHITE, ADDON, 0.07)});
   var path = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.9), pathMat);
   path.rotation.x = -Math.PI/2;
   path.position.set(2.95, 0.001, -1.37);
@@ -184,17 +184,17 @@ export function mountIsometricEstimator(
   function matte(color){
     return new THREE.MeshStandardMaterial({color: color, roughness: 1, metalness: 0});
   }
-  var WALL_MAT  = matte(PEAK_WHITE);
+  var WALL_MAT  = matte(WHITE);
   var FRAME_MAT = matte(NAVY);
   var ROOF_MAT  = matte(NAVY);
   var DOOR_MAT  = FRAME_MAT;
-  var GLASS_MAT = matte(mixColor(PEAK_WHITE, NAVY, 0.2));
+  var GLASS_MAT = matte(mixColor(WHITE, NAVY, 0.2));
   function newGlassMat(){ return GLASS_MAT.clone(); } // own instance per pane so panes can be animated independently
   // add-ons get their own instances so each can fade on its own
-  function addonMat(){ return matte(PEAK_FLEET); }
+  function addonMat(){ return matte(ADDON); }
   function addonGlassMat(){
-    var m = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
-    m.emissive = new THREE.Color(PEAK_FLEET);
+    var m = matte(mixColor(ADDON, WHITE, 0.4));
+    m.emissive = new THREE.Color(ADDON);
     m.emissiveIntensity = 0;
     return m;
   }
@@ -285,12 +285,12 @@ export function mountIsometricEstimator(
     target: 0,
     progress: 0,
     glassFrom: GLASS_MAT.color.clone(),
-    glassTo: mixColor(PEAK_FLEET, PEAK_WHITE, 0.4),
+    glassTo: mixColor(ADDON, WHITE, 0.4),
     frameFrom: FRAME_MAT.color.clone(),
-    frameTo: new THREE.Color(PEAK_FLEET)
+    frameTo: new THREE.Color(ADDON)
   };
 
-  // add-on groups (flat-roofed volumes with a glazed face, fascia cap and plinth), all in Peak Fleet
+  // add-on groups (flat-roofed volumes with a glazed face, fascia cap and plinth), all in Sky
   var addonMeshes = {};
   var ADDON_RISE = 0.9;
   // Assigned before makeAddon runs: ghostMat() reads it at construction. ?ghosts=off hides the dashed
@@ -449,7 +449,7 @@ export function mountIsometricEstimator(
     // two by two on the right half of the slope, below the chimney and clear of the loft dormer
     var panelW = 1.3, panelD = 0.82, outward = 0.045;
     var panelMat = addonMat();
-    var frameMat = matte(mixColor(PEAK_FLEET, PEAK_WHITE, 0.4));
+    var frameMat = matte(mixColor(ADDON, WHITE, 0.4));
     [3.05, 4.5].forEach(function(sx){
       [0.81, 1.75].forEach(function(slopeZ){
         var cx = sx + panelW/2;
@@ -614,7 +614,7 @@ export function mountIsometricEstimator(
   if (costBar) costBar.replaceChildren();
   if (costLegend) costLegend.replaceChildren();
 
-  // Every add-on is Peak Fleet, so the cost bar tells them apart by tint.
+  // Every add-on is Cortex Blue, so the cost bar tells them apart by tint.
   var COST_TINTS = [100, 78, 60, 46, 35, 26];
 
   var sizeTargetScale = 1, sizeCurrentScale = 1;
@@ -691,7 +691,7 @@ export function mountIsometricEstimator(
     costBar.replaceChildren();
     costLegend.replaceChildren();
     selected.forEach(function(a, i){
-      var tint = 'color-mix(in srgb, ' + a.color + ' ' + COST_TINTS[i % COST_TINTS.length] + '%, var(--peak-white))';
+      var tint = 'color-mix(in srgb, ' + a.color + ' ' + COST_TINTS[i % COST_TINTS.length] + '%, var(--white))';
       var seg = document.createElement('span');
       seg.style.width = ((a.price / basePrice) * 100) + '%';
       seg.style.background = tint;
@@ -709,12 +709,12 @@ export function mountIsometricEstimator(
   }
 
   function setShadows(obj, on){
-    obj.traverse(function(child){ if (child.isMesh) child.castShadow = on; });
+    obj.blue-shade(function(child){ if (child.isMesh) child.castShadow = on; });
   }
 
   function setGhostOpacity(ghost, opacity){
     ghost.visible = opacity > 0.005;
-    ghost.traverse(function(child){
+    ghost.blue-shade(function(child){
       if (child.material) child.material.opacity = opacity;
     });
   }
@@ -855,7 +855,7 @@ export function mountIsometricEstimator(
   canvas.addEventListener('wheel', onWheel, {passive:false});
 
   function disposeObject3D(obj){
-    obj.traverse(function(child){
+    obj.blue-shade(function(child){
       if (child.geometry) child.geometry.dispose();
       var mat = child.material;
       if (!mat) return;

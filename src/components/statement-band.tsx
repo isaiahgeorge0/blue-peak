@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 /**
- * "What we stand for" on Blue Solution. When the band first comes into view
+ * "What we stand for" on Cortex Blue. When the band first comes into view
  * its three words rise out of their masks one after another, once. The words
  * are only hidden after mounting and while the band is still off screen, so
  * they never vanish from view and show as they are without scripts.
@@ -36,7 +36,7 @@ export function StatementBand() {
         ref={ref}
         className="statement mx-auto max-w-6xl px-6 py-24 text-center lg:py-36"
       >
-        <p className="statement-eyebrow text-xs font-bold tracking-[0.2em] text-accent uppercase">
+        <p className="statement-eyebrow text-xs font-bold tracking-[0.2em] text-accent-ink uppercase">
           What we stand for
         </p>
         <h2 className="mt-6 text-6xl leading-display tracking-display text-ink lg:text-7xl xl:text-8xl">

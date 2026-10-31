@@ -27,7 +27,7 @@ function parseTimeValue(value: string): { hour: number; minute: number } | null 
 }
 
 const selectClass =
-  "h-11 w-full cursor-pointer appearance-none rounded-lg border border-admin-edge bg-admin-base pr-8 pl-3 text-[0.9375rem] text-ink tabular-nums hover:border-peak-fleet disabled:opacity-60";
+  "h-11 w-full cursor-pointer appearance-none rounded-lg border border-admin-edge bg-admin-base pr-8 pl-3 text-[0.9375rem] text-ink tabular-nums hover:border-sky disabled:opacity-60";
 
 /**
  * A 24-hour time as two native selects, hour and minutes in quarters, so it

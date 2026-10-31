@@ -209,7 +209,7 @@ export default async function AdminLeadPage({ params }: PageProps<"/admin/leads/
                 <ul className="divide-y divide-admin-line">
                   {visits.map((visit) => (
                     <li key={visit.id} className="flex gap-4 px-5 py-4">
-                      <CalendarIcon className="mt-0.5 size-5 shrink-0 text-peak-fleet" />
+                      <CalendarIcon className="mt-0.5 size-5 shrink-0 text-sky" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-ink">
                           {dayLabel(visit.start_date, now)}

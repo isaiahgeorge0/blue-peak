@@ -45,8 +45,8 @@ export default async function FollowUpsPage() {
       />
 
       {!config.enabled ? (
-        <section aria-labelledby="off-heading" className="flex gap-4 rounded-xl border border-ridge-cyan/60 bg-brand/25 px-5 py-5">
-          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
+        <section aria-labelledby="off-heading" className="flex gap-4 rounded-xl border border-glow/60 bg-brand/25 px-5 py-5">
+          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-glow" />
           <div className="min-w-0">
             <h2 id="off-heading" className="font-sans text-base font-bold text-ink">
               Follow-ups aren&apos;t switched on yet.
@@ -57,8 +57,8 @@ export default async function FollowUpsPage() {
       ) : null}
 
       {config.enabled && missing.length > 0 ? (
-        <section aria-labelledby="blocked-heading" className="flex gap-4 rounded-xl border border-ridge-cyan/60 bg-brand/25 px-5 py-5">
-          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
+        <section aria-labelledby="blocked-heading" className="flex gap-4 rounded-xl border border-glow/60 bg-brand/25 px-5 py-5">
+          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-glow" />
           <div className="min-w-0">
             <h2 id="blocked-heading" className="font-sans text-base font-bold text-ink">
               Follow-ups are switched on but can&apos;t send yet.
@@ -70,7 +70,7 @@ export default async function FollowUpsPage() {
 
       {config.testRecipient ? (
         <section aria-labelledby="test-heading" className="flex gap-4 rounded-xl border border-admin-edge bg-admin-surface px-5 py-5">
-          <FollowUpsIcon className="mt-0.5 size-6 shrink-0 text-peak-fleet" />
+          <FollowUpsIcon className="mt-0.5 size-6 shrink-0 text-sky" />
           <div className="min-w-0">
             <h2 id="test-heading" className="font-sans text-base font-bold text-ink">
               Test mode
@@ -106,7 +106,7 @@ export default async function FollowUpsPage() {
       <details className="group rounded-xl border border-admin-line bg-admin-surface">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-4 transition-colors hover:bg-admin-raised/60 [&::-webkit-details-marker]:hidden">
           <h2 className="font-serif text-[1.375rem] leading-tight tracking-heading text-ink">Technical setup (for your web developer)</h2>
-          <ChevronDownIcon className="size-5 shrink-0 text-peak-fleet transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+          <ChevronDownIcon className="size-5 shrink-0 text-sky transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
         </summary>
         <div className="border-t border-admin-line px-5 py-5">
           {config.enabled && missing.length > 0 ? (

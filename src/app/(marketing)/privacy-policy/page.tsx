@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /** Unfilled legal detail. Styled to stand out so it can't ship unnoticed. */
 function Tbc({ children }: { children: string }) {
   return (
-    <strong className="rounded bg-accent/15 px-1.5 py-0.5 font-medium text-accent ring-1 ring-accent/40">
+    <strong className="rounded bg-accent/15 px-1.5 py-0.5 font-medium text-accent-ink ring-1 ring-accent/40">
       {children}
     </strong>
   );
@@ -44,7 +44,7 @@ function P({ children }: { children: ReactNode }) {
 
 function List({ items }: { items: ReactNode[] }) {
   return (
-    <ul className="list-disc space-y-2 pl-5 leading-relaxed text-ink/80 marker:text-accent">
+    <ul className="list-disc space-y-2 pl-5 leading-relaxed text-ink/80 marker:text-accent-ink">
       {items.map((item, index) => (
         <li key={index}>{item}</li>
       ))}
@@ -77,7 +77,7 @@ function Table({ head, rows }: TableProps) {
         {head ? (
           <thead
             role="rowgroup"
-            className="border-b border-ink/10 text-xs tracking-wide text-accent uppercase max-sm:sr-only"
+            className="border-b border-ink/10 text-xs tracking-wide text-accent-ink uppercase max-sm:sr-only"
           >
             <tr role="row">
               {head.map((cell) => (
@@ -465,7 +465,7 @@ export default function PrivacyPolicyPage() {
                 complain to the ICO at{" "}
                 <a
                   href="https://ico.org.uk"
-                  className="text-accent underline underline-offset-2 hover:text-ink"
+                  className="text-accent-ink underline underline-offset-2 hover:text-ink"
                 >
                   ico.org.uk
                 </a>{" "}

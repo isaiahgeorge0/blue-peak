@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const detailHeadingClassName =
-  "font-sans text-xs font-bold tracking-[0.2em] text-accent uppercase";
+  "font-sans text-xs font-bold tracking-[0.2em] text-accent-ink uppercase";
 
 /** The form column's right edge lines up with the main container's from lg. */
 const containerInsetRight =
@@ -62,7 +62,7 @@ export default function ContactPage() {
                   <li key={area.slug}>
                     <Link
                       href={`/areas/${area.slug}`}
-                      className="link-draw tap-target text-base text-ink transition-colors duration-200 hover:text-accent"
+                      className="link-draw tap-target text-base text-ink transition-colors duration-200 hover:text-accent-ink"
                     >
                       {area.name}
                     </Link>

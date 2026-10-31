@@ -8,7 +8,7 @@
   --ie-text-dim: color-mix(in srgb, var(--ink) 76%, transparent);
   --ie-text-faint: color-mix(in srgb, var(--ink) 66%, transparent);
   --ie-accent: var(--accent);
-  --ie-pick: var(--peak-fleet);
+  --ie-pick: var(--cortex-blue);
   --ie-sticky-top: var(--site-header-height);
   color: var(--ie-text);
   font-family: var(--font-sans), Helvetica, Arial, sans-serif;
@@ -111,7 +111,7 @@
   font-size: 0.7188rem;
   font-weight: 600;
   color: var(--navy);
-  background: var(--peak-white);
+  background: var(--white);
   border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
   padding: 0.3125rem 0.6875rem;
   border-radius: 999px;
@@ -167,7 +167,7 @@
 }
 
 .ie-cost-bar span + span {
-  border-left: 2px solid var(--peak-white);
+  border-left: 2px solid var(--white);
 }
 
 .ie-cost-legend {
@@ -437,7 +437,7 @@
   top: 1.5px;
   width: 0.3125rem;
   height: 0.625rem;
-  border: solid var(--peak-white);
+  border: solid var(--white);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -556,7 +556,7 @@
 
 .ie-btn-next:hover {
   transform: scale(1.03);
-  background: var(--traverse-blue);
+  background: var(--blue-shade);
 }
 
 .ie-btn-next[aria-disabled="true"] {

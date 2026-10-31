@@ -27,8 +27,8 @@ function NavLink({ item, mode, active, tag }: { item: NavItem; mode: Mode; activ
         railOnly ? "justify-center xl:justify-start" : ""
       } ${active ? "bg-admin-raised text-ink" : "text-ink/80 hover:bg-admin-raised/60 hover:text-ink"}`}
     >
-      {active ? <span aria-hidden className="absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-ridge-cyan" /> : null}
-      <Icon className={`size-5 transition-colors ${active ? "text-ridge-cyan" : "text-peak-fleet"}`} />
+      {active ? <span aria-hidden className="absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-glow" /> : null}
+      <Icon className={`size-5 transition-colors ${active ? "text-glow" : "text-sky"}`} />
       <span className={`min-w-0 ${railOnly ? "sr-only xl:not-sr-only" : ""}`}>{item.label}</span>
       {tag ? (
         <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-[0.6875rem] whitespace-nowrap font-bold tracking-wide text-ink/80 ring-1 ring-inset ring-ink/30 ${railOnly ? "hidden xl:inline" : ""}`}>
@@ -38,7 +38,7 @@ function NavLink({ item, mode, active, tag }: { item: NavItem; mode: Mode; activ
       {railOnly ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-md bg-frost px-2.5 py-1.5 text-xs font-bold whitespace-nowrap text-navy opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 xl:hidden"
+          className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-md bg-plaster px-2.5 py-1.5 text-xs font-bold whitespace-nowrap text-navy opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 xl:hidden"
         >
           {item.label}
         </span>
@@ -64,7 +64,7 @@ function UserBlock({ user, mode }: { user: AdminUser | null; mode: Mode }) {
         {mode === "sheet" ? (
           <button
             type="submit"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-admin-edge px-4 text-sm font-bold text-ink transition-colors hover:border-peak-fleet hover:bg-admin-raised"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-admin-edge px-4 text-sm font-bold text-ink transition-colors hover:border-sky hover:bg-admin-raised"
           >
             <LogOutIcon className="size-4" />
             Log out
@@ -102,7 +102,7 @@ function NavContents({
     <>
       <div className={`flex h-16 shrink-0 items-center gap-3 px-3 ${railOnly ? "justify-center xl:justify-start" : ""}`}>
         <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-lg px-1 text-ink" aria-label="Blue Peak admin, Dashboard">
-          <BrandMark title="" className="h-7 w-auto shrink-0 text-frost" />
+          <BrandMark title="" className="h-7 w-auto shrink-0 text-plaster" />
           <span className={`font-serif text-xl leading-none tracking-heading ${railOnly ? "hidden xl:inline" : ""}`}>Blue Peak</span>
         </Link>
       </div>
@@ -221,8 +221,8 @@ function PhoneTabBar({ pathname, onMore, moreRef, moreOpen }: { pathname: string
           const { Icon } = item;
           return (
             <li key={item.href} className="flex flex-1">
-              <Link href={item.href} aria-current={active ? "page" : undefined} className={`${tab} ${active ? "text-ridge-cyan" : "text-ink/80"}`}>
-                {active ? <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b-full bg-ridge-cyan" /> : null}
+              <Link href={item.href} aria-current={active ? "page" : undefined} className={`${tab} ${active ? "text-glow" : "text-ink/80"}`}>
+                {active ? <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b-full bg-glow" /> : null}
                 <Icon className="size-5" />
                 {item.label}
               </Link>
@@ -236,9 +236,9 @@ function PhoneTabBar({ pathname, onMore, moreRef, moreOpen }: { pathname: string
             onClick={onMore}
             aria-haspopup="dialog"
             aria-expanded={moreOpen}
-            className={`${tab} ${onAddon ? "text-ridge-cyan" : "text-ink/80"}`}
+            className={`${tab} ${onAddon ? "text-glow" : "text-ink/80"}`}
           >
-            {onAddon ? <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b-full bg-ridge-cyan" /> : null}
+            {onAddon ? <span aria-hidden className="absolute top-0 h-[3px] w-8 rounded-b-full bg-glow" /> : null}
             <MoreIcon className="size-5" />
             More
           </button>
@@ -270,7 +270,7 @@ export function AdminShell({ user, children }: { user: AdminUser | null; childre
       <div className="theme-admin flex min-h-dvh flex-1 flex-col bg-page text-ink">
         <a
           href="#main"
-          className="sr-only rounded-full bg-frost text-sm font-bold text-navy focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[80] focus:px-5 focus:py-3"
+          className="sr-only rounded-full bg-plaster text-sm font-bold text-navy focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[80] focus:px-5 focus:py-3"
         >
           Skip to content
         </a>
@@ -287,7 +287,7 @@ export function AdminShell({ user, children }: { user: AdminUser | null; childre
 
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-admin-line bg-admin-surface/95 px-4 backdrop-blur md:hidden">
           <Link href="/admin" aria-label="Dashboard" className="grid size-11 place-items-center rounded-lg">
-            <BrandMark title="" className="h-6 w-auto text-frost" />
+            <BrandMark title="" className="h-6 w-auto text-plaster" />
           </Link>
           <p className="font-serif text-xl tracking-heading text-ink">{pageTitleFor(pathname)}</p>
         </header>

@@ -161,9 +161,9 @@ export default async function AdminDashboardPage() {
       {unnotified.length > 0 ? (
         <section
           aria-labelledby="unnotified-heading"
-          className="flex gap-4 rounded-xl border border-ridge-cyan/60 bg-brand/25 px-5 py-5"
+          className="flex gap-4 rounded-xl border border-glow/60 bg-brand/25 px-5 py-5"
         >
-          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-ridge-cyan" />
+          <AlertMailIcon className="mt-0.5 size-6 shrink-0 text-glow" />
           <div className="min-w-0">
             <h2 id="unnotified-heading" className="text-base font-bold text-ink">
               {unnotified.length === 1 ? "An email alert didn't send" : `${unnotified.length} email alerts didn't send`}
@@ -208,12 +208,12 @@ export default async function AdminDashboardPage() {
                       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                         <Link
                           href={`/admin/leads/${lead.id}`}
-                          className="group min-w-0 rounded-sm text-base font-bold text-ink hover:text-ridge-cyan"
+                          className="group min-w-0 rounded-sm text-base font-bold text-ink hover:text-glow"
                         >
                           <span className="break-words underline-offset-4 group-hover:underline">{leadName(lead)}</span>
                         </Link>
                         <span className="inline-flex items-center gap-1.5 text-sm text-ink/80">
-                          <ClockIcon className="size-4 text-peak-fleet" />
+                          <ClockIcon className="size-4 text-sky" />
                           <span>
                             <span className="sr-only">Waiting </span>
                             {waitedFor(lead.created_at, now)}
@@ -272,7 +272,7 @@ export default async function AdminDashboardPage() {
               <ol className="divide-y divide-admin-line">
                 {upcoming.map(({ event, occurrenceDate, isRecurring }) => (
                   <li key={`${event.id}-${occurrenceDate}`} className="flex gap-4 px-5 py-4">
-                    <CalendarIcon className="mt-0.5 size-5 shrink-0 text-peak-fleet" />
+                    <CalendarIcon className="mt-0.5 size-5 shrink-0 text-sky" />
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-ink">
                         {dayLabel(occurrenceDate, now)}
@@ -308,10 +308,10 @@ export default async function AdminDashboardPage() {
                   { label: "Failed", value: followUps.failures.length },
                 ].map((figure) => (
                   <div key={figure.label} className="flex flex-col gap-1 px-4 py-4 sm:px-5">
-                    <dt className="text-xs font-bold tracking-[0.14em] text-peak-fleet uppercase">{figure.label}</dt>
+                    <dt className="text-xs font-bold tracking-[0.14em] text-sky uppercase">{figure.label}</dt>
                     <dd
                       className={`font-serif text-[2rem] leading-none ${
-                        figure.label === "Failed" && figure.value > 0 ? "text-ridge-cyan" : "text-ink"
+                        figure.label === "Failed" && figure.value > 0 ? "text-glow" : "text-ink"
                       }`}
                     >
                       <CountUp value={figure.value} />
@@ -321,7 +321,7 @@ export default async function AdminDashboardPage() {
               </dl>
               {followUps.globallyOff ? (
                 <p className="flex items-start gap-2 border-t border-admin-line px-5 py-4 text-sm text-ink/80">
-                  <FollowUpsIcon className="mt-0.5 size-4 shrink-0 text-peak-fleet" />
+                  <FollowUpsIcon className="mt-0.5 size-4 shrink-0 text-sky" />
                   Follow-ups are off, so nothing is being sent. Anything due is logged as skipped.
                 </p>
               ) : null}
@@ -329,11 +329,11 @@ export default async function AdminDashboardPage() {
                 <ul className="divide-y divide-admin-line border-t border-admin-line">
                   {followUps.failures.slice(0, 5).map((failure) => (
                     <li key={failure.id} className="flex gap-4 px-5 py-4">
-                      <AlertMailIcon className="mt-0.5 size-5 shrink-0 text-ridge-cyan" />
+                      <AlertMailIcon className="mt-0.5 size-5 shrink-0 text-glow" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-ink">
                           {failure.step} to{" "}
-                          <Link href={`/admin/leads/${failure.leadId}`} className="rounded-sm text-peak-fleet underline-offset-4 hover:text-ridge-cyan hover:underline">
+                          <Link href={`/admin/leads/${failure.leadId}`} className="rounded-sm text-sky underline-offset-4 hover:text-glow hover:underline">
                             {failure.leadName}
                           </Link>{" "}
                           didn&apos;t send
@@ -364,13 +364,13 @@ export default async function AdminDashboardPage() {
                   href={`/admin/leads?status=${status}`}
                   className="group flex h-full flex-col gap-1 px-5 py-4 transition-colors hover:bg-admin-raised"
                 >
-                  <span className="flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-peak-fleet uppercase">
+                  <span className="flex items-center gap-1.5 text-xs font-bold tracking-[0.14em] text-sky uppercase">
                     {STATUS_LABELS[status]}
                     {index < PIPELINE.length - 1 ? (
                       <ArrowRightIcon className="size-3.5 text-ink/60 max-sm:hidden" />
                     ) : null}
                   </span>
-                  <span className="font-serif text-[2rem] leading-none text-ink group-hover:text-ridge-cyan">
+                  <span className="font-serif text-[2rem] leading-none text-ink group-hover:text-glow">
                     <CountUp value={counts[status]} />
                     <span className="sr-only"> {counts[status] === 1 ? "lead" : "leads"}</span>
                   </span>

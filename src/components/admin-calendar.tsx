@@ -87,7 +87,7 @@ function buildMonthCells(year: number, month: number) {
 }
 
 const navButton =
-  "inline-flex size-11 items-center justify-center rounded-full border border-admin-edge text-ink transition-colors hover:border-peak-fleet hover:bg-admin-raised";
+  "inline-flex size-11 items-center justify-center rounded-full border border-admin-edge text-ink transition-colors hover:border-sky hover:bg-admin-raised";
 
 export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads }: AdminCalendarProps) {
   const router = useRouter();
@@ -163,13 +163,13 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
         onClick={() => openView(occurrence)}
         className={
           compact
-            ? "relative z-10 flex w-full items-center gap-1 rounded-md bg-peak-fleet/15 px-1.5 py-1 text-left text-xs text-ink ring-1 ring-inset ring-peak-fleet/40 transition-colors hover:bg-peak-fleet/25"
+            ? "relative z-10 flex w-full items-center gap-1 rounded-md bg-sky/15 px-1.5 py-1 text-left text-xs text-ink ring-1 ring-inset ring-sky/40 transition-colors hover:bg-sky/25"
             : "flex min-h-14 w-full items-center gap-4 rounded-xl border border-admin-line bg-admin-surface px-4 py-3 text-left transition-colors hover:bg-admin-raised"
         }
       >
         {compact ? (
           <>
-            {occurrence.isRecurring ? <RepeatIcon className="size-3 shrink-0 text-ridge-cyan" /> : null}
+            {occurrence.isRecurring ? <RepeatIcon className="size-3 shrink-0 text-glow" /> : null}
             <span className="truncate">
               {start ? <span className="font-bold tabular-nums">{start} </span> : null}
               {occurrence.event.title}
@@ -178,7 +178,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
           </>
         ) : (
           <>
-            <span className="w-24 shrink-0 text-sm font-bold text-peak-fleet tabular-nums">{timeLabel(occurrence.event)}</span>
+            <span className="w-24 shrink-0 text-sm font-bold text-sky tabular-nums">{timeLabel(occurrence.event)}</span>
             <span className="min-w-0 flex-1">
               <span className="block break-words text-[0.9375rem] text-ink">{occurrence.event.title}</span>
               {occurrence.isRecurring ? (
@@ -238,7 +238,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
               <li key={cell.key}>
                 <h3 className="flex items-baseline gap-2 text-sm font-bold text-ink">
                   {formatDay(cell.dateKey, { weekday: "long", day: "numeric", month: "long" })}
-                  {cell.dateKey === todayKey ? <span className="admin-label text-ridge-cyan">Today</span> : null}
+                  {cell.dateKey === todayKey ? <span className="admin-label text-glow">Today</span> : null}
                 </h3>
                 <ul className="mt-2 space-y-2">
                   {(eventsByDate.get(cell.dateKey) ?? []).map((occurrence) => (
@@ -279,12 +279,12 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
                 />
                 <span
                   className={`pointer-events-none relative inline-flex size-7 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
-                    isToday ? "bg-frost text-navy" : cell.inMonth ? "text-ink" : "text-ink/60"
+                    isToday ? "bg-plaster text-navy" : cell.inMonth ? "text-ink" : "text-ink/60"
                   }`}
                 >
                   {cell.day}
                 </span>
-                <PlusIcon className="pointer-events-none absolute top-2.5 right-2.5 size-3.5 text-peak-fleet opacity-0 transition-opacity group-hover:opacity-100" />
+                <PlusIcon className="pointer-events-none absolute top-2.5 right-2.5 size-3.5 text-sky opacity-0 transition-opacity group-hover:opacity-100" />
                 {dayEvents.length > 0 ? (
                   <ul className="relative mt-1 space-y-1">
                     {dayEvents.map((occurrence) => (
@@ -339,7 +339,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
                 <dt className="admin-label">Repeats</dt>
                 <dd className="mt-1 text-ink">
                   <span className="inline-flex items-center gap-1.5">
-                    {viewing.isRecurring ? <RepeatIcon className="size-4 text-ridge-cyan" /> : null}
+                    {viewing.isRecurring ? <RepeatIcon className="size-4 text-glow" /> : null}
                     {recurrenceLabel(viewing.event.recurrence)}
                   </span>
                   {viewing.event.recurrence_end_date ? (
@@ -357,7 +357,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
                 <div>
                   <dt className="admin-label">Lead</dt>
                   <dd className="mt-1">
-                    <Link href={`/admin/leads/${viewing.event.lead_id}`} className="font-bold text-peak-fleet underline-offset-4 hover:text-ridge-cyan hover:underline">
+                    <Link href={`/admin/leads/${viewing.event.lead_id}`} className="font-bold text-sky underline-offset-4 hover:text-glow hover:underline">
                       {leadNames.get(viewing.event.lead_id) ?? "Open the lead"}
                     </Link>
                   </dd>
@@ -366,7 +366,7 @@ export function AdminCalendar({ year, month, rangeStart, rangeEnd, events, leads
             </dl>
 
             {error ? (
-              <p role="alert" className="mt-4 text-sm font-bold text-ridge-cyan">
+              <p role="alert" className="mt-4 text-sm font-bold text-glow">
                 {error}
               </p>
             ) : null}

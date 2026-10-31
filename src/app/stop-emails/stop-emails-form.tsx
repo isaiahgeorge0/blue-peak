@@ -13,7 +13,7 @@ export function StopEmailsForm({ token }: { token: string }) {
       <div role="status">
         <p className="mt-4 text-base leading-relaxed text-ink/80">
           Done. We won&apos;t send you any more follow-up emails. If you&apos;d like to talk to us, call{" "}
-          <a href={`tel:${sitePhoneTel}`} className="font-bold whitespace-nowrap text-accent underline underline-offset-4">
+          <a href={`tel:${sitePhoneTel}`} className="font-bold whitespace-nowrap text-accent-ink underline underline-offset-4">
             {sitePhoneDisplay}
           </a>
           .

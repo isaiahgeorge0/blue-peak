@@ -36,7 +36,7 @@ const TOP_THRESHOLD = 80;
 const WIDE_QUERY = "(min-width: 72rem)";
 
 const pillClassName =
-  "pointer-events-auto flex h-[var(--header-pill)] items-center rounded-full bg-peak-white text-ink shadow-lg ring-1 shadow-navy/20 ring-navy/5";
+  "pointer-events-auto flex h-[var(--header-pill)] items-center rounded-full bg-white text-ink shadow-lg ring-1 shadow-navy/20 ring-navy/5";
 
 /** Shadow and hairline only; outer shadows are not drawn under a box, so the pieces need no fill. */
 const pillShadowClassName = "shadow-lg ring-1 shadow-navy/20 ring-navy/5";
@@ -292,7 +292,7 @@ export function SiteHeader() {
           >
             <a
               href={`tel:${sitePhoneTel}`}
-              className={`${pillClassName} justify-center px-0 text-sm font-bold transition-colors duration-200 hover:text-accent max-md:w-[var(--header-pill)] md:px-5`}
+              className={`${pillClassName} justify-center px-0 text-sm font-bold transition-colors duration-200 hover:text-accent-ink max-md:w-[var(--header-pill)] md:px-5`}
             >
               <PhoneIcon className="h-5 w-5 md:hidden" />
               <span className="max-md:sr-only">
@@ -315,18 +315,18 @@ export function SiteHeader() {
               <div className="pill-mid pill-shadow">
                 <div className={`absolute inset-y-0 -inset-x-8 ${pillShadowClassName}`} />
               </div>
-              <div className="pill-cap pill-cap-l pointer-events-auto rounded-full bg-peak-white" />
-              <div className="pill-cap pill-cap-r pointer-events-auto rounded-full bg-peak-white" />
-              <div className="pill-mid pointer-events-auto bg-peak-white" />
+              <div className="pill-cap pill-cap-l pointer-events-auto rounded-full bg-white" />
+              <div className="pill-cap pill-cap-r pointer-events-auto rounded-full bg-white" />
+              <div className="pill-mid pointer-events-auto bg-white" />
             </div>
 
             <div
               id={menuId}
               ref={surfaceRef}
               data-open={menuOpen ? "true" : "false"}
-              className="menu-surface pointer-events-auto absolute top-0 left-1/2 max-h-[calc(100dvh_-_2*var(--header-top))] w-[var(--panel-w)] -translate-x-1/2 overflow-y-auto overscroll-contain bg-peak-white"
+              className="menu-surface pointer-events-auto absolute top-0 left-1/2 max-h-[calc(100dvh_-_2*var(--header-top))] w-[var(--panel-w)] -translate-x-1/2 overflow-y-auto overscroll-contain bg-white"
             >
-              <div aria-hidden className="sticky top-0 z-10 h-[var(--header-pill)] bg-peak-white" />
+              <div aria-hidden className="sticky top-0 z-10 h-[var(--header-pill)] bg-white" />
               <div
                 inert={!menuOpen}
                 className={`px-6 pt-5 pb-6 sm:px-10 sm:pt-6 sm:pb-8 ${
@@ -359,7 +359,7 @@ export function SiteHeader() {
                               onFocus={() => setPhotoIndex(index)}
                               aria-current={active ? "page" : undefined}
                               className={`group/link relative inline-flex rounded-sm py-[0.3rem] font-serif text-[2.125rem] leading-[1.05] tracking-heading transition-[opacity,color] duration-200 ease-out group-has-[a:hover]/menu:opacity-40 group-has-[a:focus-visible]/menu:opacity-40 hover:opacity-100! focus-visible:opacity-100! sm:py-0.5 sm:text-[2.75rem] ${
-                                active ? "text-accent" : "text-ink"
+                                active ? "text-accent-ink" : "text-ink"
                               }`}
                             >
                               <NudgeArrow className="absolute top-1/2 -left-2.5 h-[0.45em] w-[0.45em] -translate-x-2 -translate-y-1/2 opacity-0 transition-[opacity,translate] duration-200 ease-out group-hover/link:translate-x-0 group-hover/link:opacity-100 group-focus-visible/link:translate-x-0 group-focus-visible/link:opacity-100 motion-reduce:transition-none" />
@@ -375,7 +375,7 @@ export function SiteHeader() {
 
                   <div
                     aria-hidden
-                    className={`relative hidden aspect-[5/6] w-[18.75rem] shrink-0 overflow-hidden rounded-xl bg-frost transition-[opacity,translate] ease-out motion-reduce:transition-none lg:block ${
+                    className={`relative hidden aspect-[5/6] w-[18.75rem] shrink-0 overflow-hidden rounded-xl bg-plaster transition-[opacity,translate] ease-out motion-reduce:transition-none lg:block ${
                       menuOpen
                         ? "translate-y-0 opacity-100 delay-[150ms] duration-500"
                         : "translate-y-3 opacity-0 duration-150"
@@ -434,7 +434,7 @@ export function SiteHeader() {
                               <SampleTag overPhoto className="absolute top-2 left-2" />
                             ) : null}
                           </div>
-                          <p className="mt-2 text-sm font-semibold text-ink transition-colors duration-200 group-hover/card:text-accent">
+                          <p className="mt-2 text-sm font-semibold text-ink transition-colors duration-200 group-hover/card:text-accent-ink">
                             {project.title}
                           </p>
                         </Link>
@@ -450,7 +450,7 @@ export function SiteHeader() {
                 >
                   <a
                     href={`tel:${sitePhoneTel}`}
-                    className="link-draw tap-target text-base font-bold text-ink transition-colors hover:text-accent"
+                    className="link-draw tap-target text-base font-bold text-ink transition-colors hover:text-accent-ink"
                   >
                     <span className="sr-only">Call </span>
                     {sitePhoneDisplay}
@@ -472,7 +472,7 @@ export function SiteHeader() {
                 onClick={() => closeMenu()}
                 aria-label="Blue Peak, home"
                 data-open={menuOpen ? "true" : "false"}
-                className="pill-wordmark tap-target pointer-events-auto relative flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-traverse"
+                className="pill-wordmark tap-target pointer-events-auto relative flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-blue-shade"
               >
                 <BrandWordmark title="" className="h-4 w-auto sm:h-5" />
               </Link>
@@ -488,8 +488,8 @@ export function SiteHeader() {
                       key={link.href}
                       href={link.href}
                       aria-current={index === activeIndex ? "page" : undefined}
-                      className={`tap-target pointer-events-auto relative rounded-full px-2.5 py-1.5 text-[0.9375rem] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-accent ${
-                        index === activeIndex ? "text-accent" : "text-ink"
+                      className={`tap-target pointer-events-auto relative rounded-full px-2.5 py-1.5 text-[0.9375rem] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-accent-ink ${
+                        index === activeIndex ? "text-accent-ink" : "text-ink"
                       }`}
                     >
                       <span className="link-draw">{link.label}</span>
@@ -507,7 +507,7 @@ export function SiteHeader() {
                 onClick={() => (menuOpen ? closeMenu() : openMenu())}
                 data-open={menuOpen ? "true" : "false"}
                 inert={hydrated && wide}
-                className="pill-toggle tap-target pointer-events-auto absolute inset-y-0 my-auto flex h-10 w-10 items-center justify-center rounded-full text-brand hover:text-traverse"
+                className="pill-toggle tap-target pointer-events-auto absolute inset-y-0 my-auto flex h-10 w-10 items-center justify-center rounded-full text-brand hover:text-blue-shade"
               >
                 <span aria-hidden className="relative block h-3 w-5">
                   <span
@@ -530,7 +530,7 @@ export function SiteHeader() {
           >
             <Link
               href="/contact"
-              className="group pointer-events-auto flex h-[var(--header-pill)] items-center gap-2 rounded-full bg-accent px-5 text-sm font-bold text-on-accent shadow-lg ring-1 shadow-navy/20 ring-peak-white/60 transition-colors duration-200 hover:bg-traverse"
+              className="group pointer-events-auto flex h-[var(--header-pill)] items-center gap-2 rounded-full bg-accent px-5 text-sm font-bold text-on-accent shadow-lg ring-1 shadow-navy/20 ring-white/60 transition-colors duration-200 hover:bg-blue-shade"
             >
               Get a quote
               <NudgeArrow className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none" />

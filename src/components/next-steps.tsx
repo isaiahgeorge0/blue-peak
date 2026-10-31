@@ -5,7 +5,7 @@ export function NextSteps({ className = "" }: { className?: string }) {
   const steps = howWeWorkSteps.slice(0, 3);
   return (
     <div className={className}>
-      <h2 className="font-sans text-xs font-bold tracking-[0.2em] text-accent uppercase">
+      <h2 className="font-sans text-xs font-bold tracking-[0.2em] text-accent-ink uppercase">
         What happens next
       </h2>
       <ol className="mt-6">

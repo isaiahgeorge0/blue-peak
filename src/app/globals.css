@@ -15,29 +15,41 @@
 }
 
 /*
-  Blue Peak brand palette ("Deep Contour"), from the brand guidelines.
-  Use the semantic tokens (page, panel, ink, accent) in components so a
-  section can be re-themed by adding one class to its wrapper:
+  Cortex Building brand palette, from the brand guidelines.
+  Use the semantic tokens (page, panel, ink, accent, accent-ink) in
+  components so a section can be re-themed by adding one class to its
+  wrapper:
 
-    (default)     white page, navy text, Blue Solution accents
-    .theme-brand  Blue Solution background, white text (footer, menu, bands)
-    .theme-photo  text sitting on a photograph
-    .theme-admin  the dark admin dashboard
+    (default)     white page, navy text, Cortex Blue fills, Blue Shade text
+    .theme-brand  Cortex Blue background, white text (short, bold bands)
+    .theme-navy   navy background, white text (dense, text-heavy dark areas)
+    .theme-photo  text sitting on a photograph (Sky accents)
+    .theme-admin  the dark admin dashboard (Sky / Glow highlights)
+
+  Contrast rule: Cortex Blue for fills, large headings, buttons with white
+  text and graphics; Blue Shade (or --accent-ink) for small blue text and
+  links on light; Sky for accents and links on navy. Navy is for dense
+  text-heavy dark areas (footer, closing band) where faded white must stay
+  readable; Cortex Blue is for short, bold bands — small text there is full
+  white, not faded.
 */
 :root {
-  --peak-white: #fefefe;
-  --frost-white: #e9f7f7;
-  --ridge-cyan: #35dede;
-  --peak-fleet: #43b7d4;
-  --traverse-blue: #004aad;
-  --blue-solution: #1800ad;
-  --navy: #0e2240;
+  --cortex-blue: #1f6bff;
+  --blue-shade: #1449c4;
+  --sky: #8db6ff;
+  --glow: #b9d3ff;
+  --silver: #c9d0d8;
+  --steel: #5b636d;
+  --plaster: #eef1f4;
+  --white: #ffffff;
+  --navy: #0e1a30;
 
-  --page: var(--peak-white);
-  --panel: var(--frost-white);
+  --page: var(--white);
+  --panel: var(--plaster);
   --ink: var(--navy);
-  --accent: var(--blue-solution);
+  --accent: var(--cortex-blue);
   --on-accent: #ffffff;
+  --accent-ink: var(--blue-shade);
 
   /*
     Floating header: the pills sit --header-top from the top and are
@@ -87,11 +99,22 @@ html:not(:has(.theme-admin)) {
 }
 
 .theme-brand {
-  --page: var(--blue-solution);
-  --panel: #2412b8;
+  --page: var(--cortex-blue);
+  --panel: #1a5ce6;
   --ink: #ffffff;
-  --accent: var(--peak-fleet);
+  --accent: #ffffff;
   --on-accent: var(--navy);
+  --accent-ink: #ffffff;
+  color: var(--ink);
+}
+
+.theme-navy {
+  --page: var(--navy);
+  --panel: #16274a;
+  --ink: #ffffff;
+  --accent: var(--sky);
+  --on-accent: var(--navy);
+  --accent-ink: var(--sky);
   color: var(--ink);
 }
 
@@ -99,38 +122,40 @@ html:not(:has(.theme-admin)) {
   --page: #0a0a0a;
   --panel: #0a0a0a;
   --ink: #ffffff;
-  --accent: var(--peak-fleet);
+  --accent: var(--sky);
   --on-accent: var(--navy);
+  --accent-ink: var(--sky);
   color: var(--ink);
 }
 
 /*
   Admin: dark, built on the brand navy. Base, surface, raised and the two line
-  weights are the navy at different lightnesses (hue 216, saturation 64%), so
-  nothing here adds a hue. Blue Solution carries primary actions, Peak Fleet
-  and Ridge Cyan the highlights, Frost White the text (never below 60%, so
-  5.5:1 or more on every surface). --admin-edge, for field and control
-  borders, is Frost White mixed 45% into the navy: 3.5:1 or more on every
-  surface, where a lighter navy would turn into a new, brighter blue.
+  weights are the navy at different lightnesses (same hue, no new hues).
+  Cortex Blue carries primary actions, Sky and Glow the highlights, Plaster
+  the text (never below 60%, so 5.5:1 or more on every surface). --admin-edge,
+  for field and control borders, is Plaster mixed 45% into the navy: 3:1 or
+  more on every surface, where a lighter navy would turn into a new, brighter
+  blue.
 */
 .theme-admin {
-  --admin-base: #09162a;
+  --admin-base: #08111f;
   --admin-surface: var(--navy);
-  --admin-raised: #122c54;
-  --admin-line: #1a3e75;
-  --admin-edge: #718292;
+  --admin-raised: #16274a;
+  --admin-line: #213a66;
+  --admin-edge: #737b88;
   --page: var(--admin-base);
   --panel: var(--admin-surface);
-  --ink: var(--frost-white);
-  --accent: var(--peak-fleet);
+  --ink: var(--plaster);
+  --accent: var(--sky);
   --on-accent: var(--navy);
+  --accent-ink: var(--sky);
   color: var(--ink);
   color-scheme: dark;
 }
 
 /* Overscroll on phones shows the body, so it takes the admin base too. */
 body:has(> .theme-admin) {
-  background-color: #09162a;
+  background-color: #08111f;
 }
 
 /*
@@ -149,7 +174,7 @@ body:has(> .theme-admin) {
     font-weight: 700;
     letter-spacing: 0.025em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--accent-ink);
   }
 }
 
@@ -159,13 +184,16 @@ body:has(> .theme-admin) {
   --color-ink: var(--ink);
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
+  --color-accent-ink: var(--accent-ink);
 
-  --color-brand: var(--blue-solution);
-  --color-traverse: var(--traverse-blue);
-  --color-peak-fleet: var(--peak-fleet);
-  --color-ridge-cyan: var(--ridge-cyan);
-  --color-frost: var(--frost-white);
-  --color-peak-white: var(--peak-white);
+  --color-brand: var(--cortex-blue);
+  --color-blue-shade: var(--blue-shade);
+  --color-sky: var(--sky);
+  --color-glow: var(--glow);
+  --color-silver: var(--silver);
+  --color-steel: var(--steel);
+  --color-plaster: var(--plaster);
+  --color-white: var(--white);
   --color-navy: var(--navy);
   --color-admin-base: var(--admin-base);
   --color-admin-surface: var(--admin-surface);
@@ -1091,7 +1119,7 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* Inner page h1, on a photo or in the Frost White header: about 40px at 390
+/* Inner page h1, on a photo or in the Plaster header: about 40px at 390
    and 72px at 1440, then growing with the root size; held to 12% of the
    height on short screens. */
 .page-title {
@@ -1431,20 +1459,20 @@ h1[tabindex="-1"]:focus {
   }
 }
 
-/* Admin: one focus ring everywhere, Ridge Cyan, clear of the control. */
+/* Admin: one focus ring everywhere, Glow, clear of the control. */
 .theme-admin :focus-visible {
-  outline: 2px solid var(--ridge-cyan);
+  outline: 2px solid var(--glow);
   outline-offset: 2px;
 }
 
-/* Admin label: eyebrows and small headings above figures, in Peak Fleet. */
+/* Admin label: eyebrows and small headings above figures, in Sky. */
 .admin-label {
   font-size: 0.75rem;
   line-height: 1rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--peak-fleet);
+  color: var(--sky);
 }
 
 /* Admin loading placeholders: a slow breathe, static under reduced motion. */

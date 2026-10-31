@@ -69,7 +69,7 @@ export default function HomePage() {
                     See the difference
                   </h3>
                   {/* The slider's photos are placeholders, not a Blue Peak job. */}
-                  <SampleTag overPhoto onFrost />
+                  <SampleTag overPhoto onPlaster />
                 </div>
                 <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
                   Drag the handle, or use the arrow keys, to compare.

@@ -542,7 +542,7 @@ export function IsometricEstimator({
                   Prefer to talk it through?{" "}
                   <Link
                     href="/contact"
-                    className="text-accent underline underline-offset-2 hover:text-ink"
+                    className="text-accent-ink underline underline-offset-2 hover:text-ink"
                   >
                     Send an enquiry
                   </Link>

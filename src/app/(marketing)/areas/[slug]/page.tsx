@@ -84,7 +84,7 @@ export default async function AreaDetailPage({
                   <CheckIcon />
                   <Link
                     href={`/services/${service.slug}`}
-                    className="link-draw tap-target transition-colors duration-200 hover:text-accent"
+                    className="link-draw tap-target transition-colors duration-200 hover:text-accent-ink"
                   >
                     {service.name}
                   </Link>

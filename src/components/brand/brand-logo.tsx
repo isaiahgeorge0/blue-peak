@@ -76,14 +76,14 @@ export function BrandLogo({
 }
 
 type WordmarkProps = BrandProps & {
-  /** Class for the small peak under the A. Defaults to Peak Fleet. */
+  /** Class for the small peak under the A. Defaults to Sky. */
   peakClassName?: string;
 };
 
 /** The word mark: the name set upright, with the A drawn as a peak. */
 export function BrandWordmark({
   title = "Blue Peak",
-  peakClassName = "text-peak-fleet",
+  peakClassName = "text-sky",
   ...props
 }: WordmarkProps) {
   return (

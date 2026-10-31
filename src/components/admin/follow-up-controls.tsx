@@ -76,7 +76,7 @@ export function FollowUpControls({ leadId, leadName, blockedReason, paused: save
   return (
     <div className="space-y-4">
       <div className="flex gap-3">
-        <FollowUpsIcon className="mt-0.5 size-5 shrink-0 text-peak-fleet" />
+        <FollowUpsIcon className="mt-0.5 size-5 shrink-0 text-sky" />
         <div className="min-w-0 space-y-1">
           <p className="text-[0.9375rem] text-ink">{summary}</p>
           {globallyOff && !blockedReason ? (
@@ -103,7 +103,7 @@ export function FollowUpControls({ leadId, leadName, blockedReason, paused: save
       {completedAt ? (
         <p className="flex flex-wrap items-center gap-x-3 text-sm text-ink">
           <span className="inline-flex items-center gap-1.5">
-            <StatusWonIcon className="size-4 text-peak-fleet" />
+            <StatusWonIcon className="size-4 text-sky" />
             Job completed {completedAt}
           </span>
           <button
@@ -119,7 +119,7 @@ export function FollowUpControls({ leadId, leadName, blockedReason, paused: save
       ) : null}
 
       {error ? (
-        <p role="alert" className="text-sm font-bold text-ridge-cyan">
+        <p role="alert" className="text-sm font-bold text-glow">
           {error}
         </p>
       ) : null}

@@ -8,11 +8,11 @@ export type EstimatorAddon = {
   label: string;
   price: number;
   weeks: number;
-  /** CSS colour for the cost bar and legend. Every add-on uses Peak Fleet. */
+  /** CSS colour for the cost bar and legend. Every add-on uses Cortex Blue. */
   color: string;
 };
 
-const ADDON_COLOR = "var(--peak-fleet)";
+const ADDON_COLOR = "var(--cortex-blue)";
 
 export const ESTIMATOR_ADDONS: EstimatorAddon[] = [
   {

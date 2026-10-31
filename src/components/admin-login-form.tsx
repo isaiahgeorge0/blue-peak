@@ -29,7 +29,7 @@ export function AdminLoginForm() {
         <input id="password" name="password" type="password" autoComplete="current-password" required className={fieldClass} />
       </div>
       {state.error ? (
-        <p role="alert" className="rounded-lg border border-ridge-cyan/60 bg-brand/25 px-4 py-3 text-sm text-ink">
+        <p role="alert" className="rounded-lg border border-glow/60 bg-brand/25 px-4 py-3 text-sm text-ink">
           {state.error}
         </p>
       ) : null}

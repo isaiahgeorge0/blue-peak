@@ -14,11 +14,11 @@ function Row({ children, last = false }: { children: ReactNode; last?: boolean }
   );
 }
 
-function Tag({ children, tone = "fleet" }: { children: ReactNode; tone?: "fleet" | "cyan" | "frost" | "muted" }) {
+function Tag({ children, tone = "sky" }: { children: ReactNode; tone?: "sky" | "glow" | "plaster" | "muted" }) {
   const tones = {
-    fleet: "bg-peak-fleet/15 text-peak-fleet",
-    cyan: "bg-ridge-cyan/15 text-ridge-cyan",
-    frost: "bg-frost text-navy",
+    sky: "bg-sky/15 text-sky",
+    glow: "bg-glow/15 text-glow",
+    plaster: "bg-plaster text-navy",
     muted: "text-ink/80 ring-1 ring-inset ring-ink/35",
   };
   return <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${tones[tone]}`}>{children}</span>;
@@ -35,10 +35,10 @@ function Figure({ label, value }: { label: string; value: string }) {
 
 function Subcontractors() {
   const trades = [
-    ["Hughes Electrical", "Electrician · Ipswich", "Short notice OK", "cyan"],
+    ["Hughes Electrical", "Electrician · Ipswich", "Short notice OK", "glow"],
     ["P. Walsh Plastering", "Plasterer · Felixstowe", "2 weeks' notice", "muted"],
-    ["Orwell Plumbing", "Plumber · Woodbridge", "Weekdays only", "fleet"],
-    ["S. Grant Roofing", "Roofer · Colchester", "Short notice OK", "cyan"],
+    ["Orwell Plumbing", "Plumber · Woodbridge", "Weekdays only", "sky"],
+    ["S. Grant Roofing", "Roofer · Colchester", "Short notice OK", "glow"],
   ] as const;
   return (
     <div className="overflow-hidden rounded-lg border border-admin-line">
@@ -60,9 +60,9 @@ function Subcontractors() {
 
 function Quotes() {
   const rows = [
-    ["Q-1042", "Kitchen refit, Felixstowe", "£18,400", "Sent", "fleet"],
-    ["Q-1041", "Loft conversion, Ipswich", "£42,000", "Accepted", "cyan"],
-    ["INV-311", "Bathroom, Woodbridge", "£9,850", "Paid", "frost"],
+    ["Q-1042", "Kitchen refit, Felixstowe", "£18,400", "Sent", "sky"],
+    ["Q-1041", "Loft conversion, Ipswich", "£42,000", "Accepted", "glow"],
+    ["INV-311", "Bathroom, Woodbridge", "£9,850", "Paid", "plaster"],
   ] as const;
   return (
     <div className="space-y-4">
@@ -100,7 +100,7 @@ function Referrals() {
       {steps.map(([title, detail], index) => (
         <li key={title} className="relative flex gap-4 pb-5 last:pb-0">
           {index < steps.length - 1 ? <span className="absolute top-6 bottom-0 left-[0.6875rem] w-px bg-admin-line" aria-hidden /> : null}
-          <span className={`mt-1 grid size-6 shrink-0 place-items-center rounded-full ${index === 2 ? "bg-ridge-cyan text-navy" : "bg-admin-raised text-peak-fleet ring-1 ring-inset ring-admin-line"}`} aria-hidden>
+          <span className={`mt-1 grid size-6 shrink-0 place-items-center rounded-full ${index === 2 ? "bg-glow text-navy" : "bg-admin-raised text-sky ring-1 ring-inset ring-admin-line"}`} aria-hidden>
             <span className="size-1.5 rounded-full bg-current" />
           </span>
           <div>
@@ -130,7 +130,7 @@ function Seo() {
           </div>
           <div className="flex w-36 items-center gap-3">
             <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-admin-raised" aria-hidden>
-              <span className="block h-full origin-left rounded-full bg-peak-fleet" style={{ transform: `scaleX(${enquiries / 10})` }} />
+              <span className="block h-full origin-left rounded-full bg-sky" style={{ transform: `scaleX(${enquiries / 10})` }} />
             </span>
             <span className="w-16 text-right text-xs text-ink/80 tabular-nums">{enquiries} enquiries</span>
           </div>

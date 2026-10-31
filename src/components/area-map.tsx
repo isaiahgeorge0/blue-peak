@@ -80,7 +80,7 @@ export function AreaMap({ areas }: { areas: Area[] }) {
             return (
               <g key={area.slug} transform={`rotate(${(bearing - 90).toFixed(2)})`}>
                 <line
-                  className="area-map-line stroke-accent"
+                  className="area-map-line stroke-accent-ink"
                   data-active={active === area.slug ? true : undefined}
                   x1={0}
                   y1={0}
@@ -160,7 +160,7 @@ export function AreaMap({ areas }: { areas: Area[] }) {
                 <span className="text-2xl leading-tight font-semibold text-ink">
                   {area.name}
                 </span>
-                <span aria-hidden className="area-map-arrow text-accent">
+                <span aria-hidden className="area-map-arrow text-accent-ink">
                   <ArrowIcon />
                 </span>
               </span>

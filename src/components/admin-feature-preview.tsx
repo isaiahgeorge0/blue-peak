@@ -24,7 +24,7 @@ export function AdminFeaturePreview({ addon }: { addon: Addon }) {
         <ul className="mt-6 space-y-3">
           {addon.benefits.map((benefit) => (
             <li key={benefit} className="flex gap-3 text-[0.9375rem] leading-relaxed text-ink/90">
-              <svg viewBox="0 0 20 20" className="mt-0.5 size-5 shrink-0 text-ridge-cyan" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg viewBox="0 0 20 20" className="mt-0.5 size-5 shrink-0 text-glow" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m4.5 10.5 3.5 3.5 7.5-8" />
               </svg>
               {benefit}
@@ -42,7 +42,7 @@ export function AdminFeaturePreview({ addon }: { addon: Addon }) {
       <Card className="relative self-start p-4 sm:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
           <p className="admin-label">{addon.name}</p>
-          <span className="rounded-full bg-frost px-2.5 py-1 text-xs font-bold text-navy">Preview</span>
+          <span className="rounded-full bg-plaster px-2.5 py-1 text-xs font-bold text-navy">Preview</span>
         </div>
         <div aria-label={`Illustrative preview of ${addon.name}, with sample data`} role="img">
           <AddonPreview id={addon.id} />

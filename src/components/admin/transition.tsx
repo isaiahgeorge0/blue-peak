@@ -91,7 +91,7 @@ function focusWhenReady() {
 
 /**
  * Admin page transitions. A link to another admin page is held while the
- * peak A rises from the bottom in Blue Solution and grows to cover the
+ * peak A rises from the bottom in Cortex Blue and grows to cover the
  * screen; then the route is pushed. As soon as the new page's shell has
  * rendered (usually its loading skeleton, with the data still streaming in)
  * the A carries on up and the page settles in with a short fade and rise.
@@ -288,7 +288,7 @@ export function AdminTransition() {
     >
       <svg viewBox={`0 0 ${A_WIDTH} ${A_HEIGHT}`} className="absolute inset-0 size-full text-brand" fill="currentColor">
         <path d={A_LEGS} />
-        <path d={A_PEAK} className="text-peak-fleet" />
+        <path d={A_PEAK} className="text-sky" />
       </svg>
       <div ref={solidRef} className="absolute inset-0 opacity-0 will-change-[opacity]">
         <svg viewBox={`0 0 ${A_WIDTH} ${A_HEIGHT}`} className="size-full text-brand" fill="currentColor">

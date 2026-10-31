@@ -69,7 +69,7 @@ export default function AboutPage() {
           <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8 lg:mt-16 lg:gap-12">
             {differences.map((point, index) => (
               <li key={point.title} className="border-t border-ink/15 pt-6">
-                <p className="text-sm font-bold tracking-[0.2em] text-accent">
+                <p className="text-sm font-bold tracking-[0.2em] text-accent-ink">
                   {String(index + 1).padStart(2, "0")}
                 </p>
                 <h3 className="mt-3 text-2xl leading-tight font-semibold text-ink">

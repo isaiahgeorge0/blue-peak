@@ -46,7 +46,7 @@ function ScrollCue() {
   return (
     <div
       aria-hidden
-      className={`home-scroll-cue absolute right-4 bottom-4 z-10 flex h-9 items-center gap-2 rounded-full bg-peak-white pr-4 pl-3 text-xs font-bold tracking-[0.2em] text-ink uppercase shadow-lg shadow-navy/20 transition-opacity duration-300 ease-out sm:right-6 sm:bottom-6 lg:right-8 lg:bottom-10 [@media(max-height:31.2499rem)]:hidden ${
+      className={`home-scroll-cue absolute right-4 bottom-4 z-10 flex h-9 items-center gap-2 rounded-full bg-white pr-4 pl-3 text-xs font-bold tracking-[0.2em] text-ink uppercase shadow-lg shadow-navy/20 transition-opacity duration-300 ease-out sm:right-6 sm:bottom-6 lg:right-8 lg:bottom-10 [@media(max-height:31.2499rem)]:hidden ${
         gone ? "opacity-0" : "opacity-100"
       }`}
     >

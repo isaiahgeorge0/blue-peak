@@ -93,7 +93,7 @@ export function SplitOpener({
       className={`split-opener-copy relative isolate ${onPhoto ? "split-opener-onphoto max-w-2xl" : "max-w-xl"}`}
     >
       <p
-        className={`page-opener-item text-xs font-bold tracking-[0.2em] text-accent uppercase ${onPhoto ? "lg:text-white/85" : ""}`}
+        className={`page-opener-item text-xs font-bold tracking-[0.2em] text-accent-ink uppercase ${onPhoto ? "lg:text-white/85" : ""}`}
         style={openerItem(0)}
       >
         {eyebrow}

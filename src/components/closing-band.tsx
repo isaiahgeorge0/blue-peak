@@ -13,7 +13,7 @@ import { containerWide } from "@/lib/image-sizes";
 export function ClosingBand() {
   return (
     <Reveal>
-      <section className="theme-brand border-b border-white/15 bg-page">
+      <section className="theme-navy border-b border-white/15 bg-page">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">
           <div>
             <SectionHeading eyebrow="Next step">
