@@ -470,7 +470,7 @@ export function SiteHeader() {
               <Link
                 href="/"
                 onClick={() => closeMenu()}
-                aria-label="Blue Peak, home"
+                aria-label="Cortex Building, home"
                 data-open={menuOpen ? "true" : "false"}
                 className="pill-wordmark tap-target pointer-events-auto relative flex shrink-0 items-center rounded-full text-brand transition-colors hover:text-blue-shade"
               >

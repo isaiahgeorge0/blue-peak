@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "About",
     description:
-      "Meet the Ipswich building and renovation team behind Blue Peak. Every trade under one roof, a written quote before we start, and a founder running every job.",
+      "Meet the Ipswich building and renovation company behind Cortex Building. Every trade under one roof, a written quote before we start, and Kyle running every job.",
     path: "/about",
   });
 }
@@ -28,8 +28,8 @@ const differences = [
     body: "We visit, measure up, and send a clear price before any work is booked. No vague estimates once we are on site.",
   },
   {
-    title: "A founder on every job",
-    body: "Kyle or Steven runs your job from first visit to final tidy, so you always know who is in charge and who to call.",
+    title: "Kyle on every job",
+    body: "Kyle runs your job from first visit to final tidy, so you always know who is in charge and who to call.",
   },
   {
     title: "Based in Ipswich",
@@ -43,7 +43,7 @@ export default function AboutPage() {
       <SplitOpener
         eyebrow="About"
         title="One brand. Every skill. One place."
-        lede="Blue Peak is a building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start, and Kyle or Steven running every job."
+        lede="Cortex Building is a building and renovation company covering Ipswich and the surrounding Suffolk area. Every trade under one roof, a written quote before we start, and Kyle running every job."
         image={{
           src: "/about/who-we-are.jpg",
           alt: "A front room mid-job: brown protection paper taped over the floorboards, the armchair and sideboard under dust sheets, and folded dust sheets, a tool bag and a spirit level set down side by side",
@@ -87,7 +87,7 @@ export default function AboutPage() {
       <section className="bg-panel">
         <Reveal className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
           <SectionHeading eyebrow="Who you'll deal with">
-            Led by Kyle and Steven.
+            Run by Kyle.
           </SectionHeading>
           <FounderCards className="mt-12 lg:mt-16" />
         </Reveal>

@@ -156,7 +156,7 @@ async function renderSheet(browser, out) {
     .join("");
   const page = await browser.newPage({ viewport: { width: 2000, height: 800 } });
   await page.setContent(`<!doctype html><html><body style="margin:0;padding:24px;background:#fff;font:13px Helvetica,Arial,sans-serif;color:${NAVY}">
-    <h1 style="font:26px 'Times New Roman',serif;margin:0 0 16px">Blue Peak email house images: ${names.length} combinations</h1>
+    <h1 style="font:26px 'Times New Roman',serif;margin:0 0 16px">Cortex email house images: ${names.length} combinations</h1>
     <style>main{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}figure{margin:0}img{width:100%;display:block;border:1px solid #cfe3e6}figcaption{padding:4px 0;word-break:break-all}</style>
     <main>${cells}</main></body></html>`);
   await page.waitForLoadState("load");

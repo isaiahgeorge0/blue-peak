@@ -4,7 +4,7 @@ import { ESTIMATOR_SERVICE_TYPE } from "@/lib/lead-limits";
 import type { LeadNotificationPayload } from "@/lib/send-new-lead-email";
 
 const SUMMARY_MAX = 160;
-const FALLBACK_SITE_URL = "https://blue-peak-omega.vercel.app";
+const FALLBACK_SITE_URL = "https://cortexbuilding.co.uk";
 
 export function serviceLabel(serviceType: string) {
   if (!serviceType) return "General enquiry";
@@ -44,7 +44,7 @@ type NtfyPush = {
 };
 
 /**
- * POST to the ntfy topic (Kyle and Steven both subscribe), opening the admin
+ * POST to the ntfy topic (Kyle subscribes), opening the admin
  * leads list on tap. Returns false when NTFY_TOPIC_URL is not configured;
  * throws on a failed POST.
  */
@@ -82,7 +82,7 @@ export async function sendNtfyPush({
 /** Routine new-lead push. */
 export function sendNewLeadPush(lead: LeadNotificationPayload) {
   return sendNtfyPush({
-    title: "New Blue Peak lead",
+    title: "New Cortex lead",
     tags: "house",
     message: [
       `${lead.name} · ${lead.phone}`,

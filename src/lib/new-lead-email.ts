@@ -19,7 +19,7 @@ import { firstNameFrom, type RenderedEmail } from "./follow-up-email.ts";
 import type { JobCard } from "./job-card.ts";
 
 /*
-  The new-lead alert to Kyle and Steven, in the same frame as the customer
+  The new-lead alert to Kyle, in the same frame as the customer
   emails: the job card, the customer's details with tap-to-call and
   mailto links, an estimator lead's checked estimate with its house picture,
   and buttons to call the customer or open the lead in the admin. Pure, so
@@ -27,7 +27,7 @@ import type { JobCard } from "./job-card.ts";
 */
 
 export const ALERT_CARD_LABEL = "New lead";
-export const ALERT_FOOTER_NOTE = "Sent to Kyle and Steven for every new website enquiry.";
+export const ALERT_FOOTER_NOTE = "Sent to Kyle for every new website enquiry.";
 
 export type NewLeadEmailInput = {
   name: string;
@@ -41,7 +41,7 @@ export type NewLeadEmailInput = {
   estimate: Estimate | null;
   jobCard: JobCard;
   adminUrl: string;
-  /** Blue Peak's own number, for the footer. */
+  /** Cortex's own number, for the footer. */
   phoneDisplay: string;
   phoneHref: string;
   images: EmailImageSources;

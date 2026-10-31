@@ -9,19 +9,19 @@ test("unset or blank: the current address, so nothing changes", () => {
 });
 
 test("comma-separated, trimmed, duplicates removed", () => {
-  assert.deepEqual(leadAlertRecipients(" kyle@example.co.uk,steven@example.co.uk , kyle@example.co.uk "), {
-    to: ["kyle@example.co.uk", "steven@example.co.uk"],
+  assert.deepEqual(leadAlertRecipients(" kyle@example.co.uk,alex@example.co.uk , kyle@example.co.uk "), {
+    to: ["kyle@example.co.uk", "alex@example.co.uk"],
     ignored: [],
   });
 });
 
 test("entries that aren't addresses are ignored", () => {
-  assert.deepEqual(leadAlertRecipients("kyle@example.co.uk, steven, Kyle <k@example.com>"), {
+  assert.deepEqual(leadAlertRecipients("kyle@example.co.uk, not-an-email, Kyle <k@example.com>"), {
     to: ["kyle@example.co.uk"],
-    ignored: ["steven", "Kyle <k@example.com>"],
+    ignored: ["not-an-email", "Kyle <k@example.com>"],
   });
 });
 
 test("nothing usable: the current address rather than nowhere", () => {
-  assert.deepEqual(leadAlertRecipients("kyle, steven@"), { to: [DEFAULT_LEAD_ALERT_TO], ignored: ["kyle", "steven@"] });
+  assert.deepEqual(leadAlertRecipients("kyle, alex@"), { to: [DEFAULT_LEAD_ALERT_TO], ignored: ["kyle", "alex@"] });
 });

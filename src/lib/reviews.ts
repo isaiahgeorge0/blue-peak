@@ -19,7 +19,7 @@ export type Review = {
 };
 
 const sampleQuote =
-  "This is where a customer's own words will go: what the job was, how it went, and whether they would recommend Blue Peak.";
+  "This is where a customer's own words will go: what the job was, how it went, and whether they would recommend Cortex.";
 
 export const reviews: Review[] = [
   {

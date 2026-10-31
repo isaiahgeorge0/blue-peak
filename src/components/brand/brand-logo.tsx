@@ -33,7 +33,7 @@ function fillFor(tone: BrandTone, colour: string, onDark: string) {
  * for the homepage intro.
  */
 export function BrandMark({
-  title = "Blue Peak",
+  title = "Cortex Building",
   tone = "colour",
   pieces = false,
   ...props
@@ -104,7 +104,7 @@ export function BrandMark({
  * are grouped in `logo-letters`, for the homepage intro.
  */
 export function BrandLogo({
-  title = "Blue Peak",
+  title = "Cortex Building",
   tone = "colour",
   pieces = false,
   ...props
@@ -196,7 +196,7 @@ export function BrandLogo({
 
 /** The horizontal logo without the tagline: mark, divider and CORTEX. */
 export function BrandWordmark({
-  title = "Blue Peak",
+  title = "Cortex Building",
   tone = "colour",
   ...props
 }: BrandProps) {
@@ -224,7 +224,7 @@ export function BrandWordmark({
 
 /** The letters CORTEX alone, filled with currentColor (footer wordmark). */
 export function BrandName({
-  title = "Blue Peak",
+  title = "Cortex Building",
   ...props
 }: Omit<BrandProps, "tone">) {
   return (

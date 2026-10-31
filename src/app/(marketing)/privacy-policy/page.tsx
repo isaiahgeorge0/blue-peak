@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Privacy policy",
     description:
-      "How Blue Peak collects, uses and protects personal data from website visitors and enquirers.",
+      "How Cortex Building collects, uses and protects personal data from website visitors and enquirers.",
     robots: {
       index: false,
       follow: false,
@@ -146,9 +146,9 @@ export default function PrivacyPolicyPage() {
               <P>
                 This policy explains how{" "}
                 <Tbc>
-                  [Blue Peak Ltd — registered company name and number TBC]
+                  [Cortex Building LTD — company number TBC]
                 </Tbc>{" "}
-                (&quot;Blue Peak&quot;, &quot;we&quot;, &quot;us&quot;)
+                (&quot;Cortex&quot;, &quot;we&quot;, &quot;us&quot;)
                 collects, uses and protects personal data when you visit our
                 website, submit an enquiry through our contact form or quote
                 estimator, or (once launched) use our website FAQ assistant. It
@@ -164,7 +164,7 @@ export default function PrivacyPolicyPage() {
 
             <Section title="Who we are">
               <P>
-                Blue Peak is the data controller for the personal data described
+                Cortex Building is the data controller for the personal data described
                 in this policy.
               </P>
               <Table
@@ -178,7 +178,7 @@ export default function PrivacyPolicyPage() {
                     "Registered office",
                     <Tbc key="office">[TBC — registered address]</Tbc>,
                   ],
-                  ["Trading as", "Blue Peak"],
+                  ["Trading as", "Cortex Building"],
                   [
                     "Data protection contact",
                     <Tbc key="contact">[TBC: named email address]</Tbc>,
@@ -300,7 +300,7 @@ export default function PrivacyPolicyPage() {
                   [
                     "Supabase",
                     "Database hosting (London, UK)",
-                    "All lead and enquiry data, encrypted at rest; access restricted to authorised Blue Peak admins only",
+                    "All lead and enquiry data, encrypted at rest; access restricted to authorised Cortex administrators only",
                   ],
                   [
                     "Resend",
@@ -406,7 +406,7 @@ export default function PrivacyPolicyPage() {
               </P>
               <List
                 items={[
-                  "Access to enquiry and lead data restricted to authorised Blue Peak administrators only, enforced at both the application and database level",
+                  "Access to enquiry and lead data restricted to authorised Cortex administrators only, enforced at both the application and database level",
                   "Encryption of data at rest and in transit",
                   "Automated protection against spam and bot submissions (rate limiting, invisible bot checks, and honeypot fields)",
                   "Regular review of our systems for security gaps",

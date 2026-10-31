@@ -4,18 +4,19 @@ import { siteUrl } from "@/lib/content";
 import { sitePhoneTel } from "@/lib/site";
 
 /*
- * No company is registered yet, so there is no legal name or confirmed street
- * address. At launch, add: legalName (the registered company name), the
+ * Registered address and company number are still TBC. At launch, add the
  * company number (e.g. as an identifier), and streetAddress and postalCode.
  */
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Blue Peak",
+  name: "Cortex Building",
+  legalName: "Cortex Building LTD",
   description:
     "Building and renovation team covering Ipswich and the surrounding Suffolk area. Every trade under one roof, with a written quote before we start.",
   url: siteUrl,
   telephone: sitePhoneTel,
+  email: "hello@cortexbuilding.co.uk",
   priceRange: "££",
   address: {
     "@type": "PostalAddress",

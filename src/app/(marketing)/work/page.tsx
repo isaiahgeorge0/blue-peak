@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
     title: "Work",
     description:
-      "Recent kitchen, extension, bathroom, and refurb projects from Blue Peak across Ipswich and Suffolk.",
+      "Recent kitchen, extension, bathroom, and refurb projects from Cortex Building across Ipswich and Suffolk.",
     path: "/work",
   });
 }
@@ -45,7 +45,7 @@ export default function WorkPage() {
       >
         {hasSamples ? (
           <p className="text-sm text-white/85">
-            Sample layout. Real Blue Peak projects will be added before launch.
+            Sample layout. Real Cortex projects will be added before launch.
           </p>
         ) : null}
       </PageOpener>

@@ -28,7 +28,7 @@ export const addons: Addon[] = [
     href: "/admin/quotes",
     name: "Quotes & Invoices",
     summary:
-      "Build a quote from a lead's details and your own price lines, send it in a consistent Blue Peak format, and turn it into an invoice once it's accepted. Each one shows whether it's been sent, accepted or paid.",
+      "Build a quote from a lead's details and your own price lines, send it in a consistent Cortex format, and turn it into an invoice once it's accepted. Each one shows whether it's been sent, accepted or paid.",
     benefits: [
       "Quotes that look the same every time.",
       "Accepted quotes become invoices without retyping.",
@@ -71,6 +71,6 @@ export function getAddon(id: AddonId) {
 export function addonContactHref(addon: Addon) {
   const email = process.env.ADDON_CONTACT_EMAIL?.trim();
   if (!email) return null;
-  const subject = encodeURIComponent(`Blue Peak admin: adding ${addon.name}`);
+  const subject = encodeURIComponent(`Cortex admin: adding ${addon.name}`);
   return `mailto:${email}?subject=${subject}`;
 }

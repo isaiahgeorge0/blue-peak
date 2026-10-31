@@ -1,6 +1,6 @@
 /**
  * Placeholder pricing for the isometric quote calculator.
- * Wire real Blue Peak figures here later without touching the 3D scene.
+ * Wire real Cortex figures here later without touching the 3D scene.
  */
 
 export type EstimatorAddon = {

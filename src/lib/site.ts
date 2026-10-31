@@ -31,8 +31,8 @@ export const howWeWorkSteps: HowWeWorkStep[] = [
 ];
 
 /*
- * Real headshots of Kyle and Steven are needed. Until then the homepage and
- * About page show a BrandMark tile in place of a photo.
+ * A real headshot of Kyle is needed. Until then the homepage and About page
+ * show a BrandMark tile in place of a photo.
  */
 export type TeamMember = {
   name: string;
@@ -42,15 +42,10 @@ export type TeamMember = {
 
 export const teamMembers: TeamMember[] = [
   {
-    name: "Kyle",
-    role: "Co-founder",
+    name: "Kyle Rice",
+    role: "Director",
+    // Placeholder copy for Kyle to approve.
     blurb:
-      "Handles structure, joinery, and the day-to-day sequencing on site so each job stays tidy and on track.",
-  },
-  {
-    name: "Steven",
-    role: "Co-founder",
-    blurb:
-      "Focuses on finishes, client updates, and making sure the written quote matches what gets delivered.",
+      "Runs every job himself, from the first visit and the written quote to the sequencing on site and the final walk-round, so you always know who's in charge.",
   },
 ];
