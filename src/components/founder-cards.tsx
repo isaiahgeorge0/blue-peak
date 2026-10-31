@@ -25,10 +25,10 @@ export function FounderCards({ className = "" }: { className?: string }) {
             <h3 className="font-serif text-[2.5rem] leading-none tracking-display text-ink">
               {member.name}
             </h3>
-            <p className="mt-3 text-xs font-bold tracking-[0.2em] text-ink/80 uppercase">
+            <p className="mt-3 text-xs font-bold tracking-[0.2em] text-ink uppercase">
               {member.role}
             </p>
-            <p className="mt-4 max-w-sm text-lg leading-relaxed text-ink/85">
+            <p className="mt-4 max-w-sm text-lg leading-relaxed text-ink">
               {member.blurb}
             </p>
           </div>

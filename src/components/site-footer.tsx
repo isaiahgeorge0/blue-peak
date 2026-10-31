@@ -40,7 +40,7 @@ const linkClassName =
  */
 export function SiteFooter() {
   return (
-    <footer data-menu-inert className="theme-brand bg-page">
+    <footer data-menu-inert className="theme-navy bg-page">
       <div className="mx-auto max-w-6xl px-6 pt-20 lg:pt-28">
         <p className="font-serif text-[clamp(2.5rem,1.757rem+3.048vw,4.5rem)] leading-[1.02] tracking-display text-ink">
           Everything under <em>one roof.</em>

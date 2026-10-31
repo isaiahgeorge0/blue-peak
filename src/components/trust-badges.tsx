@@ -59,13 +59,13 @@ export function TrustBadges() {
         {trustBadges.map((badge) => (
           <li
             key={badge.label}
-            className="flex min-w-0 items-center gap-2 text-ink/75 lg:shrink-0"
+            className="flex min-w-0 items-center gap-2 text-ink lg:shrink-0"
           >
             <span className="shrink-0 text-accent-ink">{badge.icon}</span>
             <span className="text-xs font-medium text-ink sm:text-sm lg:whitespace-nowrap">
               {badge.label}
             </span>
-            <span className="hidden text-xs text-ink/75 md:inline">
+            <span className="hidden text-xs text-ink md:inline">
               · {badge.detail}
             </span>
           </li>

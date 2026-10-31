@@ -195,7 +195,7 @@ export default async function ServiceDetailPage({
                   </span>
                   {step.title}
                 </h3>
-                <p className="mt-3 text-lg leading-relaxed text-ink/80">
+                <p className="mt-3 text-lg leading-relaxed text-ink">
                   {step.body}
                 </p>
               </li>

@@ -21,13 +21,17 @@
   wrapper:
 
     (default)     white page, navy text, Cortex Blue fills, Blue Shade text
-    .theme-brand  Cortex Blue background, white text (footer, menu, bands)
+    .theme-brand  Cortex Blue background, white text (short, bold bands)
+    .theme-navy   navy background, white text (dense, text-heavy dark areas)
     .theme-photo  text sitting on a photograph (Sky accents)
     .theme-admin  the dark admin dashboard (Sky / Glow highlights)
 
   Contrast rule: Cortex Blue for fills, large headings, buttons with white
   text and graphics; Blue Shade (or --accent-ink) for small blue text and
-  links on light; Sky for accents and links on navy.
+  links on light; Sky for accents and links on navy. Navy is for dense
+  text-heavy dark areas (footer, closing band) where faded white must stay
+  readable; Cortex Blue is for short, bold bands — small text there is full
+  white, not faded.
 */
 :root {
   --cortex-blue: #1f6bff;
@@ -101,6 +105,16 @@ html:not(:has(.theme-admin)) {
   --accent: #ffffff;
   --on-accent: var(--navy);
   --accent-ink: #ffffff;
+  color: var(--ink);
+}
+
+.theme-navy {
+  --page: var(--navy);
+  --panel: #16274a;
+  --ink: #ffffff;
+  --accent: var(--sky);
+  --on-accent: var(--navy);
+  --accent-ink: var(--sky);
   color: var(--ink);
 }
 
