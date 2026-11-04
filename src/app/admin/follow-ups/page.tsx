@@ -7,6 +7,7 @@ import { FOLLOW_UP_STEPS, readFollowUpConfig, type FollowUpSetting } from "@/lib
 import { linkSecretStatus, MIN_LINK_SECRET_LENGTH, missingSendSettings, testSendBlockers } from "@/lib/follow-ups";
 import { leadAlertFrom } from "@/lib/lead-alert-from";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { supabaseKeysLabel } from "@/lib/supabase-secret";
 
 export const metadata: Metadata = {
   title: "Follow-ups",
@@ -36,6 +37,7 @@ export default async function FollowUpsPage() {
   const missing = missingSendSettings();
   const linkSecret = linkSecretStatus();
   const leadAlertSender = leadAlertFrom(process.env.LEAD_ALERT_FROM).from;
+  const supabaseKeys = supabaseKeysLabel();
   const adminEmail = typeof claims.email === "string" ? claims.email : "";
 
   return (
@@ -156,6 +158,9 @@ export default async function FollowUpsPage() {
             </SetupRow>
             <SetupRow label="Test address" name="FOLLOW_UP_TEST_RECIPIENT">
               {config.testRecipient ?? "Not set (emails go to customers once sending is on)"}
+            </SetupRow>
+            <SetupRow label="Supabase keys" name="NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY / SUPABASE_SECRET_KEY">
+              {supabaseKeys}
             </SetupRow>
           </dl>
         </div>

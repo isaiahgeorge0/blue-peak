@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { EMAIL_FORMAT_MESSAGE, looksLikeEmail } from "@/lib/email-format";
 import { sendLeadAlert } from "@/lib/lead-alert";
@@ -13,7 +12,10 @@ import {
   type LeadNotificationPayload,
   type StoredLead,
 } from "@/lib/send-new-lead-email";
+import { hashSubmitter, resolveSubmitterHashSalt } from "@/lib/submitter-hash";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { supabaseUrl } from "@/lib/supabase-env";
+import { supabaseSecretKey } from "@/lib/supabase-secret";
 import { isTurnstileEnforced, verifyTurnstileToken } from "@/lib/turnstile";
 
 type LeadField = keyof typeof LEAD_FIELD_LIMITS;
@@ -43,10 +45,6 @@ function clientIp(request: Request): string | null {
   const forwarded = request.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
   return ip || null;
-}
-
-function hashSubmitter(ip: string, salt: string) {
-  return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
 }
 
 async function isRateLimited(submitterHash: string) {
@@ -201,13 +199,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: EMAIL_FORMAT_MESSAGE }, { status: 400 });
     }
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !serviceRoleKey) {
-      console.error("leads API: missing Supabase admin environment variables");
+    if (!supabaseUrl() || !supabaseSecretKey()) {
+      console.error("leads API: missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY");
       return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
     }
 
-    const submitterHash = ip ? hashSubmitter(ip, serviceRoleKey) : null;
+    const salt = resolveSubmitterHashSalt({
+      SUBMITTER_HASH_SECRET: process.env.SUBMITTER_HASH_SECRET,
+      secretKeyFallback: supabaseSecretKey(),
+    });
+    if (salt.usedSecretFallback) {
+      console.error("leads API: SUBMITTER_HASH_SECRET is unset; salting rate limits with the Supabase secret key until it is set.");
+    }
+    const submitterHash = ip && salt.salt ? hashSubmitter(ip, salt.salt) : null;
 
     if (submitterHash && (await isRateLimited(submitterHash))) {
       return NextResponse.json(

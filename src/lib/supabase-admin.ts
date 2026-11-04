@@ -1,10 +1,12 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { supabaseUrl } from "./supabase-env.ts";
+import { supabaseSecretKey } from "./supabase-secret.ts";
 
 /**
- * Server-only Supabase admin client (service role).
+ * Server-only Supabase admin client (secret key).
  * WARNING: Never import this file into a Client Component.
- * The service role key bypasses RLS and must stay on the server.
+ * The secret key bypasses RLS and must stay on the server.
  */
 
 let adminClient: SupabaseClient | null = null;
@@ -14,16 +16,16 @@ export function getSupabaseAdmin(): SupabaseClient {
     return adminClient;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = supabaseUrl();
+  const key = supabaseSecretKey();
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!url || !key) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY",
     );
   }
 
-  adminClient = createClient(supabaseUrl, serviceRoleKey, {
+  adminClient = createClient(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
