@@ -22,6 +22,8 @@ export const LINE = "#D5DBE1";
 const LATER = "#DDE2E8";
 /** Silver. Readable on navy, and dark enough that Gmail's inversion still reads on a pale background. */
 export const FOOTER_TEXT = "#C9D0D8";
+/** Neutral grey for the branded footer's small print. No blue, so the Gmail blend leaves it grey. */
+export const FOOTER_FINE = "#CCCCCC";
 /** Display size of public/email/logo.png (wordmark-white alone on navy). */
 export const LOGO_WIDTH = 206;
 export const LOGO_HEIGHT = 41;
@@ -259,9 +261,9 @@ export function renderEmailDocument(doc: EmailDocument) {
             <td bgcolor="${NAVY}"${navyFill} class="bp-pad" style="padding: 32px 40px 36px; background-color: ${NAVY};${navyImage}">
               <div class="gmail-screen"><div class="gmail-difference">
               <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${PLASTER};">${TAGLINE}</p>
-              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${SKY}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
+              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: #FFFFFF; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
+              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_FINE};">${doc.footerNotesHtml}</div>
               </div></div>
-              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
             </td>
           </tr>`;
 

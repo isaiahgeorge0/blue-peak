@@ -6,7 +6,7 @@ import {
   estimateBoxHtml,
   estimateText,
   footerText,
-  FOOTER_TEXT,
+  FOOTER_FINE,
   jobCardHtml,
   jobCardText,
   jobLineHtml,
@@ -304,7 +304,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     phoneHref: input.phoneHref,
     footerNotesHtml: personal
       ? `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" class="bp-fine-link" style="color: ${MUTED}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`
-      : `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${FOOTER_TEXT}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
+      : `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${FOOTER_FINE}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
     images: input.images,
     webFont: input.webFont,
   });
