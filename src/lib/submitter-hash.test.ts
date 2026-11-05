@@ -1,30 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { hashSubmitter, resolveSubmitterHashSalt } from "./submitter-hash.ts";
+import { hashSubmitter, rateLimitSalt } from "./submitter-hash.ts";
 
-describe("resolveSubmitterHashSalt", () => {
+describe("rateLimitSalt", () => {
   test("uses SUBMITTER_HASH_SECRET when set", () => {
-    assert.deepEqual(
-      resolveSubmitterHashSalt({
-        SUBMITTER_HASH_SECRET: " dedicated-salt ",
-        secretKeyFallback: "secret-should-not-win",
-      }),
-      { salt: "dedicated-salt", usedSecretFallback: false },
-    );
+    assert.equal(rateLimitSalt(" dedicated-salt "), "dedicated-salt");
   });
 
-  test("falls back to the Supabase secret when SUBMITTER_HASH_SECRET is unset", () => {
-    assert.deepEqual(
-      resolveSubmitterHashSalt({
-        SUBMITTER_HASH_SECRET: "  ",
-        secretKeyFallback: "secret-fallback",
-      }),
-      { salt: "secret-fallback", usedSecretFallback: true },
-    );
-  });
-
-  test("returns null when neither salt is available", () => {
-    assert.deepEqual(resolveSubmitterHashSalt({}), { salt: null, usedSecretFallback: false });
+  test("a missing SUBMITTER_HASH_SECRET skips rate limiting without failing", () => {
+    assert.equal(rateLimitSalt(undefined), null);
+    assert.equal(rateLimitSalt(""), null);
+    assert.equal(rateLimitSalt("   "), null);
   });
 });
 

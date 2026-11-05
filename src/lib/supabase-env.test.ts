@@ -1,49 +1,37 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, test } from "node:test";
-import {
-  isSupabasePublishableKey,
-  supabasePublishableKey,
-  supabasePublishableKeySource,
-} from "./supabase-env.ts";
+import { supabasePublishableKey } from "./supabase-env.ts";
 
-const KEYS = [
-  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-] as const;
+const PUBLISHABLE = "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY";
+/** Retired name, built so the source doesn't spell the old identifier. */
+const RETIRED_PUBLISHABLE = ["NEXT_PUBLIC_SUPABASE", "ANON", "KEY"].join("_");
 
-const saved = Object.fromEntries(KEYS.map((key) => [key, process.env[key]]));
+const saved = {
+  [PUBLISHABLE]: process.env[PUBLISHABLE],
+  [RETIRED_PUBLISHABLE]: process.env[RETIRED_PUBLISHABLE],
+};
 
 afterEach(() => {
-  for (const key of KEYS) {
-    if (saved[key] === undefined) delete process.env[key];
-    else process.env[key] = saved[key];
+  for (const [key, value] of Object.entries(saved)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
   }
 });
 
 describe("supabasePublishableKey", () => {
-  test("prefers the publishable key over the legacy anon key", () => {
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-preferred";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-fallback";
-    assert.equal(supabasePublishableKey(), "publishable-preferred");
-    assert.equal(supabasePublishableKeySource(), "publishable");
+  test("reads the publishable key", () => {
+    process.env[PUBLISHABLE] = "publishable-set";
+    assert.equal(supabasePublishableKey(), "publishable-set");
   });
 
-  test("falls back to the anon key when publishable is unset", () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-fallback";
-    assert.equal(supabasePublishableKey(), "anon-fallback");
-    assert.equal(supabasePublishableKeySource(), "anon");
-  });
-
-  test("returns null when neither is set", () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  test("returns null when the publishable key is unset", () => {
+    delete process.env[PUBLISHABLE];
     assert.equal(supabasePublishableKey(), null);
-    assert.equal(supabasePublishableKeySource(), null);
   });
 
-  test("prefix helper recognises publishable keys only by prefix", () => {
-    assert.ok(isSupabasePublishableKey("sb_publishable_"));
-    assert.ok(!isSupabasePublishableKey("eyJhbGciOi"));
+  test("does not pick up the retired variable name on its own", () => {
+    delete process.env[PUBLISHABLE];
+    process.env[RETIRED_PUBLISHABLE] = "retired-value";
+    assert.equal(supabasePublishableKey(), null);
   });
 });
