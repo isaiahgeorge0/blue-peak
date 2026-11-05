@@ -37,7 +37,7 @@ const base: FollowUpEmailInput = {
   stopUrl: "https://example.com/stop-emails?t=abc",
   intendedRecipient: null,
   jobCard: { reference: "CX-0042", about: "Your kitchen renovation", enquiryDate: "5 October 2026", stage: 1 },
-  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null, logoLight: "cid:bp-logo-light", logoDark: "cid:bp-logo-dark", navy: "cid:bp-navy" },
+  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null, logoLight: "cid:bp-logo-light", logoDark: "cid:bp-logo-dark", navy: "https://cortexbuilding.co.uk/email/navy.png" },
 };
 
 /** The plain text after the job card (branded) or the job line (personal). */
@@ -370,8 +370,8 @@ describe("rendered email", () => {
     const email = renderFollowUpEmail(base);
     assert.match(email.html, /<img src="cid:bp-logo"[^>]*alt="Cortex Building"/);
     assert.match(email.html, /width="206" height="41"/);
-    assert.match(email.html, /background="cid:bp-navy"/);
-    assert.match(email.html, /background-image: url\('cid:bp-navy'\)/);
+    assert.match(email.html, /background="https:\/\/cortexbuilding.co.uk\/email\/navy.png"/);
+    assert.match(email.html, /background-image: url\('https:\/\/cortexbuilding.co.uk\/email\/navy.png'\)/);
     assert.match(email.html, /class="gmail-screen"/);
     assert.match(email.html, /class="bp-page body"/);
     assert.match(email.html, /#1F6BFF/);

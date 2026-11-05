@@ -144,7 +144,7 @@ export type PreparedEmail = { email: RenderedEmail; attachments: EmailAttachment
 /** A lead's follow-up, rendered with its job card and images ready to attach. */
 export async function prepareForLead(setting: FollowUpSetting, lead: FollowUpLead, intendedRecipient: string | null): Promise<PreparedEmail> {
   const estimate = setting.step === "acknowledgement" ? estimateFromLead(lead.service_type, lead.message) : null;
-  const images = await emailImages(houseImageFor(estimate?.addonKeys));
+  const images = await emailImages(setting.step === "acknowledgement" ? "branded" : "personal", houseImageFor(estimate?.addonKeys));
   const email = renderFollowUpEmail({
     step: setting.step,
     subject: setting.subject,

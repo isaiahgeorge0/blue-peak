@@ -1,14 +1,15 @@
 import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import type { EmailImageSources } from "@/lib/email-frame";
-import { HOUSE_IMAGE_DIR } from "@/lib/email-house-image";
+import { emailImageSources, type EmailLayout } from "@/lib/email-image-plan";
 
 /*
   Email images travel inside the email as inline attachments (cid:), so they
   show without depending on any website being reachable, and Outlook shows
-  them without "download pictures". The files live in public/email and are
-  bundled with the sending routes (outputFileTracingIncludes in next.config).
+  them without "download pictures". The navy tile is the exception: Gmail
+  will not render a cid: image used as a background, so it is a URL on the
+  site instead. The files live in public/email and are bundled with the
+  sending routes (outputFileTracingIncludes in next.config).
 */
 
 export type EmailAttachment = { filename: string; content: Buffer; contentType: string; contentId: string };
@@ -25,26 +26,20 @@ async function attachment(relativePath: string, contentId: string, contentType: 
   }
 }
 
-/** The frame's images, plus the house picture when one is given, as attachments and the cid: sources that point at them. */
-export async function emailImages(houseFile: string | null): Promise<{ sources: EmailImageSources; attachments: EmailAttachment[] }> {
-  const [logo, gable, house, logoLight, logoDark, navy] = await Promise.all([
-    attachment("email/logo.png", "bp-logo", "image/png"),
-    attachment("email/gable.png", "bp-gable", "image/png"),
-    houseFile ? attachment(`${HOUSE_IMAGE_DIR}/${houseFile}`, "bp-house", "image/jpeg") : Promise.resolve(null),
-    attachment("email/logo-light.png", "bp-logo-light", "image/png"),
-    attachment("email/logo-dark.png", "bp-logo-dark", "image/png"),
-    attachment("email/navy.png", "bp-navy", "image/png"),
-  ]);
-  const attachments = [logo, gable, house, logoLight, logoDark, navy].filter((item): item is EmailAttachment => Boolean(item));
-  return {
-    sources: {
-      logo: logo ? `cid:${logo.contentId}` : "",
-      gable: gable ? `cid:${gable.contentId}` : "",
-      house: house ? `cid:${house.contentId}` : null,
-      logoLight: logoLight ? `cid:${logoLight.contentId}` : "",
-      logoDark: logoDark ? `cid:${logoDark.contentId}` : "",
-      navy: navy ? `cid:${navy.contentId}` : "",
-    },
-    attachments,
-  };
+/** The images this layout shows, as attachments and the sources that point at them. Navy is a URL, not an attachment. */
+export async function emailImages(layout: EmailLayout, houseFile: string | null): Promise<{ sources: ReturnType<typeof emailImageSources>["sources"]; attachments: EmailAttachment[] }> {
+  const plan = emailImageSources(layout, houseFile, process.env.NEXT_PUBLIC_SITE_URL);
+  const loaded = await Promise.all(plan.files.map((file) => attachment(file.relativePath, file.contentId, file.contentType)));
+  const sources = { ...plan.sources };
+  const attachments: EmailAttachment[] = [];
+  loaded.forEach((item, index) => {
+    if (!item) {
+      const key = plan.files[index].key;
+      if (key === "house") sources.house = null;
+      else sources[key] = "";
+      return;
+    }
+    attachments.push(item);
+  });
+  return { sources, attachments };
 }
