@@ -376,8 +376,10 @@ describe("rendered email", () => {
     assert.match(email.html, /class="bp-page body"/);
     const blendEnd = email.html.indexOf("</div></div>");
     assert.ok(email.html.indexOf("Everything under one roof.") < blendEnd);
-    assert.ok(email.html.indexOf("getting this") > blendEnd);
-    assert.match(email.html, /style="color: #C9D0D8; text-decoration: underline;"/);
+    assert.ok(email.html.indexOf("getting this") < blendEnd);
+    assert.match(email.html, /Call <a href="tel:\+441234567890" style="color: #FFFFFF; font-weight: bold; text-decoration: none; white-space: nowrap;">01234 567890<\/a>/);
+    assert.match(email.html, /color: #CCCCCC;/);
+    assert.match(email.html, /style="color: #CCCCCC; text-decoration: underline;"/);
     assert.match(email.html, /#1F6BFF/);
     assert.match(email.html, /#8DB6FF/);
     assert.match(email.html, /#EEF1F4/);
