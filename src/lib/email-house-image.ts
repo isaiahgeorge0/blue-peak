@@ -12,7 +12,14 @@ export const HOUSE_IMAGE_HEIGHT = 900;
 
 /** The email images by URL, for the admin preview (sent emails attach them instead). */
 export function previewImageSources(houseFile: string | null) {
-  return { logo: "/email/logo.png", gable: "/email/gable.png", house: houseFile ? `/${HOUSE_IMAGE_DIR}/${houseFile}` : null };
+  return {
+    logo: "/email/logo.png",
+    gable: "/email/gable.png",
+    house: houseFile ? `/${HOUSE_IMAGE_DIR}/${houseFile}` : null,
+    logoLight: "/email/logo-light.png",
+    logoDark: "/email/logo-dark.png",
+    navy: "/email/navy.png",
+  };
 }
 
 /** File name for a set of add-on keys. Callers pass known keys; see houseImageFor for checked input. */

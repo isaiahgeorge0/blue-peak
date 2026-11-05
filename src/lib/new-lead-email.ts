@@ -15,7 +15,7 @@ import {
   type EmailImageSources,
 } from "./email-frame.ts";
 import type { Estimate } from "./estimate-summary.ts";
-import { firstNameFrom, type RenderedEmail } from "./follow-up-email.ts";
+import { displayName, firstNameFrom, type RenderedEmail } from "./follow-up-email.ts";
 import type { JobCard } from "./job-card.ts";
 
 /*
@@ -61,8 +61,9 @@ function looksLikeEmail(value: string) {
 const linkStyle = `color: ${BLUE_SHADE}; font-weight: bold; text-decoration: underline;`;
 
 export function renderNewLeadEmail(input: NewLeadEmailInput): RenderedEmail {
-  const name = input.name.trim() || "Someone";
-  const callName = firstNameFrom(name) ?? name;
+  const typed = input.name.trim();
+  const name = typed ? displayName(typed) : "Someone";
+  const callName = firstNameFrom(typed) ?? name;
   const tel = telHref(input.phone);
   const mailto = looksLikeEmail(input.email) ? `mailto:${input.email}` : null;
   const reference = input.jobCard.reference;

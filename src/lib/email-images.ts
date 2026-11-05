@@ -27,17 +27,23 @@ async function attachment(relativePath: string, contentId: string, contentType: 
 
 /** The frame's images, plus the house picture when one is given, as attachments and the cid: sources that point at them. */
 export async function emailImages(houseFile: string | null): Promise<{ sources: EmailImageSources; attachments: EmailAttachment[] }> {
-  const [logo, gable, house] = await Promise.all([
+  const [logo, gable, house, logoLight, logoDark, navy] = await Promise.all([
     attachment("email/logo.png", "bp-logo", "image/png"),
     attachment("email/gable.png", "bp-gable", "image/png"),
     houseFile ? attachment(`${HOUSE_IMAGE_DIR}/${houseFile}`, "bp-house", "image/jpeg") : Promise.resolve(null),
+    attachment("email/logo-light.png", "bp-logo-light", "image/png"),
+    attachment("email/logo-dark.png", "bp-logo-dark", "image/png"),
+    attachment("email/navy.png", "bp-navy", "image/png"),
   ]);
-  const attachments = [logo, gable, house].filter((item): item is EmailAttachment => Boolean(item));
+  const attachments = [logo, gable, house, logoLight, logoDark, navy].filter((item): item is EmailAttachment => Boolean(item));
   return {
     sources: {
       logo: logo ? `cid:${logo.contentId}` : "",
       gable: gable ? `cid:${gable.contentId}` : "",
       house: house ? `cid:${house.contentId}` : null,
+      logoLight: logoLight ? `cid:${logoLight.contentId}` : "",
+      logoDark: logoDark ? `cid:${logoDark.contentId}` : "",
+      navy: navy ? `cid:${navy.contentId}` : "",
     },
     attachments,
   };
