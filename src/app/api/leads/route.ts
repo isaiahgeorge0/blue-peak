@@ -12,7 +12,7 @@ import {
   type LeadNotificationPayload,
   type StoredLead,
 } from "@/lib/send-new-lead-email";
-import { hashSubmitter, resolveSubmitterHashSalt } from "@/lib/submitter-hash";
+import { hashSubmitter, rateLimitSalt } from "@/lib/submitter-hash";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { supabaseUrl } from "@/lib/supabase-env";
 import { supabaseSecretKey } from "@/lib/supabase-secret";
@@ -204,14 +204,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
     }
 
-    const salt = resolveSubmitterHashSalt({
-      SUBMITTER_HASH_SECRET: process.env.SUBMITTER_HASH_SECRET,
-      secretKeyFallback: supabaseSecretKey(),
-    });
-    if (salt.usedSecretFallback) {
-      console.error("leads API: SUBMITTER_HASH_SECRET is unset; salting rate limits with the Supabase secret key until it is set.");
+    const salt = rateLimitSalt(process.env.SUBMITTER_HASH_SECRET);
+    if (!salt) {
+      console.error("leads API: SUBMITTER_HASH_SECRET is unset; skipping rate limiting.");
     }
-    const submitterHash = ip && salt.salt ? hashSubmitter(ip, salt.salt) : null;
+    const submitterHash = ip && salt ? hashSubmitter(ip, salt) : null;
 
     if (submitterHash && (await isRateLimited(submitterHash))) {
       return NextResponse.json(

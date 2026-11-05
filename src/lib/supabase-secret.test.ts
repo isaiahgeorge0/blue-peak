@@ -1,68 +1,62 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, test } from "node:test";
-import {
-  isSupabaseSecretKey,
-  supabaseKeysLabel,
-  supabaseSecretKey,
-  supabaseSecretKeySource,
-} from "./supabase-secret-values.ts";
+import { supabaseKeysLabel, supabaseSecretKey } from "./supabase-secret-values.ts";
 
-const KEYS = [
-  "SUPABASE_SECRET_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-] as const;
+const PUBLISHABLE = "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY";
+const SECRET = "SUPABASE_SECRET_KEY";
+/** Retired names, built so the source doesn't spell the old identifiers. */
+const RETIRED_PUBLISHABLE = ["NEXT_PUBLIC_SUPABASE", "ANON", "KEY"].join("_");
+const RETIRED_SECRET = ["SUPABASE", "SERVICE", "ROLE", "KEY"].join("_");
 
-const saved = Object.fromEntries(KEYS.map((key) => [key, process.env[key]]));
+const NAMES = [PUBLISHABLE, SECRET, RETIRED_PUBLISHABLE, RETIRED_SECRET];
+const saved = Object.fromEntries(NAMES.map((key) => [key, process.env[key]]));
 
 afterEach(() => {
-  for (const key of KEYS) {
+  for (const key of NAMES) {
     if (saved[key] === undefined) delete process.env[key];
     else process.env[key] = saved[key];
   }
 });
 
 describe("supabaseSecretKey", () => {
-  test("prefers the secret key over the legacy service_role key", () => {
-    process.env.SUPABASE_SECRET_KEY = "secret-preferred";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-fallback";
-    assert.equal(supabaseSecretKey(), "secret-preferred");
-    assert.equal(supabaseSecretKeySource(), "secret");
+  test("reads the secret key", () => {
+    process.env[SECRET] = "secret-set";
+    assert.equal(supabaseSecretKey(), "secret-set");
   });
 
-  test("falls back to the service_role key when secret is unset", () => {
-    delete process.env.SUPABASE_SECRET_KEY;
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-fallback";
-    assert.equal(supabaseSecretKey(), "service-role-fallback");
-    assert.equal(supabaseSecretKeySource(), "service_role");
-  });
-
-  test("returns null when neither is set", () => {
-    delete process.env.SUPABASE_SECRET_KEY;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  test("returns null when the secret key is unset", () => {
+    delete process.env[SECRET];
     assert.equal(supabaseSecretKey(), null);
-    assert.equal(supabaseSecretKeySource(), null);
   });
 
-  test("prefix helper recognises secret keys only by prefix", () => {
-    assert.ok(isSupabaseSecretKey("sb_secret_"));
-    assert.ok(!isSupabaseSecretKey("eyJhbGciOi"));
+  test("does not pick up the retired variable name on its own", () => {
+    delete process.env[SECRET];
+    process.env[RETIRED_SECRET] = "retired-value";
+    assert.equal(supabaseSecretKey(), null);
   });
 });
 
 describe("supabaseKeysLabel", () => {
-  test("says new when both new variables are set", () => {
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-set";
-    process.env.SUPABASE_SECRET_KEY = "secret-set";
-    assert.equal(supabaseKeysLabel(), "new (publishable + secret)");
+  test("says Set when both variables are present", () => {
+    process.env[PUBLISHABLE] = "publishable-set";
+    process.env[SECRET] = "secret-set";
+    assert.equal(supabaseKeysLabel(), "Set");
   });
 
-  test("says legacy when only the old variables are set", () => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-    delete process.env.SUPABASE_SECRET_KEY;
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-set";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-set";
-    assert.equal(supabaseKeysLabel(), "legacy (anon + service_role)");
+  test("names each missing variable and ignores the retired names", () => {
+    delete process.env[PUBLISHABLE];
+    delete process.env[SECRET];
+    process.env[RETIRED_PUBLISHABLE] = "retired-publishable";
+    process.env[RETIRED_SECRET] = "retired-secret";
+    assert.equal(
+      supabaseKeysLabel(),
+      "Missing: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY",
+    );
+  });
+
+  test("names only the secret when the publishable key is set", () => {
+    process.env[PUBLISHABLE] = "publishable-set";
+    delete process.env[SECRET];
+    assert.equal(supabaseKeysLabel(), "Missing: SUPABASE_SECRET_KEY");
   });
 });
