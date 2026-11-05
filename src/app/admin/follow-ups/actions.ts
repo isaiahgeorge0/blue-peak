@@ -118,7 +118,7 @@ export async function sendFollowUpTest(
 
   const lead = SAMPLE_LEADS[sample];
   const estimate = step === "acknowledgement" ? estimateFromLead(lead.serviceType, lead.message) : null;
-  const images = await emailImages(houseImageFor(estimate?.addonKeys));
+  const images = await emailImages(step === "acknowledgement" ? "branded" : "personal", houseImageFor(estimate?.addonKeys));
   const email = renderFollowUpEmail({
     step,
     subject: draft.subject,

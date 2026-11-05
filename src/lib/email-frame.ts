@@ -2,11 +2,13 @@ import { ESTIMATE_CAVEAT, type EstimateRow } from "./estimate-summary.ts";
 import { JOB_STAGES, stageSummary, type JobCard } from "./job-card.ts";
 
 /*
-  The Cortex frame every email shares: a 600px table layout (with an
+  Two email layouts. Branded is the Cortex frame: a 600px table (with an
   Outlook ghost table so it holds its width there), a navy header with the
-  lockup and the 31° gable strip, a white body, and a navy footer. Images
-  are passed in as sources: cid: references when sent, URLs in the admin
-  preview. Pure, so the sender and the preview render the same thing.
+  lockup and the 31° gable strip, a white body, and a navy footer. Personal
+  is the note Kyle sends himself: white page, a one-line job reference, the
+  message, and his signature, with the same test-redirect banner and stop
+  link. Images are passed in as sources: cid: references when sent, URLs in
+  the admin preview. Pure, so the sender and the preview render the same thing.
 */
 
 export const NAVY = "#0E1A30";
@@ -18,10 +20,15 @@ export const PLASTER = "#EEF1F4";
 export const MUTED = "#5B636D";
 export const LINE = "#D5DBE1";
 const LATER = "#DDE2E8";
-const FOOTER_TEXT = "#C9D0D8";
+/** Silver. Readable on navy, and dark enough that Gmail's inversion still reads on a pale background. */
+export const FOOTER_TEXT = "#C9D0D8";
 /** Display size of public/email/logo.png (wordmark-white alone on navy). */
 export const LOGO_WIDTH = 206;
 export const LOGO_HEIGHT = 41;
+/** Display size of public/email/signature-logo.png (white lockup on a navy rounded rectangle). */
+export const SIGNATURE_LOGO_WIDTH = 180;
+export const SIGNATURE_LOGO_HEIGHT = 52;
+export const SIGNATURE_SITE = "https://cortexbuilding.co.uk";
 export const SERIF = "'Times New Roman', Times, serif";
 export const SANS = "'Nunito Sans', Helvetica, Arial, sans-serif";
 export const TAGLINE = "Everything under one roof.";
@@ -34,7 +41,15 @@ const DARK_BORDER = "#213A66";
 const DARK_ESTIMATE = "#122140";
 const DARK_LATER = "#2A3A58";
 
-export type EmailImageSources = { logo: string; gable: string; house?: string | null };
+export type EmailImageSources = {
+  logo: string;
+  gable: string;
+  house?: string | null;
+  /** White lockup on a navy rounded rectangle, for the personal signature. */
+  signature?: string;
+  /** Solid navy tile. A background image, so Gmail's dark mode leaves the header and footer navy. */
+  navy?: string;
+};
 
 export function escapeHtml(value: string) {
   return value
@@ -65,14 +80,16 @@ export function buttonHtml(href: string, label: string, { fullWidth = false }: {
 export function jobCardHtml(card: JobCard, label = "Your job") {
   const cells = JOB_STAGES.map((label, index) => {
     const number = index + 1;
-    const state = number < card.stage ? "done" : number === card.stage ? "current" : "later";
-    const bar = state === "done" ? CORTEX_BLUE : state === "current" ? SKY : LATER;
+    const filled = number <= card.stage;
+    const state = filled ? "done" : "later";
+    const bar = filled ? CORTEX_BLUE : LATER;
+    const current = number === card.stage;
     return `
                       <td width="20%" valign="top" style="width: 20%; padding: 0 ${index < JOB_STAGES.length - 1 ? 4 : 0}px 0 0;">
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                           <tr><td height="6" bgcolor="${bar}" class="bp-track-${state}" style="height: 6px; line-height: 6px; font-size: 6px; mso-line-height-rule: exactly; background-color: ${bar}; border-radius: 3px;">&nbsp;</td></tr>
                         </table>
-                        <p class="${state === "later" ? "bp-muted" : "bp-text"}" style="margin: 6px 0 0; font-family: ${SANS}; font-size: 11px; line-height: 14px; color: ${state === "later" ? MUTED : NAVY};${state === "current" ? " font-weight: bold;" : ""}">${label}</p>
+                        <p class="${filled ? "bp-text" : "bp-muted"}" style="margin: 6px 0 0; font-family: ${SANS}; font-size: 11px; line-height: 14px; color: ${filled ? NAVY : MUTED};${current ? " font-weight: bold;" : ""}">${label}</p>
                       </td>`;
   }).join("");
   return `
@@ -99,6 +116,16 @@ export function jobCardHtml(card: JobCard, label = "Your job") {
 
 export function jobCardText(card: JobCard, label = "Your job") {
   return [card.reference ? `${label}: ${card.reference}` : label, `${card.about}, enquired ${card.enquiryDate}`, stageSummary(card.stage)].join("\n");
+}
+
+/** One line in place of the job card: "CX-0042 · Your kitchen renovation · Quote sent". */
+export function jobLineText(card: JobCard) {
+  return [card.reference, card.about, JOB_STAGES[card.stage - 1]].filter(Boolean).join(" · ");
+}
+
+export function jobLineHtml(card: JobCard) {
+  return `
+              <p class="bp-jobline" style="margin: 0 0 18px; font-family: ${SANS}; font-size: 13px; line-height: 18px; color: ${MUTED};">${escapeHtml(jobLineText(card))}</p>`;
 }
 
 function houseAlt(rows: EstimateRow[]) {
@@ -149,8 +176,34 @@ export function signOffHtml(text: string) {
               <p class="bp-text bp-serif" style="margin: 8px 0 20px; font-family: ${SERIF}; font-size: 22px; line-height: 28px; color: ${NAVY};">${escapeHtml(text)}</p>`;
 }
 
+/** Kyle's signature, in place of the branded sign-off. One navy lockup, so it reads in light and dark. */
+export function signatureHtml(images: Pick<EmailImageSources, "signature">, phoneDisplay: string, phoneHref: string) {
+  const src = images.signature ?? "";
+  const logo = src
+    ? `
+                <tr>
+                  <td align="left" style="padding: 0 0 14px 0;">
+                    <img src="${escapeHtml(src)}" width="${SIGNATURE_LOGO_WIDTH}" height="${SIGNATURE_LOGO_HEIGHT}" alt="Cortex Building" style="display: block; width: ${SIGNATURE_LOGO_WIDTH}px; height: ${SIGNATURE_LOGO_HEIGHT}px; margin: 0; border: 0;" />
+                  </td>
+                </tr>`
+    : "";
+  return `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-sig" style="margin: 0 0 4px;">${logo}
+                <tr><td class="bp-sig-name bp-serif" style="font-family: ${SERIF}; font-size: 19px; line-height: 24px; color: ${NAVY};">Kyle Rice</td></tr>
+                <tr><td class="bp-sig-role" style="padding: 4px 0 0; font-family: ${SANS}; font-size: 11px; font-weight: bold; letter-spacing: 2px; line-height: 16px; color: ${BLUE_SHADE};">DIRECTOR · CORTEX BUILDING</td></tr>
+                <tr><td style="padding: 8px 0 0; font-family: ${SANS}; font-size: 13px; line-height: 18px; color: ${MUTED};"><a href="${escapeHtml(phoneHref)}" class="bp-sig-link" style="color: ${MUTED}; text-decoration: none; white-space: nowrap;">${escapeHtml(phoneDisplay)}</a> · <a href="${SIGNATURE_SITE}" class="bp-sig-link" style="color: ${MUTED}; text-decoration: none;">cortexbuilding.co.uk</a></td></tr>
+                <tr><td class="bp-sig-tag bp-serif" style="padding: 8px 0 0; font-family: ${SERIF}; font-size: 14px; font-style: italic; line-height: 20px; color: ${BLUE_SHADE};">${TAGLINE}</td></tr>
+              </table>`;
+}
+
+export function signatureText(phoneDisplay: string) {
+  return ["Kyle Rice", "Director, Cortex Building", `${phoneDisplay} · cortexbuilding.co.uk`].join("\n");
+}
+
 export type EmailDocument = {
-  /** The <title> and the heading at the top of the body. */
+  /** Branded is the navy frame. Personal is Kyle's own note. Defaults to branded. */
+  layout?: "branded" | "personal";
+  /** The <title>, and the branded layout's heading. Personal emails leave the heading to the subject line. */
   title: string;
   /** Inbox preview text. */
   preheader: string;
@@ -169,6 +222,8 @@ export type EmailDocument = {
 const PREHEADER_FILLER = "&#847;&zwnj;&nbsp;".repeat(40);
 
 export function renderEmailDocument(doc: EmailDocument) {
+  const personal = doc.layout === "personal";
+  const pageBg = personal ? "#ffffff" : PLASTER;
   const fontLink = doc.webFont === false
     ? ""
     : `
@@ -180,6 +235,42 @@ export function renderEmailDocument(doc: EmailDocument) {
           </tr>
           <tr><td style="height: 16px; line-height: 16px; font-size: 16px;">&nbsp;</td></tr>`
     : "";
+  const navySrc = doc.images.navy ? escapeHtml(doc.images.navy) : "";
+  const navyFill = navySrc ? ` background="${navySrc}"` : "";
+  const navyImage = navySrc ? ` background-image: url('${navySrc}'); background-repeat: repeat;` : "";
+
+  const brandedRows = `
+          <tr>
+            <td align="center" bgcolor="${NAVY}"${navyFill} class="bp-head" style="padding: 30px 32px 14px; background-color: ${NAVY};${navyImage}">
+              <img src="${escapeHtml(doc.images.logo)}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="Cortex Building" style="display: block; width: ${LOGO_WIDTH}px; height: ${LOGO_HEIGHT}px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: ${LOGO_HEIGHT}px; color: ${PLASTER}; text-align: center;" />
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#ffffff" class="bp-body" style="background-color: #ffffff; font-size: 0; line-height: 0;">
+              <img src="${escapeHtml(doc.images.gable)}" width="600" alt="" style="display: block; width: 100%; max-width: 600px; height: auto; border: 0;" />
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#ffffff" class="bp-body bp-pad" style="padding: 18px 40px 28px; background-color: #ffffff;">
+              <h1 class="bp-heading bp-serif" style="margin: 0 0 22px; font-family: ${SERIF}; font-size: 30px; font-weight: normal; line-height: 36px; color: ${NAVY};">${escapeHtml(doc.title)}</h1>${doc.bodyHtml}
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="${NAVY}"${navyFill} class="bp-pad" style="padding: 32px 40px 36px; background-color: ${NAVY};${navyImage}">
+              <div class="gmail-screen"><div class="gmail-difference">
+              <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${PLASTER};">${TAGLINE}</p>
+              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${SKY}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
+              </div></div>
+              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
+            </td>
+          </tr>`;
+
+  const personalRows = `
+          <tr>
+            <td bgcolor="#ffffff" class="bp-body bp-pad" style="padding: 18px 40px 28px; background-color: #ffffff;">${doc.bodyHtml}
+              <p class="bp-fine bp-rule" style="margin: 20px 0 0; padding-top: 16px; border-top: 1px solid ${LINE}; font-family: ${SANS}; font-size: 12px; line-height: 18px; color: ${MUTED};">${doc.footerNotesHtml}</p>
+            </td>
+          </tr>`;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -198,6 +289,8 @@ export function renderEmailDocument(doc: EmailDocument) {
     table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
     img { -ms-interpolation-mode: bicubic; }
     .bp-link { color: ${BLUE_SHADE}; }
+    u + .body .gmail-screen { background: #000; mix-blend-mode: screen; }
+    u + .body .gmail-difference { background: #000; mix-blend-mode: difference; }
     @media (max-width: 620px) {
       .bp-pad { padding-left: 20px !important; padding-right: 20px !important; }
       .bp-heading { font-size: 26px !important; line-height: 32px !important; }
@@ -206,50 +299,30 @@ export function renderEmailDocument(doc: EmailDocument) {
       .bp-page { background-color: ${DARK_PAGE} !important; }
       .bp-body, .bp-job { background-color: ${DARK_BODY} !important; }
       .bp-job { border-color: ${DARK_BORDER} !important; }
-      .bp-text, .bp-heading { color: ${PLASTER} !important; }
+      .bp-text, .bp-heading, .bp-jobline, .bp-sig-name, .bp-sig-role, .bp-sig-tag, .bp-fine { color: ${PLASTER} !important; }
       .bp-muted { color: ${FOOTER_TEXT} !important; }
-      .bp-link { color: ${SKY} !important; }
+      .bp-link, .bp-sig-link, .bp-fine-link { color: ${SKY} !important; }
       .bp-box { background-color: ${DARK_ESTIMATE} !important; border-color: ${DARK_BORDER} !important; }
       .bp-rule { border-color: ${DARK_BORDER} !important; }
-      .bp-track-done { background-color: ${PLASTER} !important; }
+      .bp-track-done { background-color: ${SKY} !important; }
       .bp-track-later { background-color: ${DARK_LATER} !important; }
       .bp-button { border: 1px solid ${SKY} !important; }
       .bp-banner { background-color: ${DARK_ESTIMATE} !important; color: ${PLASTER} !important; border-color: ${SKY} !important; }
     }
-    [data-ogsc] .bp-text, [data-ogsc] .bp-heading { color: ${PLASTER} !important; }
+    [data-ogsc] .bp-text, [data-ogsc] .bp-heading, [data-ogsc] .bp-jobline, [data-ogsc] .bp-sig-name, [data-ogsc] .bp-sig-role, [data-ogsc] .bp-sig-tag, [data-ogsc] .bp-fine { color: ${PLASTER} !important; }
     [data-ogsc] .bp-muted { color: ${FOOTER_TEXT} !important; }
-    [data-ogsc] .bp-link { color: ${SKY} !important; }
+    [data-ogsc] .bp-link, [data-ogsc] .bp-sig-link, [data-ogsc] .bp-fine-link { color: ${SKY} !important; }
+    [data-ogsc] .bp-track-done { background-color: ${SKY} !important; }
+    [data-ogsc] .bp-track-later { background-color: ${DARK_LATER} !important; }
   </style>
 </head>
-<body class="bp-page" style="margin: 0; padding: 0; background-color: ${PLASTER};">
+<body class="bp-page body" style="margin: 0; padding: 0; background-color: ${pageBg};">
   <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; mso-hide: all;">${escapeHtml(doc.preheader)}${PREHEADER_FILLER}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-page" bgcolor="${PLASTER}" style="background-color: ${PLASTER};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-page" bgcolor="${pageBg}" style="background-color: ${pageBg};">
     <tr>
       <td align="center" style="padding: 24px 12px 32px;">
         <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px;">${banner}
-          <tr>
-            <td align="center" bgcolor="${NAVY}" class="bp-head" style="padding: 30px 32px 14px; background-color: ${NAVY};">
-              <img src="${escapeHtml(doc.images.logo)}" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" alt="Cortex Building" style="display: block; width: ${LOGO_WIDTH}px; height: ${LOGO_HEIGHT}px; border: 0; font-family: ${SERIF}; font-size: 28px; line-height: ${LOGO_HEIGHT}px; color: ${PLASTER}; text-align: center;" />
-            </td>
-          </tr>
-          <tr>
-            <td bgcolor="#ffffff" class="bp-body" style="background-color: #ffffff; font-size: 0; line-height: 0;">
-              <img src="${escapeHtml(doc.images.gable)}" width="600" alt="" style="display: block; width: 100%; max-width: 600px; height: auto; border: 0;" />
-            </td>
-          </tr>
-          <tr>
-            <td bgcolor="#ffffff" class="bp-body bp-pad" style="padding: 18px 40px 28px; background-color: #ffffff;">
-              <h1 class="bp-heading bp-serif" style="margin: 0 0 22px; font-family: ${SERIF}; font-size: 30px; font-weight: normal; line-height: 36px; color: ${NAVY};">${escapeHtml(doc.title)}</h1>${doc.bodyHtml}
-            </td>
-          </tr>
-          <tr>
-            <td bgcolor="${NAVY}" class="bp-pad" style="padding: 32px 40px 36px; background-color: ${NAVY};">
-              <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${PLASTER};">${TAGLINE}</p>
-              <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${SKY}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
-              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
-            </td>
-          </tr>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px;">${banner}${personal ? personalRows : brandedRows}
         </table>
         <!--[if mso]></td></tr></table><![endif]-->
       </td>

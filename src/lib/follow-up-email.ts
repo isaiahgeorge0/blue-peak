@@ -6,14 +6,19 @@ import {
   estimateBoxHtml,
   estimateText,
   footerText,
+  FOOTER_TEXT,
   jobCardHtml,
   jobCardText,
+  jobLineHtml,
+  jobLineText,
+  MUTED,
   NAVY,
   paragraphHtml,
   renderEmailDocument,
   SANS,
   signOffHtml,
-  SKY,
+  signatureHtml,
+  signatureText,
   type EmailImageSources,
 } from "./email-frame.ts";
 import type { Estimate, EstimateRow } from "./estimate-summary.ts";
@@ -45,13 +50,37 @@ export const WHY_YOU_GET_THIS = "You're getting this because you contacted Corte
 
 const TITLES = new Set(["mr", "mrs", "ms", "miss", "mx", "dr", "sir", "madam", "prof", "rev"]);
 
+/** Title-case one word, including the parts of a hyphen or apostrophe. */
+export function titleCaseWord(word: string) {
+  return word
+    .split(/([-'’])/)
+    .map((part) => (part === "-" || part === "'" || part === "’" || part === "" ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()))
+    .join("");
+}
+
+/**
+ * How a name is shown. Mixed case is left as typed. A name that is entirely
+ * lower case or entirely upper case is title-cased word by word. Digits and
+ * emoji are left as typed. This never changes the stored name.
+ */
+export function displayName(name: string) {
+  const trimmed = name.trim();
+  if (!trimmed || !/^[\p{L}\s'’-]+$/u.test(trimmed)) return trimmed;
+  const oneCase = trimmed === trimmed.toLowerCase() || trimmed === trimmed.toUpperCase();
+  if (!oneCase) return trimmed;
+  return trimmed
+    .split(/(\s+)/)
+    .map((part) => (/^\s+$/.test(part) ? part : titleCaseWord(part)))
+    .join("");
+}
+
 /** A first name fit for "Hi …": the first word of the name, if it looks like one. */
 export function firstNameFrom(name: string | null | undefined): string | null {
   const first = (name ?? "").trim().split(/\s+/)[0] ?? "";
   if (TITLES.has(first.toLowerCase().replace(/\.$/, ""))) return null;
   if (!/^\p{L}[\p{L}'’-]{1,29}$/u.test(first)) return null;
   const oneCase = first === first.toLowerCase() || first === first.toUpperCase();
-  return oneCase ? first.charAt(0).toUpperCase() + first.slice(1).toLowerCase() : first;
+  return oneCase ? titleCaseWord(first) : first;
 }
 
 /** Problems that would stop a template being saved, in plain words. Empty when it is fine. */
@@ -258,22 +287,24 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
 
   const preheaderSource = blocks.find((block, index) => index > 0 && block.kind === "paragraph");
   const preheader = preheaderSource && preheaderSource.kind === "paragraph" ? preheaderSource.lines.join(" ").slice(0, 120) : "";
+  const personal = input.step !== "acknowledgement";
+  const psHtml = ps ? paragraphHtml(ps.map(inlineHtml).join("<br />"), { size: 15, margin: personal ? "0 0 18px" : "0" }) : "";
 
   const html = renderEmailDocument({
+    layout: personal ? "personal" : "branded",
     title: subject,
     preheader,
     bannerHtml: input.intendedRecipient
       ? `<strong>Test email.</strong> In normal use this would have gone to <strong>${escapeHtml(input.intendedRecipient)}</strong>.`
       : undefined,
-    bodyHtml: [
-      jobCardHtml(input.jobCard),
-      blockHtml,
-      signOffHtml(SIGN_OFF),
-      ps ? paragraphHtml(ps.map(inlineHtml).join("<br />"), { size: 15, margin: "0" }) : "",
-    ].join(""),
+    bodyHtml: personal
+      ? [jobLineHtml(input.jobCard), blockHtml, psHtml, signatureHtml(input.images, input.phoneDisplay, input.phoneHref)].join("")
+      : [jobCardHtml(input.jobCard), blockHtml, signOffHtml(SIGN_OFF), psHtml].join(""),
     phoneDisplay: input.phoneDisplay,
     phoneHref: input.phoneHref,
-    footerNotesHtml: `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${SKY}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
+    footerNotesHtml: personal
+      ? `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" class="bp-fine-link" style="color: ${MUTED}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`
+      : `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${FOOTER_TEXT}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
     images: input.images,
     webFont: input.webFont,
   });
@@ -284,16 +315,28 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
     if (block.kind === "list") return block.items.map((item, index) => `${index + 1}. ${item}`).join("\n");
     return block.lines.join("\n").replaceAll(REVIEW_LINK, `${REVIEW_BUTTON_TEXT} (${reviewHref})`);
   });
-  const text = [
-    ...(input.intendedRecipient ? [`TEST EMAIL. In normal use this would have gone to ${input.intendedRecipient}.`, ""] : []),
-    jobCardText(input.jobCard),
-    "",
-    ...textBlocks.flatMap((block) => [block, ""]),
-    SIGN_OFF,
-    "",
-    ...(ps ? [ps.join("\n"), ""] : []),
-    footerText(input.phoneDisplay, [WHY_YOU_GET_THIS, `${STOP_LINK_TEXT}: ${input.stopUrl}`]),
-  ].join("\n");
+  const text = personal
+    ? [
+        ...(input.intendedRecipient ? [`TEST EMAIL. In normal use this would have gone to ${input.intendedRecipient}.`, ""] : []),
+        jobLineText(input.jobCard),
+        "",
+        ...textBlocks.flatMap((block) => [block, ""]),
+        ...(ps ? [ps.join("\n"), ""] : []),
+        signatureText(input.phoneDisplay),
+        "",
+        WHY_YOU_GET_THIS,
+        `${STOP_LINK_TEXT}: ${input.stopUrl}`,
+      ].join("\n")
+    : [
+        ...(input.intendedRecipient ? [`TEST EMAIL. In normal use this would have gone to ${input.intendedRecipient}.`, ""] : []),
+        jobCardText(input.jobCard),
+        "",
+        ...textBlocks.flatMap((block) => [block, ""]),
+        SIGN_OFF,
+        "",
+        ...(ps ? [ps.join("\n"), ""] : []),
+        footerText(input.phoneDisplay, [WHY_YOU_GET_THIS, `${STOP_LINK_TEXT}: ${input.stopUrl}`]),
+      ].join("\n");
 
   return { subject, html, text };
 }

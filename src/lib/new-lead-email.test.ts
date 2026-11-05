@@ -22,6 +22,23 @@ describe("new-lead alert", () => {
     assert.equal(renderNewLeadEmail(base).subject, "New lead CX-0007: Jo Bloggs, Kitchen renovations");
   });
 
+  test("a one-case name is title-cased for display, and a mixed name, a number or an emoji is left as typed", () => {
+    const subject = (name: string) => renderNewLeadEmail({ ...base, name }).subject;
+    assert.equal(subject("isaiah george"), "New lead CX-0007: Isaiah George, Kitchen renovations");
+    assert.equal(subject("O'BRIEN"), "New lead CX-0007: O'Brien, Kitchen renovations");
+    assert.equal(subject("mary-jane smith"), "New lead CX-0007: Mary-Jane Smith, Kitchen renovations");
+    assert.equal(subject("Jo Bloggs"), "New lead CX-0007: Jo Bloggs, Kitchen renovations");
+    assert.equal(subject("jo2"), "New lead CX-0007: jo2, Kitchen renovations");
+    assert.equal(subject("ISAIAH 😀"), "New lead CX-0007: ISAIAH 😀, Kitchen renovations");
+    const lower = renderNewLeadEmail({ ...base, name: "isaiah george" });
+    assert.match(lower.html, />New lead: Isaiah George</);
+    assert.match(lower.html, />Isaiah George</);
+    assert.match(lower.html, />Call Isaiah</);
+    assert.match(lower.text, /Name: Isaiah George/);
+    assert.match(renderNewLeadEmail({ ...base, name: "jo2" }).html, />Call jo2</);
+    assert.match(renderNewLeadEmail({ ...base, name: "ISAIAH 😀" }).text, /Name: ISAIAH 😀/);
+  });
+
   test("job card, tap-to-call, mailto, message and both buttons", () => {
     const { html, text } = renderNewLeadEmail(base);
     assert.match(html, />CX-0007</);

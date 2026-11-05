@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 import { MIN_LINK_SECRET_LENGTH, readLinkSecret, type FollowUpStep } from "./follow-up-schedule.ts";
 import {
+  displayName,
   fillPlaceholders,
   firstNameFrom,
   renderFollowUpEmail,
@@ -36,13 +37,15 @@ const base: FollowUpEmailInput = {
   stopUrl: "https://example.com/stop-emails?t=abc",
   intendedRecipient: null,
   jobCard: { reference: "CX-0042", about: "Your kitchen renovation", enquiryDate: "5 October 2026", stage: 1 },
-  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null },
+  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null, signature: "cid:bp-signature", navy: "https://cortexbuilding.co.uk/email/navy.png" },
 };
 
-/** The plain text after the job card that opens every email. */
+/** The plain text after the job card (branded) or the job line (personal). */
 function afterJobCard(text: string) {
-  const card = text.indexOf("\n\n", text.indexOf("Stage "));
-  return text.slice(card + 2);
+  const stageAt = text.indexOf("Stage ");
+  if (stageAt !== -1) return text.slice(text.indexOf("\n\n", stageAt) + 2);
+  const lineEnd = text.indexOf("\n\n");
+  return lineEnd === -1 ? text : text.slice(lineEnd + 2);
 }
 
 describe("first names", () => {
@@ -50,7 +53,19 @@ describe("first names", () => {
     assert.equal(firstNameFrom("jo bloggs"), "Jo");
     assert.equal(firstNameFrom("JO BLOGGS"), "Jo");
     assert.equal(firstNameFrom("  Mary-Jane Smith "), "Mary-Jane");
+    assert.equal(firstNameFrom("mary-jane"), "Mary-Jane");
+    assert.equal(firstNameFrom("O'BRIEN"), "O'Brien");
     assert.equal(firstNameFrom("Siân"), "Siân");
+  });
+
+  test("a whole name is title-cased only when it is one case", () => {
+    assert.equal(displayName("isaiah george"), "Isaiah George");
+    assert.equal(displayName("O'BRIEN"), "O'Brien");
+    assert.equal(displayName("mary-jane"), "Mary-Jane");
+    assert.equal(displayName("Jo Bloggs"), "Jo Bloggs");
+    assert.equal(displayName("Mary-Jane"), "Mary-Jane");
+    assert.equal(displayName("jo2"), "jo2");
+    assert.equal(displayName("ISAIAH 😀"), "ISAIAH 😀");
   });
 
   test("nothing usable", () => {
@@ -239,8 +254,14 @@ describe("seeded templates, every combination of name and service", () => {
             assert.match(afterJobCard(email.text), firstName ? new RegExp(`^Hi ${firstName},`) : /^Hi there,/, label);
             assert.equal(email.text.includes("Your estimate"), template.step === "acknowledgement" && estimate !== null, label);
             assert.doesNotMatch(email.html, /\{(first_name|service|phone|review_link|estimate)\}/, label);
-            assert.ok(email.text.indexOf("Kyle Rice, Cortex Building\n\nP.S.") > 0, label);
-            assert.ok(email.html.indexOf("Kyle Rice, Cortex Building") < email.html.indexOf(">P.S. "), label);
+            if (template.step === "acknowledgement") {
+              assert.ok(email.text.indexOf("Kyle Rice, Cortex Building\n\nP.S.") > 0, label);
+              assert.ok(email.html.indexOf("Kyle Rice, Cortex Building") < email.html.indexOf(">P.S. "), label);
+            } else {
+              assert.ok(email.text.indexOf("Kyle Rice\nDirector, Cortex Building\n") > 0, label);
+              assert.ok(email.text.indexOf("P.S.") < email.text.indexOf("Kyle Rice\nDirector, Cortex Building"), label);
+              assert.ok(email.html.indexOf(">P.S. ") < email.html.indexOf(">Kyle Rice<"), label);
+            }
           }
         }
       }
@@ -349,6 +370,14 @@ describe("rendered email", () => {
     const email = renderFollowUpEmail(base);
     assert.match(email.html, /<img src="cid:bp-logo"[^>]*alt="Cortex Building"/);
     assert.match(email.html, /width="206" height="41"/);
+    assert.match(email.html, /background="https:\/\/cortexbuilding.co.uk\/email\/navy.png"/);
+    assert.match(email.html, /background-image: url\('https:\/\/cortexbuilding.co.uk\/email\/navy.png'\)/);
+    assert.match(email.html, /class="gmail-screen"/);
+    assert.match(email.html, /class="bp-page body"/);
+    const blendEnd = email.html.indexOf("</div></div>");
+    assert.ok(email.html.indexOf("Everything under one roof.") < blendEnd);
+    assert.ok(email.html.indexOf("getting this") > blendEnd);
+    assert.match(email.html, /style="color: #C9D0D8; text-decoration: underline;"/);
     assert.match(email.html, /#1F6BFF/);
     assert.match(email.html, /#8DB6FF/);
     assert.match(email.html, /#EEF1F4/);
@@ -375,9 +404,29 @@ describe("rendered email", () => {
     assert.match(email.text, /^Your job: CX-0042\nYour kitchen renovation, enquired 5 October 2026\nStage 3 of 5: Quote sent\n\n/);
     assert.match(email.html, />CX-0042</);
     assert.match(email.html, /Stage 3 of 5:<\/strong> Quote sent/);
-    assert.equal(email.html.match(/class="bp-track-done"/g)?.length, 2);
-    assert.equal(email.html.match(/class="bp-track-current"/g)?.length, 1);
+    assert.equal(email.html.match(/class="bp-track-done"/g)?.length, 3);
     assert.equal(email.html.match(/class="bp-track-later"/g)?.length, 2);
+    assert.equal(email.html.match(/class="bp-track-current"/g)?.length, undefined);
+    const bars = [...email.html.matchAll(/class="bp-track-(?:done|later)" style="[^"]*background-color: (#[0-9A-F]+)/g)].map((match) => match[1]);
+    assert.deepEqual(bars, ["#1F6BFF", "#1F6BFF", "#1F6BFF", "#DDE2E8", "#DDE2E8"]);
+    const labels = [...email.html.matchAll(/font-size: 11px; line-height: 14px; color: #[0-9A-F]+;( font-weight: bold;)?">([^<]+)<\/p>/g)];
+    assert.deepEqual(
+      labels.map((match) => [match[2], Boolean(match[1])]),
+      [
+        ["Enquiry received", false],
+        ["In touch", false],
+        ["Quote sent", true],
+        ["Booked", false],
+        ["Finished", false],
+      ],
+    );
+    assert.match(email.html, /\.bp-track-done \{ background-color: #8DB6FF !important; \}/);
+    const finished = renderFollowUpEmail({ ...base, jobCard: { ...base.jobCard, stage: 5 } });
+    assert.equal(finished.html.match(/class="bp-track-done"/g)?.length, 5);
+    assert.equal(finished.html.match(/class="bp-track-later"/g)?.length, undefined);
+    const finishedBars = [...finished.html.matchAll(/class="bp-track-done" style="[^"]*background-color: (#[0-9A-F]+)/g)].map((match) => match[1]);
+    assert.deepEqual(finishedBars, ["#1F6BFF", "#1F6BFF", "#1F6BFF", "#1F6BFF", "#1F6BFF"]);
+    assert.match(finished.html, /font-weight: bold;">Finished/);
     const content = email.html.slice(email.html.indexOf("<h1"));
     assert.ok(content.indexOf("CX-0042") < content.indexOf("Thanks for getting in touch"));
   });
@@ -394,6 +443,40 @@ describe("rendered email", () => {
     const email = renderFollowUpEmail({ ...base, intendedRecipient: "jo@example.com" });
     assert.match(email.text, /^TEST EMAIL\. In normal use this would have gone to jo@example\.com\./);
     assert.ok(email.html.indexOf("jo@example.com") < email.html.indexOf('alt="Cortex Building"'));
+  });
+
+  test("quote chasers and the review request use the personal layout", () => {
+    for (const step of ["quote_chaser_1", "quote_chaser_2", "review_request"] as const) {
+      const email = renderFollowUpEmail({
+        ...base,
+        step,
+        subject: "Checking in, {first_name}",
+        body: step === "review_request" ? "Hi {first_name},\n\nHope you're settled in.\n\n{review_link}\n\nP.S. We'd love a photo." : "Hi {first_name},\n\nJust checking you saw the quote.\n\nP.S. A note.",
+        reviewUrl: "https://g.page/r/x/review",
+        intendedRecipient: "jo@example.com",
+        jobCard: { ...base.jobCard, stage: step === "review_request" ? 5 : 3 },
+      });
+      assert.doesNotMatch(email.html, /<h1[\s>]/, step);
+      assert.doesNotMatch(email.html, /cid:bp-gable|class="bp-head"/, step);
+      assert.match(email.html, /CX-0042 · Your kitchen renovation · /, step);
+      assert.match(email.html, /cid:bp-signature/, step);
+      assert.doesNotMatch(email.html, /logo-light|logo-dark|light-img|dark-img/, step);
+      assert.match(email.html, /width="180" height="52"/, step);
+      assert.match(email.html, /padding: 0 0 14px 0;/, step);
+      assert.ok(email.html.indexOf(">P.S. ") < email.html.indexOf(">Kyle Rice<"), step);
+      assert.ok(email.text.indexOf("P.S.") < email.text.indexOf("Kyle Rice\nDirector"), step);
+      assert.match(email.html, />Kyle Rice</, step);
+      assert.match(email.html, /DIRECTOR · CORTEX BUILDING/, step);
+      assert.match(email.html, /href="https:\/\/cortexbuilding.co.uk"/, step);
+      assert.match(email.html, /class="bp-fine/, step);
+      assert.match(email.html, /Test email\./, step);
+      assert.ok(email.html.includes(STOP_LINK_TEXT.replace("'", "&#39;")), step);
+      assert.match(email.text, /^TEST EMAIL\. In normal use this would have gone to jo@example\.com\.\n\nCX-0042 · /, step);
+      assert.match(email.text, /Kyle Rice\nDirector, Cortex Building\n01234 567890 · cortexbuilding\.co\.uk/, step);
+      assert.doesNotMatch(email.text, /Your job:|Stage \d of 5|^--$/m, step);
+      if (step === "review_request") assert.match(email.html, /Leave a Google review/, step);
+      else assert.doesNotMatch(email.html, /class="bp-button"/, step);
+    }
   });
 
   test("review request: button to the review link, added if the template leaves it out", () => {

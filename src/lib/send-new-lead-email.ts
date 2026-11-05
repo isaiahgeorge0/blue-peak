@@ -41,7 +41,7 @@ export async function sendNewLeadEmail(lead: LeadNotificationPayload, stored: St
   }
 
   const estimate = estimateFromLead(lead.serviceType, lead.message);
-  const images = await emailImages(houseImageFor(estimate?.addonKeys));
+  const images = await emailImages("branded", houseImageFor(estimate?.addonKeys));
   const label = serviceLabel(lead.serviceType);
   const card = jobCardFor({ reference_number: stored.referenceNumber, service_type: lead.serviceType, created_at: stored.createdAt, stage: 1 });
   const { subject, html, text } = renderNewLeadEmail({

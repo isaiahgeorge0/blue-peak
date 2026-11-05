@@ -58,6 +58,34 @@ async function renderLockup(browser) {
   return { width: Math.round(box.width), height: Math.round(box.height) };
 }
 
+/** White mark + CORTEX on a navy rounded rectangle, 180×52 at 1×, exported at 2×. Cropped to the rectangle. */
+async function renderSignatureLogo(browser) {
+  const wordmark = fs.readFileSync(path.join(ROOT, "public/brand/wordmark-white.svg"), "utf8");
+  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 240, height: 120 } });
+  await page.setContent(`<!doctype html><html><body style="margin:0;background:transparent">
+    <div id="pill" style="box-sizing:border-box;width:180px;height:52px;padding:10px;background:${NAVY};border-radius:10px;line-height:0;font-size:0;">
+      <div style="width:160px;height:32px">${wordmark.replace("<svg ", '<svg width="100%" height="100%" ')}</div>
+    </div></body></html>`);
+  await page.locator("#pill").screenshot({ path: path.join(OUT, "signature-logo.png"), omitBackground: true });
+  await page.close();
+}
+
+/** An 8×8 solid navy tile. Gmail's dark mode inverts a flat background colour and leaves a background image alone. */
+async function renderNavy(browser) {
+  const page = await browser.newPage();
+  const url = await page.evaluate((navy) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 8;
+    canvas.height = 8;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = navy;
+    ctx.fillRect(0, 0, 8, 8);
+    return canvas.toDataURL("image/png");
+  }, NAVY);
+  fs.writeFileSync(path.join(OUT, "navy.png"), dataUrlToBuffer(url));
+  await page.close();
+}
+
 /** A navy strip with a small centred gable cut out of its bottom edge at the brand's 31° pitch; transparent inside the gable. */
 async function renderGable(browser) {
   const page = await browser.newPage();
@@ -175,7 +203,9 @@ if (part === "brand") {
   await withBrowser(async (browser) => {
     const lockup = await renderLockup(browser);
     await renderGable(browser);
-    console.log(`logo.png ${lockup.width}x${lockup.height} (display size), gable.png 600x24 (display size)`);
+    await renderSignatureLogo(browser);
+    await renderNavy(browser);
+    console.log(`logo.png ${lockup.width}x${lockup.height} (display size), gable.png 600x24, signature-logo.png 180x52, navy.png 8x8`);
   });
 } else if (part === "houses") {
   const base = (arg || "http://localhost:3000").replace(/\/$/, "");
