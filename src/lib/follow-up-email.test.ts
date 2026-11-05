@@ -37,7 +37,7 @@ const base: FollowUpEmailInput = {
   stopUrl: "https://example.com/stop-emails?t=abc",
   intendedRecipient: null,
   jobCard: { reference: "CX-0042", about: "Your kitchen renovation", enquiryDate: "5 October 2026", stage: 1 },
-  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null, logoLight: "cid:bp-logo-light", logoDark: "cid:bp-logo-dark", navy: "https://cortexbuilding.co.uk/email/navy.png" },
+  images: { logo: "cid:bp-logo", gable: "cid:bp-gable", house: null, signature: "cid:bp-signature", navy: "https://cortexbuilding.co.uk/email/navy.png" },
 };
 
 /** The plain text after the job card (branded) or the job line (personal). */
@@ -259,8 +259,8 @@ describe("seeded templates, every combination of name and service", () => {
               assert.ok(email.html.indexOf("Kyle Rice, Cortex Building") < email.html.indexOf(">P.S. "), label);
             } else {
               assert.ok(email.text.indexOf("Kyle Rice\nDirector, Cortex Building\n") > 0, label);
-              assert.ok(email.text.indexOf("Director, Cortex Building") < email.text.indexOf("P.S."), label);
-              assert.ok(email.html.indexOf(">Kyle Rice<") < email.html.indexOf(">P.S. "), label);
+              assert.ok(email.text.indexOf("P.S.") < email.text.indexOf("Kyle Rice\nDirector, Cortex Building"), label);
+              assert.ok(email.html.indexOf(">P.S. ") < email.html.indexOf(">Kyle Rice<"), label);
             }
           }
         }
@@ -374,6 +374,10 @@ describe("rendered email", () => {
     assert.match(email.html, /background-image: url\('https:\/\/cortexbuilding.co.uk\/email\/navy.png'\)/);
     assert.match(email.html, /class="gmail-screen"/);
     assert.match(email.html, /class="bp-page body"/);
+    const blendEnd = email.html.indexOf("</div></div>");
+    assert.ok(email.html.indexOf("Everything under one roof.") < blendEnd);
+    assert.ok(email.html.indexOf("getting this") > blendEnd);
+    assert.match(email.html, /style="color: #C9D0D8; text-decoration: underline;"/);
     assert.match(email.html, /#1F6BFF/);
     assert.match(email.html, /#8DB6FF/);
     assert.match(email.html, /#EEF1F4/);
@@ -447,7 +451,7 @@ describe("rendered email", () => {
         ...base,
         step,
         subject: "Checking in, {first_name}",
-        body: step === "review_request" ? "Hi {first_name},\n\nHope you're settled in.\n\n{review_link}" : "Hi {first_name},\n\nJust checking you saw the quote.",
+        body: step === "review_request" ? "Hi {first_name},\n\nHope you're settled in.\n\n{review_link}\n\nP.S. We'd love a photo." : "Hi {first_name},\n\nJust checking you saw the quote.\n\nP.S. A note.",
         reviewUrl: "https://g.page/r/x/review",
         intendedRecipient: "jo@example.com",
         jobCard: { ...base.jobCard, stage: step === "review_request" ? 5 : 3 },
@@ -455,9 +459,12 @@ describe("rendered email", () => {
       assert.doesNotMatch(email.html, /<h1[\s>]/, step);
       assert.doesNotMatch(email.html, /cid:bp-gable|class="bp-head"/, step);
       assert.match(email.html, /CX-0042 · Your kitchen renovation · /, step);
-      assert.match(email.html, /cid:bp-logo-light/, step);
-      assert.match(email.html, /class="dark-img"/, step);
-      assert.match(email.html, /width="200" height="40"/, step);
+      assert.match(email.html, /cid:bp-signature/, step);
+      assert.doesNotMatch(email.html, /logo-light|logo-dark|light-img|dark-img/, step);
+      assert.match(email.html, /width="180" height="52"/, step);
+      assert.match(email.html, /padding: 0 0 14px 0;/, step);
+      assert.ok(email.html.indexOf(">P.S. ") < email.html.indexOf(">Kyle Rice<"), step);
+      assert.ok(email.text.indexOf("P.S.") < email.text.indexOf("Kyle Rice\nDirector"), step);
       assert.match(email.html, />Kyle Rice</, step);
       assert.match(email.html, /DIRECTOR · CORTEX BUILDING/, step);
       assert.match(email.html, /href="https:\/\/cortexbuilding.co.uk"/, step);

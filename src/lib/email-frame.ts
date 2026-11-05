@@ -20,13 +20,14 @@ export const PLASTER = "#EEF1F4";
 export const MUTED = "#5B636D";
 export const LINE = "#D5DBE1";
 const LATER = "#DDE2E8";
-const FOOTER_TEXT = "#C9D0D8";
+/** Silver. Readable on navy, and dark enough that Gmail's inversion still reads on a pale background. */
+export const FOOTER_TEXT = "#C9D0D8";
 /** Display size of public/email/logo.png (wordmark-white alone on navy). */
 export const LOGO_WIDTH = 206;
 export const LOGO_HEIGHT = 41;
-/** Display size of the signature lockup (public/email/logo-light.png and logo-dark.png). */
-export const SIGNATURE_LOGO_WIDTH = 200;
-export const SIGNATURE_LOGO_HEIGHT = 40;
+/** Display size of public/email/signature-logo.png (white lockup on a navy rounded rectangle). */
+export const SIGNATURE_LOGO_WIDTH = 180;
+export const SIGNATURE_LOGO_HEIGHT = 52;
 export const SIGNATURE_SITE = "https://cortexbuilding.co.uk";
 export const SERIF = "'Times New Roman', Times, serif";
 export const SANS = "'Nunito Sans', Helvetica, Arial, sans-serif";
@@ -44,10 +45,8 @@ export type EmailImageSources = {
   logo: string;
   gable: string;
   house?: string | null;
-  /** Colour lockup for the signature on a light background. */
-  logoLight?: string;
-  /** Light-on-dark lockup for the signature in dark mode. */
-  logoDark?: string;
+  /** White lockup on a navy rounded rectangle, for the personal signature. */
+  signature?: string;
   /** Solid navy tile. A background image, so Gmail's dark mode leaves the header and footer navy. */
   navy?: string;
 };
@@ -177,21 +176,19 @@ export function signOffHtml(text: string) {
               <p class="bp-text bp-serif" style="margin: 8px 0 20px; font-family: ${SERIF}; font-size: 22px; line-height: 28px; color: ${NAVY};">${escapeHtml(text)}</p>`;
 }
 
-/** Kyle's signature, in place of the branded sign-off. The dark lockup is hidden until dark mode, and Outlook only receives the light one. */
-export function signatureHtml(images: Pick<EmailImageSources, "logoLight" | "logoDark">, phoneDisplay: string, phoneHref: string) {
-  const light = images.logoLight ?? "";
-  const dark = images.logoDark || light;
-  const logos = light
+/** Kyle's signature, in place of the branded sign-off. One navy lockup, so it reads in light and dark. */
+export function signatureHtml(images: Pick<EmailImageSources, "signature">, phoneDisplay: string, phoneHref: string) {
+  const src = images.signature ?? "";
+  const logo = src
     ? `
                 <tr>
-                  <td style="padding: 0 0 14px;">
-                    <img src="${escapeHtml(light)}" width="${SIGNATURE_LOGO_WIDTH}" height="${SIGNATURE_LOGO_HEIGHT}" alt="Cortex Building" class="light-img" style="display: block; width: ${SIGNATURE_LOGO_WIDTH}px; height: ${SIGNATURE_LOGO_HEIGHT}px; border: 0;" />
-                    <!--[if !mso]><!--><img src="${escapeHtml(dark)}" width="${SIGNATURE_LOGO_WIDTH}" height="${SIGNATURE_LOGO_HEIGHT}" alt="" class="dark-img" style="display: none; width: ${SIGNATURE_LOGO_WIDTH}px; height: ${SIGNATURE_LOGO_HEIGHT}px; border: 0; mso-hide: all;" /><!--<![endif]-->
+                  <td align="left" style="padding: 0 0 14px 0;">
+                    <img src="${escapeHtml(src)}" width="${SIGNATURE_LOGO_WIDTH}" height="${SIGNATURE_LOGO_HEIGHT}" alt="Cortex Building" style="display: block; width: ${SIGNATURE_LOGO_WIDTH}px; height: ${SIGNATURE_LOGO_HEIGHT}px; margin: 0; border: 0;" />
                   </td>
                 </tr>`
     : "";
   return `
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="bp-sig" style="margin: 8px 0 4px;">${logos}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bp-sig" style="margin: 0 0 4px;">${logo}
                 <tr><td class="bp-sig-name bp-serif" style="font-family: ${SERIF}; font-size: 19px; line-height: 24px; color: ${NAVY};">Kyle Rice</td></tr>
                 <tr><td class="bp-sig-role" style="padding: 4px 0 0; font-family: ${SANS}; font-size: 11px; font-weight: bold; letter-spacing: 2px; line-height: 16px; color: ${BLUE_SHADE};">DIRECTOR · CORTEX BUILDING</td></tr>
                 <tr><td style="padding: 8px 0 0; font-family: ${SANS}; font-size: 13px; line-height: 18px; color: ${MUTED};"><a href="${escapeHtml(phoneHref)}" class="bp-sig-link" style="color: ${MUTED}; text-decoration: none; white-space: nowrap;">${escapeHtml(phoneDisplay)}</a> · <a href="${SIGNATURE_SITE}" class="bp-sig-link" style="color: ${MUTED}; text-decoration: none;">cortexbuilding.co.uk</a></td></tr>
@@ -263,8 +260,8 @@ export function renderEmailDocument(doc: EmailDocument) {
               <div class="gmail-screen"><div class="gmail-difference">
               <p class="bp-serif" style="margin: 0 0 10px; font-family: ${SERIF}; font-size: 26px; font-style: italic; line-height: 32px; color: ${PLASTER};">${TAGLINE}</p>
               <p style="margin: 0 0 20px; font-family: ${SANS}; font-size: 16px; line-height: 22px; color: ${PLASTER};">Call <a href="${escapeHtml(doc.phoneHref)}" style="color: ${SKY}; font-weight: bold; text-decoration: none; white-space: nowrap;">${escapeHtml(doc.phoneDisplay)}</a></p>
-              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
               </div></div>
+              <div style="font-family: ${SANS}; font-size: 13px; line-height: 20px; color: ${FOOTER_TEXT};">${doc.footerNotesHtml}</div>
             </td>
           </tr>`;
 
@@ -311,16 +308,12 @@ export function renderEmailDocument(doc: EmailDocument) {
       .bp-track-later { background-color: ${DARK_LATER} !important; }
       .bp-button { border: 1px solid ${SKY} !important; }
       .bp-banner { background-color: ${DARK_ESTIMATE} !important; color: ${PLASTER} !important; border-color: ${SKY} !important; }
-      .light-img { display: none !important; }
-      .dark-img { display: block !important; }
     }
     [data-ogsc] .bp-text, [data-ogsc] .bp-heading, [data-ogsc] .bp-jobline, [data-ogsc] .bp-sig-name, [data-ogsc] .bp-sig-role, [data-ogsc] .bp-sig-tag, [data-ogsc] .bp-fine { color: ${PLASTER} !important; }
     [data-ogsc] .bp-muted { color: ${FOOTER_TEXT} !important; }
     [data-ogsc] .bp-link, [data-ogsc] .bp-sig-link, [data-ogsc] .bp-fine-link { color: ${SKY} !important; }
     [data-ogsc] .bp-track-done { background-color: ${SKY} !important; }
     [data-ogsc] .bp-track-later { background-color: ${DARK_LATER} !important; }
-    [data-ogsc] .light-img { display: none !important; }
-    [data-ogsc] .dark-img { display: block !important; }
   </style>
 </head>
 <body class="bp-page body" style="margin: 0; padding: 0; background-color: ${pageBg};">

@@ -6,6 +6,7 @@ import {
   estimateBoxHtml,
   estimateText,
   footerText,
+  FOOTER_TEXT,
   jobCardHtml,
   jobCardText,
   jobLineHtml,
@@ -18,7 +19,6 @@ import {
   signOffHtml,
   signatureHtml,
   signatureText,
-  SKY,
   type EmailImageSources,
 } from "./email-frame.ts";
 import type { Estimate, EstimateRow } from "./estimate-summary.ts";
@@ -288,7 +288,7 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
   const preheaderSource = blocks.find((block, index) => index > 0 && block.kind === "paragraph");
   const preheader = preheaderSource && preheaderSource.kind === "paragraph" ? preheaderSource.lines.join(" ").slice(0, 120) : "";
   const personal = input.step !== "acknowledgement";
-  const psHtml = ps ? paragraphHtml(ps.map(inlineHtml).join("<br />"), { size: 15, margin: "0" }) : "";
+  const psHtml = ps ? paragraphHtml(ps.map(inlineHtml).join("<br />"), { size: 15, margin: personal ? "0 0 18px" : "0" }) : "";
 
   const html = renderEmailDocument({
     layout: personal ? "personal" : "branded",
@@ -298,13 +298,13 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
       ? `<strong>Test email.</strong> In normal use this would have gone to <strong>${escapeHtml(input.intendedRecipient)}</strong>.`
       : undefined,
     bodyHtml: personal
-      ? [jobLineHtml(input.jobCard), blockHtml, signatureHtml(input.images, input.phoneDisplay, input.phoneHref), psHtml].join("")
+      ? [jobLineHtml(input.jobCard), blockHtml, psHtml, signatureHtml(input.images, input.phoneDisplay, input.phoneHref)].join("")
       : [jobCardHtml(input.jobCard), blockHtml, signOffHtml(SIGN_OFF), psHtml].join(""),
     phoneDisplay: input.phoneDisplay,
     phoneHref: input.phoneHref,
     footerNotesHtml: personal
       ? `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" class="bp-fine-link" style="color: ${MUTED}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`
-      : `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${SKY}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
+      : `${escapeHtml(WHY_YOU_GET_THIS)}<br /><a href="${escapeHtml(input.stopUrl)}" style="color: ${FOOTER_TEXT}; text-decoration: underline;">${escapeHtml(STOP_LINK_TEXT)}</a>`,
     images: input.images,
     webFont: input.webFont,
   });
@@ -321,9 +321,9 @@ export function renderFollowUpEmail(input: FollowUpEmailInput): RenderedEmail {
         jobLineText(input.jobCard),
         "",
         ...textBlocks.flatMap((block) => [block, ""]),
+        ...(ps ? [ps.join("\n"), ""] : []),
         signatureText(input.phoneDisplay),
         "",
-        ...(ps ? [ps.join("\n"), ""] : []),
         WHY_YOU_GET_THIS,
         `${STOP_LINK_TEXT}: ${input.stopUrl}`,
       ].join("\n")

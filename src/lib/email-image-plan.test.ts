@@ -65,6 +65,11 @@ describe("email image attachments", () => {
       const email = followUp(step, plan.sources);
       assertImageContract(email.html, plan.files.map((file) => file.contentId));
       assert.equal(plan.files.some((file) => file.relativePath.endsWith("navy.png")), false, step);
+      assert.equal(plan.files.some((file) => /logo-light|logo-dark/.test(file.relativePath)), false, step);
+      if (layout === "personal") {
+        assert.deepEqual(plan.files.map((file) => file.contentId), ["bp-signature"]);
+        assert.match(email.html, /cid:bp-signature/);
+      }
       if (layout === "branded") assert.match(email.html, new RegExp(`background="${FALLBACK_SITE_URL}/email/navy.png"`));
     }
   });

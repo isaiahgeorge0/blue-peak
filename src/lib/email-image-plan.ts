@@ -19,7 +19,7 @@ export function siteUrlFrom(value: string | undefined) {
 }
 
 export type EmailImageFile = {
-  key: "logo" | "gable" | "house" | "logoLight" | "logoDark";
+  key: "logo" | "gable" | "house" | "signature";
   relativePath: string;
   contentId: string;
   contentType: string;
@@ -27,13 +27,10 @@ export type EmailImageFile = {
 
 /** The cid: sources and the files behind them. Navy, when the layout uses it, is a URL. */
 export function emailImageSources(layout: EmailLayout, houseFile: string | null, siteUrl?: string) {
-  const sources: EmailImageSources = { logo: "", gable: "", house: null, logoLight: "", logoDark: "" };
+  const sources: EmailImageSources = { logo: "", gable: "", house: null, signature: "" };
   const files: EmailImageFile[] =
     layout === "personal"
-      ? [
-          { key: "logoLight", relativePath: "email/logo-light.png", contentId: "bp-logo-light", contentType: "image/png" },
-          { key: "logoDark", relativePath: "email/logo-dark.png", contentId: "bp-logo-dark", contentType: "image/png" },
-        ]
+      ? [{ key: "signature", relativePath: "email/signature-logo.png", contentId: "bp-signature", contentType: "image/png" }]
       : [
           { key: "logo", relativePath: "email/logo.png", contentId: "bp-logo", contentType: "image/png" },
           { key: "gable", relativePath: "email/gable.png", contentId: "bp-gable", contentType: "image/png" },

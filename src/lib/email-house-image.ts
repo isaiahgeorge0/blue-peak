@@ -16,8 +16,7 @@ export function previewImageSources(houseFile: string | null) {
     logo: "/email/logo.png",
     gable: "/email/gable.png",
     house: houseFile ? `/${HOUSE_IMAGE_DIR}/${houseFile}` : null,
-    logoLight: "/email/logo-light.png",
-    logoDark: "/email/logo-dark.png",
+    signature: "/email/signature-logo.png",
     navy: "/email/navy.png",
   };
 }

@@ -58,14 +58,15 @@ async function renderLockup(browser) {
   return { width: Math.round(box.width), height: Math.round(box.height) };
 }
 
-/** Colour lockup for a light background, and the light-on-dark lockup, each 200×40 at 2×. */
-async function renderSignature(browser, svgName, outName) {
-  const svg = fs.readFileSync(path.join(ROOT, "public/brand", svgName), "utf8");
-  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 240, height: 80 } });
+/** White mark + CORTEX on a navy rounded rectangle, 180×52 at 1×, exported at 2×. Cropped to the rectangle. */
+async function renderSignatureLogo(browser) {
+  const wordmark = fs.readFileSync(path.join(ROOT, "public/brand/wordmark-white.svg"), "utf8");
+  const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 240, height: 120 } });
   await page.setContent(`<!doctype html><html><body style="margin:0;background:transparent">
-    <div id="logo" style="width:200px;height:40px">${svg.replace("<svg ", '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ')}</div>
-  </body></html>`);
-  await page.locator("#logo").screenshot({ path: path.join(OUT, outName), omitBackground: true });
+    <div id="pill" style="box-sizing:border-box;width:180px;height:52px;padding:10px;background:${NAVY};border-radius:10px;line-height:0;font-size:0;">
+      <div style="width:160px;height:32px">${wordmark.replace("<svg ", '<svg width="100%" height="100%" ')}</div>
+    </div></body></html>`);
+  await page.locator("#pill").screenshot({ path: path.join(OUT, "signature-logo.png"), omitBackground: true });
   await page.close();
 }
 
@@ -202,10 +203,9 @@ if (part === "brand") {
   await withBrowser(async (browser) => {
     const lockup = await renderLockup(browser);
     await renderGable(browser);
-    await renderSignature(browser, "logo.svg", "logo-light.png");
-    await renderSignature(browser, "logo-on-dark.svg", "logo-dark.png");
+    await renderSignatureLogo(browser);
     await renderNavy(browser);
-    console.log(`logo.png ${lockup.width}x${lockup.height} (display size), gable.png 600x24, logo-light.png and logo-dark.png 200x40, navy.png 8x8`);
+    console.log(`logo.png ${lockup.width}x${lockup.height} (display size), gable.png 600x24, signature-logo.png 180x52, navy.png 8x8`);
   });
 } else if (part === "houses") {
   const base = (arg || "http://localhost:3000").replace(/\/$/, "");
